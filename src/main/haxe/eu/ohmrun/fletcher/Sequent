@@ -1,0 +1,13 @@
+package eu.ohmrun.fletcher;
+
+typedef SequentDef<E,S,R> = FletcherDef<Triple<Option<Err<E>>,R,S>,Triple<Option<Err<E>>,R,S>,Noise>;
+
+abstract Sequent<E,S,R>(SequentDef<E,S,R>) from SequentDef<E,S,R> to SequentDef<E,S,R>{
+  public inline function new(self) this = self;
+  static public inline function lift<E,S,R>(self:SequentDef<E,S,R>):Sequent<E,S,R> return new Sequent(self);
+
+
+  public function prj():SequentDef<E,S,R> return this;
+  private var self(get,never):Sequent<E,S,R>;
+  private function get_self():Sequent<E,S,R> return lift(this);
+}
