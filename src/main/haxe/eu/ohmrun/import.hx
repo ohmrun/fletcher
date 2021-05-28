@@ -9,3 +9,4 @@ using stx.Fp;
 using stx.Log;
 
 using eu.ohmrun.Fletcher;
+using eu.ohmrun.fletcher.Log;

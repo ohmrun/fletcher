@@ -18,7 +18,7 @@ class Events{
         arw.augure(dispatcher).apply(printer());
         arw.tie(__.couple).then(
           function(l:IEventDispatcher,r:T){
-            trace('here');
+            __.log().debug('here');
             cb(r);
             return done ? Done(Unit) : Cont(l);
           }.tupled()

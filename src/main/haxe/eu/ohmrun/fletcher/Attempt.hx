@@ -131,7 +131,7 @@ class AttemptLift{
         (ipt:I,cont:Terminal<Res<Couple<I,O>,E>,Noise>) -> {
           return cont.receive(
             self.map(
-              (o:O) -> __.tracer()(__.couple(ipt,o))
+              (o:O) -> __.couple(ipt,o)
             ).forward(ipt)
           );
         }

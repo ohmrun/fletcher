@@ -32,16 +32,13 @@ class TerminalLift{
     return issue(self,__.success(r));
   }
   static public function issue<R,E>(self:Terminal<R,E>,value:ArwOut<R,E>):Receiver<R,E>{
-    return Receiver.lift(
-      function(fn:ReceiverSink<R,E>):Work{
-        return self.apply(
-          (ipt) -> {
-            ipt.trigger(value);
-            return fn(ipt.asFuture());
-          }
-        );
+    return Receiver.lift(Continuation._.map(
+      self,
+      (trg) -> {
+        trg.trigger(value);
+        return trg.asFuture();
       }
-    );
+    ).prj());
   } 
   static public function later<R,E>(self:Terminal<R,E>,ft:Future<Outcome<R,Defect<E>>>,?pos:Pos):Receiver<R,E>{
     return Receiver.lift(
@@ -84,17 +81,17 @@ class TerminalLift{
   }
   static public function acc<P,E>(self:TerminalDef<P,E>,fn:TerminalInput<P,E>->Work):Terminal<P,E>{
     return (f:TerminalInput<P,E>->Work) -> {
-      trace('call a');
+      __.log().debug('call a');
       var a = Terminal.lift(self).apply(
         (res) -> {
-          trace(res);
+          __.log().debug(_ -> _.pure(res));
           return fn(res);
         }
       );
-      trace('call b');
+      __.log().debug('call b');
       var b = Terminal.lift(self).apply(
         res -> {
-          trace(res);
+          __.log().debug(_ -> _.pure(res));
           return f(res);
         }
       );
@@ -104,7 +101,7 @@ class TerminalLift{
   // static public function defer<P,Pi,E,EE>(self:TerminalDef<P,E>,that:Receiver<Pi,EE>):Terminal<P,E>{
   //   return Receiver.lift((f:TerminalInput<P,E>->Work) -> {
   //     var lhs = that.reply();
-  //     trace("lhs called"); 
+  //     __.log().debug("lhs called"); 
   //     return lhs.seq(Terminal.lift(self).apply(f));
   //   });
   // }

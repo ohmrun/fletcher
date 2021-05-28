@@ -2,6 +2,7 @@ package eu.ohmrun.fletcher;
 
 typedef ReceiverDef<R,E> = ContinuationDef<Work,ReceiverInput<R,E>>;
 
+//@:using(stx.fp.Continuation.ContinuationLift)
 @:using(eu.ohmrun.fletcher.Receiver.ReceiverLift)
 abstract Receiver<R,E>(ReceiverDef<R,E>) to ReceiverDef<R,E>{
   static public var _(default,never) = ReceiverLift;
@@ -47,7 +48,7 @@ class ReceiverLift{
   // static public function defer<P,Pi,E,EE>(self:ReceiverDef<P,E>,that:Receiver<Pi,EE>):Receiver<P,E>{
   //   return Receiver.lift((f:ReceiverInput<P,E>->Work) -> {
   //     var lhs = that.reply();
-  //     trace("lhs called"); 
+  //     __.log().debug("lhs called"); 
   //     return lhs.seq(Terminal.lift(self).apply(f));
   //   });
   // }
@@ -66,16 +67,23 @@ class ReceiverLift{
   //   return next;
   // }
   static public function flat_fold<P,Pi,E>(self:ReceiverDef<P,E>,ok:P->Receiver<Pi,E>,no:Defect<E>->Receiver<Pi,E>):Receiver<Pi,E>{
-    trace("set up flat_fold");
+    __.log().debug("set up flat_fold");
     return Receiver.lift(
       (cont : ReceiverInput<Pi,E> -> Work) -> {
-        trace("call flat_fold");
+        __.log().debug("call flat_fold");
         return Receiver.lift(self).apply(
           (p:ReceiverInput<P,E>) -> {
+
+            __.log().debug("inside flat_fold");
             return p.flatMap(
-              out -> out.fold(ok,no)
+              out -> {
+                __.log().debug(_ -> _.pure(out));
+                return out.fold(ok,no);
+              }
             ).flatMap(
-              rec -> rec.apply(cont)
+              rec -> {
+                return rec.apply(cont);
+              }
             );
           }
         );
@@ -83,11 +91,13 @@ class ReceiverLift{
     );
   }
   static public function map<P,Pi,E>(self:ReceiverDef<P,E>,fn:P->Pi):Receiver<Pi,E>{
-    return Receiver.lift((cont:ReceiverInput<Pi,E>->Work) -> Receiver.lift(self).apply(
-      (p:ReceiverInput<P,E>) -> cont(
-        p.map(x -> x.map(fn))
-      )
+    return Receiver.lift(Continuation._.map(
+      self,
+      out -> out.map(x -> x.map(fn))
     ));
+  }
+  static public function tap<P,Pi,E>(self:ReceiverDef<P,E>,fn:P->Void):Receiver<P,E>{
+    return map(self,__.command(fn));
   }
   static public function fold_bind<P,Pi,E,EE>(self:ReceiverDef<P,E>,ok:P->ReceiverInput<Pi,EE>,no:Defect<E>->ReceiverInput<Pi,EE>):Receiver<Pi,EE>{
     return Receiver.lift((cont:ReceiverInput<Pi,EE>->Work) -> Receiver.lift(self).apply(

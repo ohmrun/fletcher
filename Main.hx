@@ -11,7 +11,8 @@ class Main{
     //   [new ThenTest()],
     //   []
     // );
-    new ThenTest().test();
+    var then_test = new ThenTest();
+        then_test.test();
   }
 }
 class CycleTest extends TestCase{
@@ -22,19 +23,30 @@ class CycleTest extends TestCase{
   }
 }
 class ThenTest extends TestCase{
+  public function test_env(){
+    var a = Fletcher.Sync((x) -> {
+      __.log().debug(x);
+      return x+1;
+    });
+    a.environment(
+      1,
+      __.__.log().debug()
+    ).crunch();
+    __.log().debug("______");
+  }
   public function test(){
     var a = Fletcher.Sync((x) -> {
-      trace(x);
+      __.log().debug(x);
       return x+1;
     });
     var b = Fletcher.Sync((y) -> {
-      trace(y);
-      return y+5;
+      __.log().debug(y);
+      return y*5;
     });
     var c = a.then(b);
         c.environment(
           100,
-          (x) -> trace(x)
+          (x) -> __.log().debug(x)
         ).crunch();
   }
 }
@@ -44,17 +56,17 @@ class ThenTest extends TestCase{
 //     var a = Terminal.unit().issue(__.success(1));
 //     // var b = a.apply(
 //     //   (v) -> {
-//     //     trace(v);
+//     //     __.log().debug(v);
 //     //     return Work.unit();
 //     //   }
 //     // );
 //     var a = function(v:Int,cont:Terminal<Int,Dynamic>):Work{
 //       var ft = Future.trigger();
-//           trace('a called with $v');
+//           __.log().debug('a called with $v');
 //           ft.trigger(__.success(v+1));
 //       var a  = cont.later(ft).map(
 //         x -> {
-//           trace(x);
+//           __.log().debug(x);
 //           return x;
 //         }
 //       ).serve();
@@ -65,7 +77,7 @@ class ThenTest extends TestCase{
 //           ft.trigger(__.success(v));
 //       var snd = cont.later(ft).map(
 //         x -> {
-//           trace(x);
+//           __.log().debug(x);
 //           return x;
 //         }
 //       );

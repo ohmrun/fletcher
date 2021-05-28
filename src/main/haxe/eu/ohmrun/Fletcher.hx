@@ -23,7 +23,7 @@ typedef FletcherDef<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
   }
   static public function constant<P,R,E>(self:ArwOut<R,E>):Fletcher<P,R,E>{
     return lift(
-      (_:P,cont:Terminal<R,E>) -> cont.issue(self).serve()
+      (_:P,cont:Terminal<R,E>) -> cont.receive(cont.issue(self))
     );
   }
   static public function pure<P,R,E>(self:R):Fletcher<P,R,E>{
@@ -38,11 +38,18 @@ typedef FletcherDef<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
   static public function forward<P,Pi,E>(f:P -> Terminal<Pi,E> -> Work,p:P):Receiver<Pi,E>{
     return Receiver.lift(
       function(k:ReceiverSink<Pi,E>){
-        var ft  = Future.trigger();
+        __.log().debug('forward called');
+        var ft : FutureTrigger<ArwOut<Pi,E>> = Future.trigger();
+            ft.asFuture().handle(
+              x -> {
+                __.log().debug('forwarded: $x');
+              }
+            );
         var fst = f(
           p,
           Terminal.lift(
             (t_sink:TerminalSink<Pi,E>) -> {
+              __.log().debug('forwarding');
               return t_sink(ft);
             }
           )
@@ -56,9 +63,9 @@ typedef FletcherDef<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
     return lift(
       (p:P,cont:Terminal<R,E>) -> {
         var res   = fn(p);
-        trace(res);
-        var resI  = cont.value(res).serve();
-        return resI;
+      __.log().debug(_ -> _.pure(res));
+        var resI  = cont.value(res);
+        return resI.serve();
       }
     );
   }
@@ -98,24 +105,29 @@ class FletcherLift{
   }
   static public function environment<P,Pi,E>(self:Fletcher<P,Pi,E>,p:P,success:Pi->Void,?failure:Defect<E>->Void):Fiber{
     return Fiber.lift(
-    (_:Noise,cont:Terminal<Noise,Noise>) -> {
-      trace("fiber");
-      return self(
-        p,
-        Terminal.unit()(
-          (fn:TerminalSink<Pi,E>) -> {
-            trace("HEHEHEHE");
-            return fn.reply();
+      (_:Noise,cont:Terminal<Noise,Noise>) -> {
+        return cont.apply(
+          (trg) -> {
+            __.log().debug("fiber");
+            return self(
+              p,
+              Terminal.lift(
+                (fn:TerminalSink<Pi,E>) -> {
+                  var ft = Future.trigger();
+                      ft.handle(
+                        (x:ArwOut<Pi,E>) -> x.fold(
+                          success,
+                          failure
+                        )
+                      );
+                  return fn(ft); 
+                }
+              )
+            );
           }
-        )
-      ).seq(cont.apply(
-        (fn) -> {
-          trace(fn);
-          fn.trigger(__.success(Noise));
-          return Work.unit();
-        }
-      ));
-    });
+        );
+      }
+    );
   }
   static public function fudge<P,R,E>(self:Fletcher<P,R,E>,p:P):R{
     var val = null;
@@ -130,13 +142,11 @@ class FletcherLift{
   static public function then<Pi,Ri,Rii,E>(self:Fletcher<Pi,Ri,E>,that:Fletcher<Ri,Rii,E>):Fletcher<Pi,Rii,E>{
     return Fletcher.lift(
       (pI:Pi,cont:Terminal<Rii,E>) -> {
-        trace(pI);
         var a = self.forward(pI);
-        trace('forwarded');
-        return a.flat_fold(
+        return cont.receive(a.flat_fold(
           ok -> that.forward(ok),
           no -> Receiver.error(no)
-        ).serve();
+        ));
       }  
     );
   }
@@ -144,7 +154,7 @@ class FletcherLift{
     return Fletcher.lift((p:Couple<Pi,Pii>,cont:Terminal<Couple<Ri,Rii>,E>) -> {
       final lhs = self.forward(p.fst());
       final rhs = that.forward(p.snd());
-      return lhs.zip(rhs).serve();
+      return cont.receive(lhs.zip(rhs));
     });
   }
   static public function split<Pi,Ri,Rii,E>(self:FletcherDef<Pi,Ri,E>,that:FletcherDef<Pi,Rii,E>):Fletcher<Pi,Couple<Ri,Rii>,E>{
