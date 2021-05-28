@@ -243,3 +243,5 @@ typedef ResolveDef<I,E>     = eu.ohmrun.fletcher.Resolve.ResolveDef<I,E>;
 typedef Resolve<I,E>        = eu.ohmrun.fletcher.Resolve<I,E>;
 
 typedef WorkContDef<R,E>    = ContinuationDef<Work,ArwOut<R,E>>;
+typedef TerminalInputDef<R,E>  = eu.ohmrun.fletcher.TerminalInput.TerminalInputDef`<R,E>;
+typedef TerminalInput<R,E>  = eu.ohmrun.fletcher.TerminalInput<R,E>;

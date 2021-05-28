@@ -1,6 +1,6 @@
 package eu.ohmrun.fletcher;
 
-typedef TerminalDef<R,E>    = Ref<ContinuationDef<Work,ArwOut<R,E>>>;
+typedef TerminalDef<R,E>    = ContinuationDef<Work,TerminalInput<R,E>>;
 
 @:using(eu.ohmrun.fletcher.Terminal.TerminalLift)
 @:forward(get_value)abstract Terminal<R,E>(TerminalDef<R,E>) from TerminalDef<R,E> to TerminalDef<R,E>{
