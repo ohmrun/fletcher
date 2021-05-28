@@ -162,7 +162,7 @@ class CascadeLift {
 	static public function reframe<I, O, E>(self:Cascade<I, O, E>):Reframe<I, O, E> {
 		return lift(
 			(p:Res<I,E>,cont:Waypoint<Couple<O,I>,E>) -> cont.receive(
-				self.forward(p).fold_map(
+				self.forward(p).fold_mapp(
 					ok -> __.success(ok.zip(p)),
 					e  -> __.failure(e)
 				)

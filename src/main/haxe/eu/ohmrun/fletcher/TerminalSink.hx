@@ -25,6 +25,6 @@ typedef TerminalSinkDef<R,E>    = TerminalInput<R,E>     -> Work;
   private function get_self():TerminalSink<R,E> return lift(this);
 
   public function reply(){
-    return this(null);
+    return this(Future.trigger());
   }
 }

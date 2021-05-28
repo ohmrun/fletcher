@@ -34,21 +34,7 @@ abstract Receiver<R,E>(ReceiverDef<R,E>) to ReceiverDef<R,E>{
     return Receiver.lift((fn:ReceiverSink<R,E>) -> fn(ft));
   }
   public inline function serve():Work{
-    return Work.lift(Some(Future.irreversible(
-      cb -> {
-        trace('serving');
-        reply().prj().fold(
-          ft -> { 
-            ft.handle(
-              v -> {
-                trace(v); 
-                cb(v); 
-              } 
-          ); null; },
-          ()->{}
-        );
-      }
-    )));
+    return reply();
   }
   public function toString(){
     return 'Receiver($this)';
@@ -113,7 +99,7 @@ class ReceiverLift{
       )
     ));
   }
-  static public function fold<P,Pi,E,EE>(self:ReceiverDef<P,E>,ok:P->ArwOut<Pi,EE>,no:Defect<E>->ArwOut<Pi,EE>):Receiver<Pi,EE>{
+  static public function fold_mapp<P,Pi,E,EE>(self:ReceiverDef<P,E>,ok:P->ArwOut<Pi,EE>,no:Defect<E>->ArwOut<Pi,EE>):Receiver<Pi,EE>{
     return Receiver.lift((cont:ReceiverInput<Pi,EE>->Work) -> Receiver.lift(self).apply(
       (p:ReceiverInput<P,E>) -> cont(
         p.fold_mapp(

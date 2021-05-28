@@ -85,7 +85,7 @@ class CommandLift{
   static public function toCascade<I,O,E>(command:CommandDef<I,E>):Cascade<I,I,E>{
     return Cascade.lift(
       (p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
-        (okI:I) -> cont.receive(command.forward(okI).fold_map(
+        (okI:I) -> cont.receive(command.forward(okI).fold_mapp(
           okII -> okII.fold(
             er -> __.success(__.reject(er)),
             () -> __.success(__.accept(okI))

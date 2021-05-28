@@ -37,7 +37,7 @@ class RecoverLift{
       return p.fold(
         ok -> cont.value(ok).serve(),
         no -> cont.receive(
-          self.forward(no).fold_map(
+          self.forward(no).fold_mapp(
             ok -> __.success(ok),
             _  -> __.failure(_)
           )

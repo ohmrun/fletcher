@@ -99,15 +99,18 @@ class FletcherLift{
   static public function environment<P,Pi,E>(self:Fletcher<P,Pi,E>,p:P,success:Pi->Void,?failure:Defect<E>->Void):Fiber{
     return Fiber.lift(
     (_:Noise,cont:Terminal<Noise,Noise>) -> {
+      trace("fiber");
       return self(
         p,
-        Terminal.lift(
+        Terminal.unit()(
           (fn:TerminalSink<Pi,E>) -> {
-            return Work.unit();
+            trace("HEHEHEHE");
+            return fn.reply();
           }
         )
       ).seq(cont.apply(
         (fn) -> {
+          trace(fn);
           fn.trigger(__.success(Noise));
           return Work.unit();
         }

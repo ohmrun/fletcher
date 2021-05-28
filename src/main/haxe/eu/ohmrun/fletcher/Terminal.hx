@@ -4,11 +4,13 @@ typedef TerminalDef<R,E>    = ContinuationDef<Work,TerminalInput<R,E>>;
 
 @:using(eu.ohmrun.fletcher.Terminal.TerminalLift)
 abstract Terminal<R,E>(TerminalDef<R,E>) from TerminalDef<R,E> to TerminalDef<R,E>{
-  // @:noUsing static public function unit<R,E>():Terminal<R,E>{
-  //   return lift(
-  //     (fn:TerminalInput<R,E> -> Work) -> return Work.unit() 
-  //   );
-  // }
+  @:noUsing static public function unit<R,E>():Terminal<R,E>{
+    return lift(
+      (fn:TerminalInput<R,E> -> Work) -> {
+        return fn(TerminalInput.unit());
+      } 
+    );
+  }
   static public function lift<R,E>(self:TerminalDef<R,E>):Terminal<R,E>{
     return new Terminal(self);
   }       
