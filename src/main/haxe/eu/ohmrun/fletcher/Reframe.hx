@@ -54,15 +54,13 @@ class ReframeLift{
     return Reframe.lift(
       Fletcher.Anon(
         (ipt:Res<I,E>,cont:Terminal<Res<Couple<Oi,I>,E>,Noise>) -> return cont.receive(self.forward(ipt).flat_fold(
-          oc -> oc.fold(
-            (res:Res<Couple<O,I>,E>) -> that.forward(
-              res.fold(
-                (tp:Couple<O,I>)  -> __.accept(__.couple(__.accept(tp.fst()),tp.snd())),
-                (err)             -> ipt.fold(i -> __.accept(__.couple(__.reject(err),i)),e -> __.reject(e))
-              )
-            ).map(res -> res.zip(ipt)),
-            err -> cont.error(err)
-          )
+          (res:Res<Couple<O,I>,E>) -> that.forward(
+            res.fold(
+              (tp:Couple<O,I>)  -> __.accept(__.couple(__.accept(tp.fst()),tp.snd())),
+              (err)             -> ipt.fold(i -> __.accept(__.couple(__.reject(err),i)),e -> __.reject(e))
+            )
+          ).map(res -> res.zip(ipt)),
+          err -> cont.error(err)
         ))
       )
     );
@@ -80,13 +78,11 @@ class ReframeLift{
   static public function arrangement<I,Ii,O,Oi,E>(self:Reframe<I,O,E>,that:O->Arrange<Ii,I,Oi,E>):Attempt<Couple<Ii,I>,Oi,E>{
     return Attempt.lift(Fletcher.Anon(
       (ipt:Couple<Ii,I>,cont:Terminal<Res<Oi,E>,Noise>) -> cont.receive(self.forward(__.success(ipt.snd())).flat_fold(
-        oc -> oc.fold(
-          (tp:Res<Couple<O,I>,E>) -> tp.fold(
-            tp  -> that(tp.fst()).forward(__.success(ipt)),
-            err -> cont.value(__.reject(err))
-          ),
-          e -> cont.error(e)
-        )
+        (tp:Res<Couple<O,I>,E>) -> tp.fold(
+          tp  -> that(tp.fst()).forward(__.success(ipt)),
+          err -> cont.value(__.reject(err))
+        ),
+        e -> cont.error(e)
       ))
     ));
   }
@@ -107,24 +103,22 @@ class ReframeLift{
   static public function commandment<I,O,E>(self:Reframe<I,O,E>,fn:O->Command<I,E>):Reframe<I,O,E>{
     return lift(Fletcher.Anon(
       (ipt:Res<I,E>,cont:Terminal<Res<Couple<O,I>,E>,Noise>) -> cont.receive(self.forward(ipt).flat_fold(
-        (oc) -> oc.fold(
-          res -> res.fold(
-            ok -> {
-              var cmd = fn(ok.fst());//TODO HMMM
-              return ipt.fold(
-                i -> cmd.forward(i).map(
-                  report -> report.fold(
-                    err -> __.reject(err),
-                    ()  -> __.accept(__.couple(ok.fst(),i))//TODO also hmm
-                  )
-                ),
-                e -> cont.value(__.reject(e))
-              );
-            },
-            no -> cont.value(__.reject(no))
-          ),
-          (no)  -> cont.error(no)
-        )
+        res -> res.fold(
+          ok -> {
+            var cmd = fn(ok.fst());//TODO HMMM
+            return ipt.fold(
+              i -> cmd.forward(i).map(
+                report -> report.fold(
+                  err -> __.reject(err),
+                  ()  -> __.accept(__.couple(ok.fst(),i))//TODO also hmm
+                )
+              ),
+              e -> cont.value(__.reject(e))
+            );
+          },
+          no -> cont.value(__.reject(no))
+        ),
+        (no)  -> cont.error(no)
       )
     )));
   }

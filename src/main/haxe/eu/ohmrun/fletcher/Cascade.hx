@@ -216,10 +216,8 @@ class CascadeLift {
 
 	static public function arrange<I, O, Oi, E>(self:Cascade<I, O, E>, then:Arrange<O, I, Oi, E>):Cascade<I, Oi, E> {
 		return lift(Fletcher.Anon((i:Res<I, E>, cont:Terminal<Res<Oi, E>, Noise>) -> self.forward(i).flat_fold(
-				(oc) -> oc.fold(
-					res -> then.forward(res.zip(i)),
-					e 	-> cont.error(e)
-				)
+				res -> then.forward(res.zip(i)),
+				e 	-> cont.error(e)
 			).serve()
 		));
 	}

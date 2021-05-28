@@ -20,11 +20,9 @@ abstract Convert<I,O>(ConvertDef<I,O>) from ConvertDef<I,O> to ConvertDef<I,O>{
   @:noUsing static public function fromConvertProvide<P,R>(self:Convert<P,Provide<R>>):Convert<P,R>{
     return lift(
       (p:P,con) -> self.forward(p).flat_fold(
-          oc -> oc.fold(
-            (ok:Provide<R>)   -> ok.forward(Noise),
-            (er)              -> Receiver.error(er)
-          )
-        ).serve()
+        (ok:Provide<R>)   -> ok.forward(Noise),
+        (er)              -> Receiver.error(er)
+      ).serve()
     );
   }
   

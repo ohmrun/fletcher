@@ -149,10 +149,8 @@ class AttemptLift{
     return lift(
       (p:I,cont:Waypoint<Oi,E>) -> 
         self.forward(p).flat_fold(
-          oc -> oc.fold(
-            ok -> then.forward(ok.map(__.couple.bind(_,p))),
-            no -> cont.error(no) 
-          )
+          ok -> then.forward(ok.map(__.couple.bind(_,p))),
+          no -> cont.error(no) 
         ).serve()
     );
   }
