@@ -47,7 +47,7 @@ abstract Propose<O,E>(ProposeDef<O,E>) from ProposeDef<O,E> to ProposeDef<O,E>{
         memo.toFletcher().then(
           Fletcher.Anon(
             (res:Chunk<O,E>,cont:Terminal<Chunk<O,E>,Noise>) -> res.fold(
-              (o) -> cont.receive(fn(next,o).receive(Noise)),
+              (o) -> cont.receive(fn(next,o).forward(Noise)),
               (e) -> cont.value(End(e)).serve(),
               ()  -> cont.value(Tap).serve()
             )
@@ -77,7 +77,7 @@ class ProposeLift{
       self,
       Fletcher.Anon(
         (ipt:Chunk<O,E>,cont:Terminal<Chunk<Oi,E>,Noise>) -> ipt.fold(
-          (o) -> cont.receive(next.map(Val).receive(o)),
+          (o) -> cont.receive(next.map(Val).forward(o)),
           (e) -> cont.value(End(e)).serve(),
           ()  -> cont.value(Tap).serve()
         )
@@ -89,7 +89,7 @@ class ProposeLift{
       self,
       Fletcher.Anon(
         (ipt:Chunk<O,E>,cont:Terminal<Chunk<Oi,E>,Noise>) -> ipt.fold(
-          (o) -> cont.receive(next.toFletcher().map((res:Res<Oi,E>) -> res.toChunk()).receive(o)),
+          (o) -> cont.receive(next.toFletcher().map((res:Res<Oi,E>) -> res.toChunk()).forward(o)),
           (e) -> cont.value(End(e)).serve(),
           ()  -> cont.value(Tap).serve()
         )
@@ -113,7 +113,7 @@ class ProposeLift{
           (ipt:Chunk<O,E>,cont:Terminal<Chunk<O,E>,Noise>) -> ipt.fold(
             (o) -> cont.value(Val(o)).serve(),
             (e) -> cont.value(End(e)).serve(),
-            ()  -> cont.receive(or().receive(Noise))
+            ()  -> cont.receive(or().forward(Noise))
           )
         )
       )
@@ -148,7 +148,7 @@ class ProposeLift{
         Fletcher.lift(self),
         Fletcher.Anon(
           (ipt:Chunk<O,E>,cont:Terminal<Chunk<Couple<O,Oi>,E>,Noise>) -> ipt.fold(
-            (o) -> cont.receive(that.map(__.couple.bind(o)).receive(Noise)),
+            (o) -> cont.receive(that.map(__.couple.bind(o)).forward(Noise)),
             (e) -> cont.value(End(e)).serve(),
             ()  -> cont.value(Tap).serve()
           )
@@ -162,7 +162,7 @@ class ProposeLift{
         self,
         Fletcher.Anon(
           (ipt:Chunk<O,E>,cont:Terminal<Report<E>,Noise>) -> ipt.fold(
-            o     -> cont.receive(that.receive(o)),
+            o     -> cont.receive(that.forward(o)),
             e     -> cont.value(Report.pure(e)).serve(),
             ()    -> cont.value(Report.unit()).serve()
           )

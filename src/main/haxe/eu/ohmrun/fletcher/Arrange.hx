@@ -32,7 +32,7 @@ typedef ArrangeDef<I,S,O,E>             = CascadeDef<Couple<I,S>,O,E>;
     return lift(Fletcher.Anon(
       (i:Res<Couple<I,S>,E>,cont:Terminal<Res<O,E>,Noise>) -> 
         i.fold(
-          i -> cont.receive(f(i.fst()).receive(i.snd())),
+          i -> cont.receive(f(i.fst()).forward(i.snd())),
           e -> cont.value(__.reject(e)).serve()
         )
     ));
@@ -41,7 +41,7 @@ typedef ArrangeDef<I,S,O,E>             = CascadeDef<Couple<I,S>,O,E>;
     return lift(Fletcher.Anon(
       (i:Res<Couple<Res<I,E>,S>,E>,cont:Terminal<Res<O,E>,Noise>) -> 
         i.fold(
-          i -> cont.receive(f(i.fst()).receive(i.snd())),
+          i -> cont.receive(f(i.fst()).forward(i.snd())),
           e -> cont.value(__.reject(e)).serve()
         )
     ));
@@ -50,7 +50,7 @@ typedef ArrangeDef<I,S,O,E>             = CascadeDef<Couple<I,S>,O,E>;
     return lift(Fletcher.Anon(
       (i:Res<Couple<I,S>,E>,cont:Terminal<Res<O,E>,Noise>) -> 
         i.fold(
-          i -> cont.receive(f(i.fst()).receive(__.accept(i.snd()))),
+          i -> cont.receive(f(i.fst()).forward(__.accept(i.snd()))),
           e -> cont.value(__.reject(e)).serve()
         )
     ));
@@ -59,7 +59,7 @@ typedef ArrangeDef<I,S,O,E>             = CascadeDef<Couple<I,S>,O,E>;
     return lift(Fletcher.Anon(
       (i:Res<Couple<Res<I,E>,S>,E>,cont:Terminal<Res<O,E>,Noise>) -> 
         i.fold(
-          (i) -> cont.receive(f(i.fst()).receive(__.accept(i.snd()))),
+          (i) -> cont.receive(f(i.fst()).forward(__.accept(i.snd()))),
           (e) -> cont.value(__.reject(e)).serve()
         )
     ));
@@ -122,7 +122,7 @@ class ArrangeLift{
     return Arrange.lift(
       Fletcher.Anon(
         (res:Res<Couple<I,S>,EE>,cont:Terminal<Res<O,EE>,Noise>) -> res.fold(
-          i -> cont.receive(self.map((res:Res<O,E>) -> res.errata(fn)).receive(__.accept(i))),
+          i -> cont.receive(self.map((res:Res<O,E>) -> res.errata(fn)).forward(__.accept(i))),
           e -> cont.value(__.reject(e)).serve()
         )
       )
@@ -141,7 +141,7 @@ class ArrangeLift{
       Fletcher.Anon(
         (res:Res<S,E>,cont:Terminal<Res<O,E>,Noise>) ->  
           cont.receive(
-            self.receive(res.map(__.couple.bind(i)))
+            self.forward(res.map(__.couple.bind(i)))
          )
       )
     );

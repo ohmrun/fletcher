@@ -26,7 +26,7 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
   static public function fromFletcher<I,E>(self:Fletcher<I,Noise,E>):Command<I,E>{
     return lift(
       (p:I,cont:Terminal<Report<E>,Noise>) -> cont.receive(
-        self.receive(p).fold_map(
+        self.forward(p).fold_map(
           _ -> __.success(__.report()),
           e -> __.success(e.toErr().report())
         )
@@ -36,7 +36,7 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
   @:from static public function fromFun1Execute<I,E>(fn:I->Execute<E>):Command<I,E>{
     return lift(
       Fletcher.Anon(
-        (i:I,cont) -> cont.receive(fn(i).receive(Noise))
+        (i:I,cont) -> cont.receive(fn(i).forward(Noise))
       )
     );
   }
@@ -44,7 +44,7 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
     return Cascade.lift(
       (p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
         ok -> cont.receive(
-          this.receive(ok).fold_map(
+          this.forward(ok).fold_map(
             report -> report.fold(
               e   -> __.success(__.reject(e)),
               ()  -> __.success(__.accept(ok)) 
@@ -74,7 +74,7 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
   }
   public function provide(i:I):Execute<E>{
     return Execute.lift(
-      Fletcher.Anon((_:Noise,cont:Terminal<Report<E>,Noise>) -> cont.receive(this.receive(i)))
+      Fletcher.Anon((_:Noise,cont:Terminal<Report<E>,Noise>) -> cont.receive(this.forward(i)))
     );
   }
   private var self(get,never):Command<I,E>;
@@ -85,7 +85,7 @@ class CommandLift{
   static public function toCascade<I,O,E>(command:CommandDef<I,E>):Cascade<I,I,E>{
     return Cascade.lift(
       (p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
-        (okI:I) -> cont.receive(command.receive(okI).fold_map(
+        (okI:I) -> cont.receive(command.forward(okI).fold_map(
           okII -> okII.fold(
             er -> __.success(__.reject(er)),
             () -> __.success(__.accept(okI))
@@ -103,7 +103,7 @@ class CommandLift{
         Fletcher.Anon(
           (ipt:Report<E>,cont:Terminal<Res<O,E>,Noise>) -> ipt.fold(
             e   -> cont.value(__.reject(e)).serve(),
-            ()  -> cont.receive(produce.receive(Noise))
+            ()  -> cont.receive(produce.forward(Noise))
           )
         )
       )

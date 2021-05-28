@@ -22,7 +22,7 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
   }
   @:from @:noUsing static public function fromFunXProduce<O,E>(self:Void->Produce<O,E>):Produce<O,E>{
     return lift(Fletcher.Anon(
-      (_:Noise,cont:Terminal<Res<O,E>,Noise>) -> cont.receive(self().receive(Noise))
+      (_:Noise,cont:Terminal<Res<O,E>,Noise>) -> cont.receive(self().forward(Noise))
     ));
   }
   @:noUsing static public function fromErr<O,E>(e:Err<E>):Produce<O,E>{
@@ -63,7 +63,7 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
   @:noUsing static public function fromFletcher<O,E>(arw:Fletcher<Noise,O,E>):Produce<O,E>{
     return lift(
       (_:Noise,cont:Waypoint<O,E>) -> cont.receive(
-          arw.receive(Noise).fold_map(
+          arw.forward(Noise).fold_map(
             (ok:O)          -> __.success(__.accept(ok)),
             (no:Defect<E>)  -> __.success(__.reject(no.toErr()))
           )
@@ -72,7 +72,7 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
   }
   static public function fromProvide<O,E>(self:Provide<Res<O,E>>):Produce<O,E>{
     return Produce.lift(Fletcher.Anon(
-      (_:Noise,cont:Terminal<Res<O,E>,Noise>) -> cont.receive(self.receive(Noise))
+      (_:Noise,cont:Terminal<Res<O,E>,Noise>) -> cont.receive(self.forward(Noise))
     ));
   }
   public inline function environment(success:O->Void,failure:Err<E>->Void):Fiber{
@@ -125,10 +125,10 @@ class ProduceLift{
     return Execute.lift(
       Fletcher.Anon(
         (_:Noise,cont:Terminal<Report<E>,Noise>) -> cont.receive(
-          self.receive(Noise).flat_fold(
+          self.forward(Noise).flat_fold(
             (oc:ArwOut<Res<O,E>,Noise>) -> oc.fold(
               res -> res.fold(
-                ok -> success(ok).receive(Noise),
+                ok -> success(ok).forward(Noise),
                 er -> cont.value(Report.pure(er))
               ),
               err -> cont.error(err)
@@ -176,15 +176,15 @@ class ProduceLift{
         next.toCascade()
       )).attempt(
         Attempt.lift(Fletcher.Anon(
-          (prd:Produce<Oi,E>,cont:Terminal<Res<Oi,E>,Noise>) -> cont.receive(prd.receive(Noise))
+          (prd:Produce<Oi,E>,cont:Terminal<Res<Oi,E>,Noise>) -> cont.receive(prd.forward(Noise))
         ))
       );
   }
   static public function arrange<S,O,Oi,E>(self:Produce<O,E>,next:Arrange<O,S,Oi,E>):Attempt<S,Oi,E>{
     return Attempt.lift(Fletcher.Anon(
-      (i:S,cont:Terminal<Res<Oi,E>,Noise>) -> cont.receive(self.receive(Noise).flat_fold(
+      (i:S,cont:Terminal<Res<Oi,E>,Noise>) -> cont.receive(self.forward(Noise).flat_fold(
         (oc:ArwOut<Res<O,E>,Noise>) -> oc.fold(
-          res -> next.receive(res.map(__.couple.bind(_,i))),
+          res -> next.forward(res.map(__.couple.bind(_,i))),
           err -> cont.error(err)
         )
       ))
@@ -194,9 +194,9 @@ class ProduceLift{
     return Attempt.lift(
       Fletcher.Anon(
         (i:S,cont:Terminal<Res<Oi,E>,Noise>) -> 
-          self.receive(Noise).flat_fold(
+          self.forward(Noise).flat_fold(
             oc -> oc.fold(
-              res -> next.receive(__.accept(__.couple(res,i))),
+              res -> next.forward(__.accept(__.couple(res,i))),
               no  -> cont.error(no)
             )
           ).serve()

@@ -53,9 +53,9 @@ class ReframeLift{
   static public function rearrange<I,O,Oi,E>(self:Reframe<I,O,E>,that:Arrange<Res<O,E>,I,Oi,E>):Reframe<I,Oi,E>{
     return Reframe.lift(
       Fletcher.Anon(
-        (ipt:Res<I,E>,cont:Terminal<Res<Couple<Oi,I>,E>,Noise>) -> return cont.receive(self.receive(ipt).flat_fold(
+        (ipt:Res<I,E>,cont:Terminal<Res<Couple<Oi,I>,E>,Noise>) -> return cont.receive(self.forward(ipt).flat_fold(
           oc -> oc.fold(
-            (res:Res<Couple<O,I>,E>) -> that.receive(
+            (res:Res<Couple<O,I>,E>) -> that.forward(
               res.fold(
                 (tp:Couple<O,I>)  -> __.accept(__.couple(__.accept(tp.fst()),tp.snd())),
                 (err)             -> ipt.fold(i -> __.accept(__.couple(__.reject(err),i)),e -> __.reject(e))
@@ -79,10 +79,10 @@ class ReframeLift{
   }
   static public function arrangement<I,Ii,O,Oi,E>(self:Reframe<I,O,E>,that:O->Arrange<Ii,I,Oi,E>):Attempt<Couple<Ii,I>,Oi,E>{
     return Attempt.lift(Fletcher.Anon(
-      (ipt:Couple<Ii,I>,cont:Terminal<Res<Oi,E>,Noise>) -> cont.receive(self.receive(__.success(ipt.snd())).flat_fold(
+      (ipt:Couple<Ii,I>,cont:Terminal<Res<Oi,E>,Noise>) -> cont.receive(self.forward(__.success(ipt.snd())).flat_fold(
         oc -> oc.fold(
           (tp:Res<Couple<O,I>,E>) -> tp.fold(
-            tp  -> that(tp.fst()).receive(__.success(ipt)),
+            tp  -> that(tp.fst()).forward(__.success(ipt)),
             err -> cont.value(__.reject(err))
           ),
           e -> cont.error(e)
@@ -100,19 +100,19 @@ class ReframeLift{
               Report.pure
             )
           )
-        ).receive(__.accept(ipt)))
+        ).forward(__.accept(ipt)))
       )
     );
   }
   static public function commandment<I,O,E>(self:Reframe<I,O,E>,fn:O->Command<I,E>):Reframe<I,O,E>{
     return lift(Fletcher.Anon(
-      (ipt:Res<I,E>,cont:Terminal<Res<Couple<O,I>,E>,Noise>) -> cont.receive(self.receive(ipt).flat_fold(
+      (ipt:Res<I,E>,cont:Terminal<Res<Couple<O,I>,E>,Noise>) -> cont.receive(self.forward(ipt).flat_fold(
         (oc) -> oc.fold(
           res -> res.fold(
             ok -> {
               var cmd = fn(ok.fst());//TODO HMMM
               return ipt.fold(
-                i -> cmd.receive(i).map(
+                i -> cmd.forward(i).map(
                   report -> report.fold(
                     err -> __.reject(err),
                     ()  -> __.accept(__.couple(ok.fst(),i))//TODO also hmm
@@ -139,7 +139,7 @@ class ReframeLift{
     return lift(
       Fletcher.Anon(
         (i:Res<I,EE>,cont:Terminal<Res<Couple<O,I>,EE>,Noise>) -> i.fold(
-          (i) -> cont.receive(self.map(o -> o.errata((e) -> e.map(fn))).receive(__.accept(i))),
+          (i) -> cont.receive(self.map(o -> o.errata((e) -> e.map(fn))).forward(__.accept(i))),
           (e) -> cont.value(__.reject(e)).serve()
         )
       )

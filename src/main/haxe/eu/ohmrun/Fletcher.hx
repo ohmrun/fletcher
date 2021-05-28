@@ -1,5 +1,8 @@
 package eu.ohmrun;
 
+interface FletcherApi<P,Pi,E> {
+  public function defer(p:P,cont:Terminal<Pi,E>):Work;
+}
 typedef FletcherDef<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
 
 @:using(eu.ohmrun.Fletcher.FletcherLift)
@@ -12,6 +15,9 @@ typedef FletcherDef<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
   private var self(get,never):Fletcher<P,Pi,E>;
   private function get_self():Fletcher<P,Pi,E> return lift(this);
 
+  @:from static public function fromApi<P,Pi,E>(self:FletcherApi<P,Pi,E>){
+    return lift(self.defer); 
+  }
   static public function unit<P,E>():Fletcher<P,P,E>{
     return Sync(x -> x);
   }
@@ -29,30 +35,46 @@ typedef FletcherDef<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
   static public inline function fromFunXR<R,E>(self:Void->R):Fletcher<Noise,R,E>{
     return Sync((_:Noise) -> self());
   }
-  static public function receive<P,Pi,E>(f:P -> Terminal<Pi,E> -> Work,v:P):Receiver<Pi,E>{
-    var done = false;
-    var next : Terminal<Pi,E> = null;
-        next = Terminal.lift(
-          function (fn:TerminalSink<Pi,E>) : Work {
-            return f(
-                v,
-                Terminal.unit()
-            );
-          }
+  static public function forward<P,Pi,E>(f:P -> Terminal<Pi,E> -> Work,p:P):Receiver<Pi,E>{
+    return Receiver.lift(
+      function(k:TerminalSink<Pi,E>){
+        trace('calling forward with $p');
+        return f(p,
+          Terminal.lift(
+            (kI:TerminalSink<Pi,E>) -> {
+              trace('calling forward terminal');
+              return Work.unit();
+            }
+          )
+        ).seq(
+          Work.lift(Some(
+            Future.irreversible(
+              cb -> {
+                trace("here");
+                cb(Cycle.ZERO);
+              }
+            )
+          ))
         );
-    return Receiver.lift(next.prj());
+      }
+    );
   }
   static public inline function Sync<P,R,E>(fn:P->R):Fletcher<P,R,E>{
     return lift(
-      (p:P,cont:Terminal<R,E>) -> cont.value(fn(p)).serve()
+      (p:P,cont:Terminal<R,E>) -> {
+        var res   = fn(p);
+        trace(res);
+        var resI  = cont.value(res).serve();
+        return resI;
+      }
     );
   }
 
   static public function FlatMap<P,R,Ri,E>(self:Fletcher<P,R,E>,fn:R->Fletcher<P,Ri,E>):Fletcher<P,Ri,E>{
     return lift(
-      (p:P,cont:Terminal<Ri,E>) -> cont.receive(self.receive(p).flat_fold(
+      (p:P,cont:Terminal<Ri,E>) -> cont.receive(self.forward(p).flat_fold(
         (oc:ArwOut<R,E>) -> oc.fold(
-          (ok:R)  -> fn(ok).receive(p),
+          (ok:R)  -> fn(ok).forward(p),
           no      -> Receiver.error(no)
         ) 
       ))
@@ -88,11 +110,10 @@ class FletcherLift{
     (_:Noise,cont:Terminal<Noise,Noise>) -> {
       return self(
         p,
-        Terminal.unit().tap(
-          (outcome) -> outcome.fold(
-            success,
-            (e) -> __.option(failure).defv(__.crack)(e)
-          )
+        Terminal.lift(
+          (fn:TerminalSink<Pi,E>) -> {
+            return Work.unit();
+          }
         )
       ).seq(cont.reply());
     });
@@ -110,9 +131,12 @@ class FletcherLift{
   static public function then<Pi,Ri,Rii,E>(self:Fletcher<Pi,Ri,E>,that:Fletcher<Ri,Rii,E>):Fletcher<Pi,Rii,E>{
     return Fletcher.lift(
       (pI:Pi,cont:Terminal<Rii,E>) -> {
-        self.receive(pI).flat_fold(
-          outcome -> outcome.fold(
-            ok -> that.receive(ok),
+        trace(pI);
+        var a = self.forward(pI);
+        trace('forwarded');
+        return a.flat_fold(
+          outcome -> __.tracer()(outcome).fold(
+            ok -> that.forward(ok),
             no -> Receiver.error(no)
           )
         ).serve();
@@ -121,8 +145,8 @@ class FletcherLift{
   }
   static public function pair<Pi,Ri,Pii,Rii,E>(self:FletcherDef<Pi,Ri,E>,that:Fletcher<Pii,Rii,E>):Fletcher<Couple<Pi,Pii>,Couple<Ri,Rii>,E>{
     return Fletcher.lift((p:Couple<Pi,Pii>,cont:Terminal<Couple<Ri,Rii>,E>) -> {
-      final lhs = self.receive(p.fst());
-      final rhs = that.receive(p.snd());
+      final lhs = self.forward(p.fst());
+      final rhs = that.forward(p.snd());
       return lhs.zip(rhs).serve();
     });
   }
@@ -136,13 +160,13 @@ class FletcherLift{
   }
   static public function pinch<P,Ri,Rii,E>(self:FletcherDef<P,Ri,E>,that:Fletcher<P,Rii,E>):Fletcher<P,Couple<Ri,Rii>,E>{
     return lift((p:P,cont:Terminal<Couple<Ri,Rii>,E>) -> cont.receive(
-      self.receive(p).zip(that.receive(p))
+      self.forward(p).zip(that.forward(p))
     ));
   }
   static public function map<P,Ri,Rii,E>(self:FletcherDef<P,Ri,E>,that:Ri->Rii):Fletcher<P,Rii,E>{
     return lift(
       (p:P,cont:Terminal<Rii,E>) -> cont.receive(
-        self.receive(p).map(that)
+        self.forward(p).map(that)
       )
     );
   }
@@ -161,14 +185,11 @@ class FletcherLift{
     return bound(self,Fletcher.Sync(__.decouple(__.couple)));
   }
 }
-class TerminalSinks{
-  static public function unit<R,E>():TerminalSink<R,E>{
-    return (x:ArwOut<R,E>)  ->  Work.unit();
-  }
-}
-typedef TerminalSink<R,E>   = ArwOut<R,E>     -> Work; 
-typedef ReceiverDef<R,E>    = eu.ohmrun.fletcher.Receiver.ReceiverDef<R,E>;
-typedef Receiver<R,E>       = eu.ohmrun.fletcher.Receiver<R,E>;
+
+typedef TerminalSinkDef<R,E>    = eu.ohmrun.fletcher.TerminalSink.TerminalSinkDef<R,E>;
+typedef TerminalSink<R,E>       = eu.ohmrun.fletcher.TerminalSink<R,E>;
+typedef ReceiverDef<R,E>        = eu.ohmrun.fletcher.Receiver.ReceiverDef<R,E>;
+typedef Receiver<R,E>           = eu.ohmrun.fletcher.Receiver<R,E>;
 typedef TerminalDef<R,E>    = eu.ohmrun.fletcher.Terminal.TerminalDef<R,E>;
 typedef Terminal<R,E>       = eu.ohmrun.fletcher.Terminal<R,E>;
 typedef Waypoint<R,E>       = Terminal<Res<R,E>,Noise>;
@@ -220,3 +241,5 @@ typedef Rectify<I,O,E>      = eu.ohmrun.fletcher.Rectify<I,O,E>;
 
 typedef ResolveDef<I,E>     = eu.ohmrun.fletcher.Resolve.ResolveDef<I,E>;
 typedef Resolve<I,E>        = eu.ohmrun.fletcher.Resolve<I,E>;
+
+typedef WorkContDef<R,E>    = ContinuationDef<Work,ArwOut<R,E>>;

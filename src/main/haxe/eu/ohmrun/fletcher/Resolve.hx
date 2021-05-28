@@ -14,7 +14,7 @@ abstract Resolve<I,E>(ResolveDef<I,E>) from ResolveDef<I,E> to ResolveDef<I,E>{
     return lift(
       self.then(
         (i:Propose<I,E>,cont:Terminal<Chunk<I,E>,Noise>) -> cont.receive(
-          i.receive(Noise)
+          i.forward(Noise)
         )
       )
     );
@@ -24,7 +24,7 @@ abstract Resolve<I,E>(ResolveDef<I,E>) from ResolveDef<I,E> to ResolveDef<I,E>{
       Fletcher.Then(
         Fletcher.Sync(arw),
         Fletcher.Anon((i:Propose<I,E>,cont:Terminal<Chunk<I,E>,Noise>) -> cont.receive(
-          i.receive(Noise) 
+          i.forward(Noise) 
         ))
       )
     );
@@ -57,7 +57,7 @@ class ResolveLift{
                   ()  -> __.reject(e)//<-----
                 )               
               );
-              return cont.receive(next.receive(e));
+              return cont.receive(next.forward(e));
             }
           )
     );

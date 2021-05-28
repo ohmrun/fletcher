@@ -1,14 +1,14 @@
 package eu.ohmrun.fletcher;
 
-typedef TerminalDef<R,E>    = ContinuationDef<Work,ArwOut<R,E>>;
+typedef TerminalDef<R,E>    = Ref<ContinuationDef<Work,ArwOut<R,E>>>;
 
 @:using(eu.ohmrun.fletcher.Terminal.TerminalLift)
-abstract Terminal<R,E>(TerminalDef<R,E>) from TerminalDef<R,E> to TerminalDef<R,E>{
-  @:noUsing static public function unit<R,E>():Terminal<R,E>{
-    return lift(
-      (fn:ArwOut<R,E> -> Work) -> return Work.unit() 
-    );
-  }
+@:forward(get_value)abstract Terminal<R,E>(TerminalDef<R,E>) from TerminalDef<R,E> to TerminalDef<R,E>{
+  // @:noUsing static public function unit<R,E>():Terminal<R,E>{
+  //   return lift(
+  //     (fn:ArwOut<R,E> -> Work) -> return Work.unit() 
+  //   );
+  // }
   static public function lift<R,E>(self:TerminalDef<R,E>):Terminal<R,E>{
     return new Terminal(self);
   }       
@@ -16,18 +16,24 @@ abstract Terminal<R,E>(TerminalDef<R,E>) from TerminalDef<R,E> to TerminalDef<R,
     this = self;
   }
   public function reply():Work{
-    return this(TerminalSinks.unit());
+    return @:privateAccess this.get_value()(TerminalSink.unit());
   }
   public function apply(fn:ArwOut<R,E>->Work):Work{
-    return this(fn);
+    return this.value(fn);
   }
-  // public function issue(outcome:Outcome<R,Defect<E>>):Receiver<R,E>{
-  //   return Receiver.lift(
-  //     (fn:TerminalSink<R,E>) -> {
-  //       return fn(outcome).seq(this(fn));
-  //     }
-  //   );
-  // }
+  public function replace(self:Receiver<R,E>){
+    trace('replace');
+    @:privateAccess this.set_value(
+      (fn:TerminalSink<R,E>) -> {
+        trace("CALLED");
+        @:privateAccess final thiz = this.get_value();
+        var a = thiz(fn);
+        var b = self.apply(fn);
+        return a.seq(b);
+        //Terminal.lift(self).get_value()
+      }
+    );
+  }
   public function toTerminal():Terminal<R,E> return this;
   public function prj():TerminalDef<R,E> return this;
 }
@@ -40,17 +46,18 @@ class TerminalLift{
     return issue(self,__.success(r));
   }
   static public function issue<R,E>(self:Terminal<R,E>,value:ArwOut<R,E>):Receiver<R,E>{
-    return Receiver.lift(
+    trace("issue");
+    var done = false;
+    var next = Receiver.lift(
       function(fn:ArwOut<R,E>->Work):Work{
-        //trace('non done');
-        var lhs = fn(value);
-        //trace('lhs done');
-        var rhs = self.apply(fn);
-        //trace('rhs done');
-        return lhs.seq(rhs); 
+        trace('using issue: $value');
+        return fn(value);
       }
     );
-  }
+    self.replace(next);
+    trace('replaced');
+    return next;
+  } 
   static public function later<R,E>(self:Terminal<R,E>,ft:Future<Outcome<R,Defect<E>>>,?pos:Pos):Receiver<R,E>{
     return Receiver.lift((fn:TerminalSink<R,E>) -> {
       return Work.lift(Some(ft.flatMap(
@@ -67,25 +74,40 @@ class TerminalLift{
   //   return Terminal.lift(Continuation.lift(Terminal.unit().prj()).zip_with(self.prj(),(lhs,rhs) -> lhs).asFunction());
   // }
   static public function apply<P,E>(self:TerminalDef<P,E>,fn:ArwOut<P,E>->Work):Work{
-    return self(fn);
-  }
-  static public function map<P,Pi,E>(self:TerminalDef<P,E>,fn:P->Pi):Terminal<Pi,E>{
-    return (cont:ArwOut<Pi,E>->Work) -> self(
-      (p:ArwOut<P,E>) -> cont(p.map(fn))
-    );
+    return self.value(fn);
   }
   static public function tap<P,E>(self:TerminalDef<P,E>,fn:ArwOut<P,E>->Void):Terminal<P,E>{
-    return (cont:ArwOut<P,E>->Work) -> self(
+    return (cont:ArwOut<P,E>->Work) -> Terminal.lift(self).apply(
       (p:ArwOut<P,E>) -> {
+        trace(p);
         fn(p);
-        cont(p);
+        return cont(p);
       }
     );
   }
   static public function mod<P,E>(self:TerminalDef<P,E>,g:Work->Work):Terminal<P,E>{
     return (f:ArwOut<P,E>->Work) -> {
-      return g(self(f));
+      return g(Terminal.lift(self).apply(f));
     };
+  }
+  static public function acc<P,E>(self:TerminalDef<P,E>,fn:ArwOut<P,E>->Work):Terminal<P,E>{
+    return (f:ArwOut<P,E>->Work) -> {
+      trace('call a');
+      var a = Terminal.lift(self).apply(
+        (res) -> {
+          trace(res);
+          return fn(res);
+        }
+      );
+      trace('call b');
+      var b = Terminal.lift(self).apply(
+        res -> {
+          trace(res);
+          return f(res);
+        }
+      );
+      return a.seq(b);
+    }; 
   }
   // static public function defer<P,Pi,E,EE>(self:TerminalDef<P,E>,that:Receiver<Pi,EE>):Terminal<P,E>{
   //   return Receiver.lift((f:ArwOut<P,E>->Work) -> {
@@ -110,7 +132,10 @@ class TerminalLift{
   }
   static public function receive<P,E>(self:TerminalDef<P,E>,receiver:Receiver<P,E>):Work{
     return receiver.apply(
-      (oc:ArwOut<P,E>) -> Terminal.lift(self).reply()
+      (oc:ArwOut<P,E>) -> {
+        trace(oc);
+        Terminal.lift(self).reply();
+      }
     );
   }
 }

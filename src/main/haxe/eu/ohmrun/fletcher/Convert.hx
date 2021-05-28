@@ -14,14 +14,14 @@ abstract Convert<I,O>(ConvertDef<I,O>) from ConvertDef<I,O> to ConvertDef<I,O>{
 
   @:noUsing static public function fromFun1Provide<I,O>(self:I->Provide<O>):Convert<I,O>{
     return lift(
-      (i:I,cont:Terminal<O,Noise>) -> cont.receive(self(i).receive(Noise))
+      (i:I,cont:Terminal<O,Noise>) -> cont.receive(self(i).forward(Noise))
     );
   }
   @:noUsing static public function fromConvertProvide<P,R>(self:Convert<P,Provide<R>>):Convert<P,R>{
     return lift(
-      (p:P,con) -> self.receive(p).flat_fold(
+      (p:P,con) -> self.forward(p).flat_fold(
           oc -> oc.fold(
-            (ok:Provide<R>)   -> ok.receive(Noise),
+            (ok:Provide<R>)   -> ok.forward(Noise),
             (er)              -> Receiver.error(er)
           )
         ).serve()
@@ -37,7 +37,7 @@ abstract Convert<I,O>(ConvertDef<I,O>) from ConvertDef<I,O> to ConvertDef<I,O>{
   public function toCascade<E>():Cascade<I,O,E>{
     return Cascade.lift(
       (p:Res<I,E>,cont:Waypoint<O,E>) -> p.fold(
-        ok -> cont.receive(this.receive(ok).map(__.accept)),
+        ok -> cont.receive(this.forward(ok).map(__.accept)),
         no -> cont.value(__.reject(no)).serve()
       ) 
     );

@@ -13,14 +13,14 @@ typedef RecoverDef<I,E>                 = FletcherDef<Err<E>,I,Noise>;
     (p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
       ok -> cont.value(__.accept(ok)).serve(),
       no -> cont.receive(
-        this.receive(no).map(__.accept)
+        this.forward(no).map(__.accept)
       )
     )
   );
   public function toRectify():Rectify<I,I,E> return Rectify.lift(
     (p:Res<I,E>,cont:Terminal<I,Noise>) -> p.fold(
       ok -> cont.value(ok).serve(),
-      er -> cont.receive(this.receive(er))
+      er -> cont.receive(this.forward(er))
     )
   );
 
@@ -37,7 +37,7 @@ class RecoverLift{
       return p.fold(
         ok -> cont.value(ok).serve(),
         no -> cont.receive(
-          self.receive(no).fold_map(
+          self.forward(no).fold_map(
             ok -> __.success(ok),
             _  -> __.failure(_)
           )
@@ -49,7 +49,7 @@ class RecoverLift{
     return Cascade.lift(
       (p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
         ok -> cont.value(__.accept(ok)).serve(),
-        no -> cont.receive(self.receive(no).map(__.accept)))
+        no -> cont.receive(self.forward(no).map(__.accept)))
     );
   }
 }

@@ -11,14 +11,14 @@ typedef FiberDef = Fletcher<Noise,Noise,Noise>;
   public inline function submit():Void{
     this(
       Noise,
-      Terminal.unit()
+      Terminal.lift((fn) -> fn(null))
     ).toCycle()
      .submit();
   }
   public inline function crunch():Void{
     this(
       Noise,
-      Terminal.unit()
+      Terminal.lift((fn) -> fn(null))
     ).toCycle()
      .crunch();
   }
