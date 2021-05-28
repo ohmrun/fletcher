@@ -26,7 +26,7 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
   static public function fromFletcher<I,E>(self:Fletcher<I,Noise,E>):Command<I,E>{
     return lift(
       (p:I,cont:Terminal<Report<E>,Noise>) -> cont.receive(
-        self.forward(p).fold_map(
+        self.forward(p).fold_mapp(
           _ -> __.success(__.report()),
           e -> __.success(e.toErr().report())
         )
@@ -44,7 +44,7 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
     return Cascade.lift(
       (p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
         ok -> cont.receive(
-          this.forward(ok).fold_map(
+          this.forward(ok).fold_mapp(
             report -> report.fold(
               e   -> __.success(__.reject(e)),
               ()  -> __.success(__.accept(ok)) 

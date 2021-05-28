@@ -52,7 +52,7 @@ typedef CascadeDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 		return lift(
 			(p:Res<I,E>,cont:Waypoint<O,E>) -> cont.receive(
 				p.fold(
-					ok -> arw.forward(ok).fold_map(
+					ok -> arw.forward(ok).fold_mapp(
 						ok -> __.success(__.accept(ok)),
 						no -> __.success(__.reject(no.toErr())) 
 					),

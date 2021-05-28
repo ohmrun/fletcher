@@ -63,7 +63,7 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
   @:noUsing static public function fromFletcher<O,E>(arw:Fletcher<Noise,O,E>):Produce<O,E>{
     return lift(
       (_:Noise,cont:Waypoint<O,E>) -> cont.receive(
-          arw.forward(Noise).fold_map(
+          arw.forward(Noise).fold_mapp(
             (ok:O)          -> __.success(__.accept(ok)),
             (no:Defect<E>)  -> __.success(__.reject(no.toErr()))
           )

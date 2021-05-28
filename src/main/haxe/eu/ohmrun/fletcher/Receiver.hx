@@ -103,10 +103,10 @@ class ReceiverLift{
       )
     ));
   }
-  static public function fold_map<P,Pi,E,EE>(self:ReceiverDef<P,E>,ok:P->ReceiverInput<Pi,EE>,no:Defect<E>->ReceiverInput<Pi,EE>):Receiver<Pi,EE>{
+  static public function fold_bind<P,Pi,E,EE>(self:ReceiverDef<P,E>,ok:P->ReceiverInput<Pi,EE>,no:Defect<E>->ReceiverInput<Pi,EE>):Receiver<Pi,EE>{
     return Receiver.lift((cont:ReceiverInput<Pi,EE>->Work) -> Receiver.lift(self).apply(
       (p:ReceiverInput<P,E>) -> cont(
-        p.fold_map(
+        p.fold_bind(
           ok,
           no
         )
@@ -116,7 +116,7 @@ class ReceiverLift{
   static public function fold<P,Pi,E,EE>(self:ReceiverDef<P,E>,ok:P->ArwOut<Pi,EE>,no:Defect<E>->ArwOut<Pi,EE>):Receiver<Pi,EE>{
     return Receiver.lift((cont:ReceiverInput<Pi,EE>->Work) -> Receiver.lift(self).apply(
       (p:ReceiverInput<P,E>) -> cont(
-        p.fold(
+        p.fold_mapp(
           ok,
           no
         )
