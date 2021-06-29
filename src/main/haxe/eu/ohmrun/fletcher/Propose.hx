@@ -42,7 +42,7 @@ abstract Propose<O,E>(ProposeDef<O,E>) from ProposeDef<O,E> to ProposeDef<O,E>{
   private var self(get,never):Propose<O,E>;
   private function get_self():Propose<O,E> return lift(this);
   @:noUsing static public function bind_fold<T,O,E>(fn:T->O->Propose<O,E>,iterable:Iterable<T>,seed:O):Option<Propose<O,E>>{
-    return iterable.toIter().foldl(
+    return iterable.toIter().lfold(
       (next:T,memo:Propose<O,E>) -> Propose.lift(
         memo.toFletcher().then(
           Fletcher.Anon(
