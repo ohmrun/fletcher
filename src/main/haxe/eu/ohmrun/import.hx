@@ -10,4 +10,4 @@ using stx.Log;
 using stx.Stream;
 
 using eu.ohmrun.Fletcher;
-using eu.ohmrun.fletcher.Log;
+using eu.ohmrun.fletcher.Logging;
