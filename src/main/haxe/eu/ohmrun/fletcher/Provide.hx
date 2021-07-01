@@ -71,7 +71,10 @@ class ProvideLift{
       (o) -> {
         handler(o);
       },
-      (e) -> throw(e)
+      (e) -> {
+        __.log().fatal(_ -> _.pure(e));
+        throw(e);
+      }
     );
   }
   static public function flat_map<O,Oi>(self:Provide<O>,fn:O->ProvideDef<Oi>):Provide<Oi>{
