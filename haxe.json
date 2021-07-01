@@ -3,7 +3,7 @@
     "-D"    : ["no-deprecation-warnings"],
     "-cp"   : "src/main/haxe",
     "-L"    : ["tink_core","stx_pico","stx_nano","stx_fn","stx_fp","stx_log","stx_test"],
-    "test" : {
+    "test"  : {
       "-main"     : "Main",
       "--interp"  : true
     }

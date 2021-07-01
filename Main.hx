@@ -4,6 +4,8 @@ using tink.CoreApi;
 using stx.Nano;
 using stx.unit.Test;
 using stx.Fn;
+using stx.Log;
+using stx.Stream;
 
 class Main{
   static public function main(){
@@ -19,27 +21,27 @@ class CycleTest extends TestCase{
   public function test(){
     var a = Cycle.unit();
     var b = Cycle.unit();
-    a.seq(b).crunch();
+        a.seq(b).crunch();
   }
 }
 class ThenTest extends TestCase{
   public function test_env(){
-    var a = Fletcher.Sync((x) -> {
+    var a = Fletcher.Sync((x:Int) -> {
       __.log().debug(x);
       return x+1;
     });
     a.environment(
       1,
-      __.__.log().debug()
+      (x) -> __.log().debug('$x')
     ).crunch();
     __.log().debug("______");
   }
   public function test(){
-    var a = Fletcher.Sync((x) -> {
+    var a = Fletcher.Sync((x:Int) -> {
       __.log().debug(x);
       return x+1;
     });
-    var b = Fletcher.Sync((y) -> {
+    var b = Fletcher.Sync((y:Int) -> {
       __.log().debug(y);
       return y*5;
     });

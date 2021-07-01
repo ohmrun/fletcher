@@ -1,5 +1,8 @@
 package eu.ohmrun;
 
+typedef ArwOutDef<R,E>    = Outcome<R,Defect<E>>;
+typedef ArwOut<R,E>       = ArwOutDef<R,E>; 
+
 interface FletcherApi<P,Pi,E> {
   public function defer(p:P,cont:Terminal<Pi,E>):Work;
 }
