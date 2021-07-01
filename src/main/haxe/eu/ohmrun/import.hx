@@ -8,6 +8,7 @@ using stx.Fn;
 using stx.Fp;
 using stx.Log;
 using stx.Stream;
+using stx.Pkg;
 
 using eu.ohmrun.Fletcher;
 using eu.ohmrun.fletcher.Logging;
