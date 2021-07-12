@@ -67,17 +67,18 @@ class ReceiverLift{
   //   return next;
   // }
   static public function flat_fold<P,Pi,E>(self:ReceiverDef<P,E>,ok:P->Receiver<Pi,E>,no:Defect<E>->Receiver<Pi,E>):Receiver<Pi,E>{
-    __.log().debug("set up flat_fold");
+    final uuid = __.uuid('xxxx');
+    __.log().debug('set up flat_fold: $uuid');
     return Receiver.lift(
       (cont : ReceiverInput<Pi,E> -> Work) -> {
-        __.log().debug("call flat_fold");
+        __.log().debug('call flat_fold $uuid');
         return Receiver.lift(self).apply(
           (p:ReceiverInput<P,E>) -> {
 
-            __.log().debug("inside flat_fold");
+            __.log().debug('inside flat_fold $uuid');
             return p.flatMap(
               out -> {
-                __.log().debug(_ -> _.pure(out));
+                __.log().debug('flat_fold:end $uuid');
                 return out.fold(ok,no);
               }
             ).flatMap(
