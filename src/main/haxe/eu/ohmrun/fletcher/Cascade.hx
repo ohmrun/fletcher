@@ -66,7 +66,7 @@ typedef CascadeDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 		return lift(
 			(p:Res<I,E>,cont:Waypoint<O,E>) -> p.fold(
 				ok -> cont.receive(self.forward(ok)),
-				no -> cont.value(__.reject(no)).serve()
+				no -> cont.receive(cont.value(__.reject(no)))
 			)
 		);
 	}
@@ -76,7 +76,7 @@ typedef CascadeDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 			(p:Res<Noise,E>,cont:Waypoint<O,E>) -> 
 				p.fold(
 					_ -> cont.receive(arw.forward(Noise)),
-					e -> cont.value(__.reject(e)).serve()
+					e -> cont.receive(cont.value(__.reject(e)))
 				)
 		);
 	}
@@ -94,7 +94,7 @@ typedef CascadeDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 	}
 
 	static private function typical_fail_handler<O, E>(cont:Terminal<Res<O, E>, Noise>) {
-		return (e:Err<E>) -> cont.value(__.reject(e)).serve();
+		return (e:Err<E>) -> cont.receive(cont.value(__.reject(e)));
 	}
 
 	@:to public inline function toFletcher():Fletcher<Res<I, E>, Res<O, E>, Noise> return this;
@@ -133,7 +133,7 @@ class CascadeLift {
 							lhs -> self.forward(__.accept(lhs)),
 							rhs -> that.forward(__.accept(rhs))
 						)),
-						no -> cont.value(__.reject(no)).serve()
+						no -> cont.receive(cont.value(__.reject(no)))
 					)
 			)
 		);
@@ -149,7 +149,7 @@ class CascadeLift {
 								o -> o.errata(fn)).forward(__.accept(i)
 							)
 						),
-					(e) -> cont.value(__.reject(e)).serve()
+					(e) -> cont.receive(cont.value(__.reject(e)))
 				)
 			)
 		);
@@ -191,7 +191,7 @@ class CascadeLift {
 	}
 
 	static function typical_fail_handler<O, E>(cont:Terminal<Res<O, E>, Noise>):Err<E>->Work {
-		return (e:Err<E>) ->  cont.value(__.reject(e)).serve();
+		return (e:Err<E>) ->  cont.receive(cont.value(__.reject(e)));
 	}
 
 	@:noUsing static public inline function environment<I, O, E>(self:Cascade<I, O, E>, i:I, success:O->Void, failure:Err<E>->Void):Fiber {
@@ -215,10 +215,10 @@ class CascadeLift {
 	}
 
 	static public function arrange<I, O, Oi, E>(self:Cascade<I, O, E>, then:Arrange<O, I, Oi, E>):Cascade<I, Oi, E> {
-		return lift(Fletcher.Anon((i:Res<I, E>, cont:Terminal<Res<Oi, E>, Noise>) -> self.forward(i).flat_fold(
+		return lift(Fletcher.Anon((i:Res<I, E>, cont:Terminal<Res<Oi, E>, Noise>) -> cont.receive(self.forward(i).flat_fold(
 				res -> then.forward(res.zip(i)),
 				e 	-> cont.error(e)
-			).serve()
+			))
 		));
 	}
 
@@ -253,11 +253,17 @@ class CascadeLift {
         Fletcher.Anon(
           (ipt:Res<O,E>,cont:Terminal<Res<O,E>,Noise>) -> ipt.fold(
             o -> cont.receive(that.produce(Produce.pure(o)).forward(o)),
-            e -> cont.value(__.reject(e)).serve()
+            e -> cont.receive(cont.value(__.reject(e)))
           )
         )
       )
     );
   }
-	
+	static public function provide<I,O,E>(self:Cascade<I,O,E>,i:I):Produce<O,E>{
+    return Produce.lift(
+      Fletcher.Anon(
+        (_:Noise,cont) -> cont.receive(self.forward(__.accept(i)))
+      )
+   );
+  } 	
 }

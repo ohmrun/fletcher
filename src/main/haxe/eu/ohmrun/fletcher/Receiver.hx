@@ -12,6 +12,16 @@ abstract Receiver<R,E>(ReceiverDef<R,E>) to ReceiverDef<R,E>{
   public function apply(fn){
     return this(fn);
   }
+  // public function direct():ReceiverInput<R,E>{
+  //   var val = null;
+  //   apply(
+  //     (x) -> {
+  //       val = x;
+  //       return Work.unit();
+  //     }
+  //   ).toCycle().crunch();
+  //   return val;
+  // }
   static inline public function lift<R,E>(self:ReceiverDef<R,E>) return new Receiver(self);
 
   private inline function new(self:ReceiverDef<R,E>) this = self;
