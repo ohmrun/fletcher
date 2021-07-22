@@ -2,7 +2,7 @@ using eu.ohmrun.Fletcher;
 
 using tink.CoreApi;
 using stx.Nano;
-using stx.unit.Test;
+using stx.Test;
 using stx.Fn;
 using stx.Log;
 using stx.Stream;

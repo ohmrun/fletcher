@@ -122,9 +122,9 @@ class AttemptLift{
   static public function attempt<I,O,Oi,E>(self:Attempt<I,O,E>,next:Attempt<O,Oi,E>):Attempt<I,Oi,E>{
     return then(self,next.toCascade());
   }
-  // static public function reframe<I,O,E>(self:Attempt<I,O,E>):Reframe<I,O,E>{ 
-  //   return self.toCascade().reframe();
-  // }
+  static public function reframe<I,O,E>(self:Attempt<I,O,E>):Reframe<I,O,E>{ 
+    return self.toCascade().reframe();
+  }
   static public function broach<I,O,E>(self:Attempt<I,O,E>):Attempt<I,Couple<I,O>,E>{
     return Attempt.lift(
       Fletcher.Anon(

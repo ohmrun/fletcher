@@ -22,6 +22,9 @@ typedef FiberDef = Fletcher<Noise,Noise,Noise>;
     ).toCycle()
      .crunch();
   }
+  @:from static public function fromCompletion<P,R,E>(self:Completion<P,R,E>){
+    return lift(Fletcher.lift(self.defer));
+  }
   public function prj():FletcherDef<Noise,Noise,Noise>{
     return this;
   }
