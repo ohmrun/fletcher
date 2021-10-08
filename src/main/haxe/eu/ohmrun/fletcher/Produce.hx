@@ -242,8 +242,8 @@ class ProduceLift{
   }
   static public function pledge<O,E>(self:Produce<O,E>):Pledge<O,E>{
     return Pledge.lift(
-      $type(Fletcher._.future(self,Noise)).map(
-        (outcome:Outcome<Res<O,E>,Defect<E>>) -> $type(outcome.fold(
+      (Fletcher._.future(self,Noise)).map(
+        (outcome:Outcome<Res<O,E>,Defect<Noise>>) -> (outcome.fold(
           (x:Res<O,E>)      -> x,
           (e:Defect<Noise>) -> __.reject(e.elide().toErr())
         ))
