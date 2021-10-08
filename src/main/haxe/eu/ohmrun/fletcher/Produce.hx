@@ -240,4 +240,14 @@ class ProduceLift{
       Fletcher.fromFun1R((res:Res<O,E>) -> res.flat_map(fn))
     ));
   }
+  static public function pledge<O,E>(self:Produce<O,E>):Pledge<O,E>{
+    return Pledge.lift($type(
+      Fletcher._.future(self,Noise).map(
+        (outcome:Outcome<O,Defect<E>>) -> $type(outcome.fold(
+          __.accept,
+          e -> __.reject(e.toErr())
+        ))
+      )
+    ));
+  }
 }
