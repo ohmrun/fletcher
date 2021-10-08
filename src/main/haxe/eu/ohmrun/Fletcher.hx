@@ -44,7 +44,7 @@ typedef FletcherDef<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
   static public function forward<P,Pi,E>(f:P -> Terminal<Pi,E> -> Work,p:P):Receiver<Pi,E>{
     return Receiver.lift(
       function(k:ReceiverSink<Pi,E>){
-        __.log().debug('forward called');
+        __.log().trace('forward called');
         var ft : FutureTrigger<ArwOut<Pi,E>> = Future.trigger();
             ft.asFuture().handle(
               x -> {
@@ -55,7 +55,7 @@ typedef FletcherDef<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
           p,
           Terminal.lift(
             (t_sink:TerminalSink<Pi,E>) -> {
-              __.log().debug('forwarding');
+              __.log().trace('forwarding');
               return t_sink(ft);
             }
           )

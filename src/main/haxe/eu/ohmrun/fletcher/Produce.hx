@@ -70,6 +70,16 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
         )
     );
   }
+  static public function bind_fold<P,O,R,E>(data:Iter<P>,fn:P->R->Produce<R,E>,r:R):Produce<R,E>{
+    return data.lfold(
+      (next:P,memo:Produce<R,E>) -> {
+        return memo.flat_map(
+          r -> fn(next,r)
+        );
+      },
+      pure(r)
+    );
+  }
   static public function fromProvide<O,E>(self:Provide<Res<O,E>>):Produce<O,E>{
     return Produce.lift(Fletcher.Anon(
       (_:Noise,cont:Terminal<Res<O,E>,Noise>) -> cont.receive(self.forward(Noise))
@@ -214,7 +224,14 @@ class ProduceLift{
       )
     );
   }
-  static public function then<O,Oi,E,EE>(self:Produce<O,E>,that:Fletcher<Res<O,E>,Oi,Noise>):Provide<Oi>{
+  static public function then<O,Oi,E>(self:Produce<O,E>,that:Fletcher<Res<O,E>,Oi,Noise>):Provide<Oi>{
     return Provide.lift(Fletcher.Then(self,that));
+  }
+  static public function pair<O,Oi,E>(self:Produce<O,E>,that:Produce<Oi,E>):Produce<Couple<O,Oi>,E>{
+    return lift(Fletcher._.split(self,that).then(
+      Fletcher.fromFun1R(
+        __.decouple((l:Res<O,E>,r:Res<Oi,E>) -> l.zip(r))
+      )
+    ));
   }
 }
