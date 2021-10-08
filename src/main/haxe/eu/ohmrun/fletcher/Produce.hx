@@ -227,11 +227,17 @@ class ProduceLift{
   static public function then<O,Oi,E>(self:Produce<O,E>,that:Fletcher<Res<O,E>,Oi,Noise>):Provide<Oi>{
     return Provide.lift(Fletcher.Then(self,that));
   }
-  static public function pair<O,Oi,E>(self:Produce<O,E>,that:Produce<Oi,E>):Produce<Couple<O,Oi>,E>{
+  static public function split<O,Oi,E>(self:Produce<O,E>,that:Produce<Oi,E>):Produce<Couple<O,Oi>,E>{
     return lift(Fletcher._.split(self,that).then(
       Fletcher.fromFun1R(
         __.decouple((l:Res<O,E>,r:Res<Oi,E>) -> l.zip(r))
       )
+    ));
+  }
+  static public function adjust<O,Oi,E>(self:Produce<O,E>,fn:O->Res<Oi,E>):Produce<Oi,E>{
+    return lift(Fletcher._.then(
+      self,
+      Fletcher.fromFun1R((res:Res<O,E>) -> res.flat_map(fn))
     ));
   }
 }

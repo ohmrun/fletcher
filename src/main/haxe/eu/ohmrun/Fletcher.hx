@@ -197,6 +197,16 @@ class FletcherLift{
   static public function broach<Oi,Oii,E>(self:FletcherDef<Oi,Oii,E>):Fletcher<Oi,Couple<Oi,Oii>,E>{
     return bound(self,Fletcher.Sync(__.decouple(__.couple)));
   }
+  static public function future<P,O,E>(self:FletcherDef<P,O,E>,p:P):Future<Outcome<O,Defect<E>>>{
+    return Future.irreversible(
+      cb -> environment(
+        self,
+        p,
+        (ok) -> cb(__.success(ok)),
+        (no) -> cb(__.failure(no))
+      ).submit() 
+    );
+  }
 }
 
 typedef TerminalSinkDef<R,E>    = eu.ohmrun.fletcher.TerminalSink.TerminalSinkDef<R,E>;
