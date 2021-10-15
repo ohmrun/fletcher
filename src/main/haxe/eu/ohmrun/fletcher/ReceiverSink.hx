@@ -12,7 +12,7 @@ typedef ReceiverSinkDef<R,E>    = ReceiverInput<R,E>     -> Work;
     });
   }
   static public function unit<R,E>():ReceiverSink<R,E>{
-    return (x:ReceiverInput<R,E>)  ->  Work.unit();
+    return lift((x:ReceiverInput<R,E>)  ->  Work.unit());
   }
   public function prj():ReceiverSinkDef<R,E> return this;
   private var self(get,never):ReceiverSink<R,E>;
