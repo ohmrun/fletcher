@@ -207,6 +207,7 @@ class FletcherLift{
       ).submit() 
     );
   }
+  //static public function provide<I,O>(self:FletcherDef<I,O>):
 }
 
 typedef TerminalSinkDef<R,E>    = eu.ohmrun.fletcher.TerminalSink.TerminalSinkDef<R,E>;
