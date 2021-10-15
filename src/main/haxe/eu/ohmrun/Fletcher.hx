@@ -46,21 +46,22 @@ typedef FletcherDef<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
       function(k:ReceiverSink<Pi,E>){
         __.log().trace('forward called');
         var ft : FutureTrigger<ArwOut<Pi,E>> = Future.trigger();
-            ft.asFuture().handle(
-              x -> {
-                __.log().debug('forwarded: $x');
-              }
-            );
         var fst = f(
           p,
           Terminal.lift(
             (t_sink:TerminalSink<Pi,E>) -> {
               __.log().trace('forwarding');
+              __.assert().exists(t_sink);
               return t_sink(ft);
             }
           )
         );
-        var snd = k(ft.asFuture());
+        var snd = k(ft.asFuture().map(
+          x -> {
+            __.log().debug('forwarded: $x');
+            return x;
+          }
+        ));
         return fst.seq(snd);
       }
     );
@@ -119,6 +120,7 @@ class FletcherLift{
               p,
               Terminal.lift(
                 (fn:TerminalSink<Pi,E>) -> {
+                  __.log().debug("fiber:lifted");
                   var ft = Future.trigger();
                       ft.handle(
                         (x:ArwOut<Pi,E>) -> x.fold(
@@ -140,9 +142,16 @@ class FletcherLift{
     environment(
       self,
       p,
-      (ok) -> val = ok,
-      (no) -> __.crack(no)
+      (ok) -> {
+        __.log().debug('fudged');
+        val = ok;
+      },
+      (no) -> {
+        __.log().debug('fudged:fail');
+        __.crack(no);
+      }
     ).crunch();
+    trace(val);
     return val;
   }
   static public function then<Pi,Ri,Rii,E>(self:Fletcher<Pi,Ri,E>,that:Fletcher<Ri,Rii,E>):Fletcher<Pi,Rii,E>{
