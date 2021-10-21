@@ -14,7 +14,7 @@ typedef ReceiverSinkDef<R,E>    = ReceiverInput<R,E>     -> Work;
   static public function unit<R,E>():ReceiverSink<R,E>{
     return lift(
       (x:ReceiverInput<R,E>)  ->  {
-        trace(x.handle(x -> __.log().trace('received $x')));
+        //trace(x.handle(x -> __.log().trace('received $x')));
         return Work.unit();
       }
     );

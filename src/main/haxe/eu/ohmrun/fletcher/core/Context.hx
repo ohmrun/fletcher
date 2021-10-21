@@ -17,7 +17,7 @@ package eu.ohmrun.fletcher.core;
   @:from static public function fromInput<P,R,E>(environment:P):Context<P,R,E>{
     return make(environment);
   }
-  public function load(arrowlet:P -> Terminal<R,E> -> Work):Fiber{
-    return Fiber.lift(new Completion(this,Fletcher.lift(arrowlet)));
+  public function load(arrowlet:Fletcher<P,R,E>):Fiber{
+    return Fiber.lift(new Completion(this,arrowlet));
   }
 }

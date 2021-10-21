@@ -10,8 +10,8 @@ typedef FletcherDef<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
 
 @:using(eu.ohmrun.Fletcher.FletcherLift)
 @:callable abstract Fletcher<P,Pi,E>(FletcherDef<P,Pi,E>) from FletcherDef<P,Pi,E> to FletcherDef<P,Pi,E>{
-  static public function ctx<P,R,E>(wildcard:Wildcard,environment:P):eu.ohmrun.fletcher.core.Context<P,R,E>{
-    return eu.ohmrun.fletcher.core.Context.pure(environment);
+  static public function ctx<P,R,E>(wildcard:Wildcard,environment:P,?ok,?no):eu.ohmrun.fletcher.core.Context<P,R,E>{
+    return eu.ohmrun.fletcher.core.Context.make(environment,ok,no);
   }
   static public var _(default,never) = FletcherLift;
   public function new(self) this = self;

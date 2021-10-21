@@ -109,4 +109,5 @@ class ProvideLift{
   static public inline function fudge<O>(self:Provide<O>):O{
     return Fletcher._.fudge(self,Noise);
   }
+  //static public inline function future<O>(self:Provide<O>)  
 }
