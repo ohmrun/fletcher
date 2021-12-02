@@ -1,6 +1,6 @@
 package eu.ohmrun.fletcher;
         
-typedef ResolveDef<I,E> = FletcherDef<Err<E>,Chunk<I,E>,Noise>;
+typedef ResolveDef<I,E> = FletcherDef<Error<E>,Chunk<I,E>,Noise>;
 
 /**
   Chunk.Tap signifies no resolution has been found.
@@ -10,7 +10,7 @@ abstract Resolve<I,E>(ResolveDef<I,E>) from ResolveDef<I,E> to ResolveDef<I,E>{
   public inline function new(self) this = self;
   static public inline function lift<I,E>(self:ResolveDef<I,E>):Resolve<I,E> return new Resolve(self);
   
-  @:from static public function fromResolvePropose<I,E>(self:Fletcher<Err<E>,Propose<I,E>,Noise>):Resolve<I,E>{
+  @:from static public function fromResolvePropose<I,E>(self:Fletcher<Error<E>,Propose<I,E>,Noise>):Resolve<I,E>{
     return lift(
       self.then(
         (i:Propose<I,E>,cont:Terminal<Chunk<I,E>,Noise>) -> cont.receive(
@@ -19,7 +19,7 @@ abstract Resolve<I,E>(ResolveDef<I,E>) from ResolveDef<I,E> to ResolveDef<I,E>{
       )
     );
   }
-  @:from static public function fromFunErrPropose<I,E>(arw:Err<E>->Propose<I,E>):Resolve<I,E>{
+  @:from static public function fromFunErrPropose<I,E>(arw:Error<E>->Propose<I,E>):Resolve<I,E>{
     return lift(
       Fletcher.Then(
         Fletcher.Sync(arw),
@@ -29,17 +29,17 @@ abstract Resolve<I,E>(ResolveDef<I,E>) from ResolveDef<I,E> to ResolveDef<I,E>{
       )
     );
   }
-  @:from static public function fromErrChunk<I,E>(fn:Err<E>->Chunk<I,E>):Resolve<I,E>{
+  @:from static public function fromErrChunk<I,E>(fn:Error<E>->Chunk<I,E>):Resolve<I,E>{
     return lift(Fletcher.Sync(fn));
   }
   @:noUsing static public function unit<I,E>():Resolve<I,E>{
-    return lift(Fletcher.Sync((e:Err<E>) -> Tap));
+    return lift(Fletcher.Sync((e:Error<E>) -> Tap));
   }
 
   public function prj():ResolveDef<I,E> return this;
   private var self(get,never):Resolve<I,E>;
   private function get_self():Resolve<I,E> return lift(this);
-  @:to public inline function toFletcher():Fletcher<Err<E>,Chunk<I,E>,Noise>{
+  @:to public inline function toFletcher():Fletcher<Error<E>,Chunk<I,E>,Noise>{
     return this;
   }
 }

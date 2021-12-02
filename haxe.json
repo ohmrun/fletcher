@@ -3,9 +3,11 @@
     "-D"    : ["no-deprecation-warnings"],
     "-cp"   : ["src/main/haxe"],
     "-L"    : ["tink_core","stx_pico","stx_nano","stx_fn","stx_fp","stx_log","stx_test"],
-    "interp"  : {
+    "main"  : {
       "-main"     : "Main",
-      "--interp"  : true
+      "interp"  : {
+        "--interp"  : true
+      }
     }
   }
 }

@@ -1,12 +1,12 @@
 package eu.ohmrun.fletcher;
         
-typedef RecoverDef<I,E>                 = FletcherDef<Err<E>,I,Noise>;
+typedef RecoverDef<I,E>                 = FletcherDef<Error<E>,I,Noise>;
 
 @:forward abstract Recover<I,E>(RecoverDef<I,E>) from RecoverDef<I,E> to RecoverDef<I,E>{
   public inline function new(self) this = self;
   @:noUsing static public inline function lift<I,E>(self:RecoverDef<I,E>) return new Recover(self);
 
-  @:from static public function fromFunErrR<I,E>(fn:Err<E>->I):Recover<I,E>{
+  @:from static public function fromFunErrR<I,E>(fn:Error<E>->I):Recover<I,E>{
     return lift(Fletcher.Sync(fn));
   }
   public function toCascade():Cascade<I,I,E> return Cascade.lift(
@@ -27,7 +27,7 @@ typedef RecoverDef<I,E>                 = FletcherDef<Err<E>,I,Noise>;
   public inline function prj():RecoverDef<I,E>{
     return this;
   }
-  public inline function toFletcher():Fletcher<Err<E>,I,Noise>{
+  public inline function toFletcher():Fletcher<Error<E>,I,Noise>{
     return Fletcher.lift(this);
   }
 } 
