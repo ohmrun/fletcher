@@ -25,7 +25,7 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
       (_:Noise,cont:Terminal<Res<O,E>,Noise>) -> cont.receive(self().forward(Noise))
     ));
   }
-  @:noUsing static public function fromErr<O,E>(e:Err<E>):Produce<O,E>{
+  @:noUsing static public function fromException<O,E>(e:Exception<E>):Produce<O,E>{
     return Sync(__.reject(e));
   }
   @:noUsing static public function pure<O,E>(v:O):Produce<O,E>{
@@ -45,7 +45,7 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
           return cont.later(
             pl.fold(
               (x) -> __.success(__.accept(x)),
-              (e) -> __.success(__.reject(Defect.fromErr(e)))
+              (e) -> __.success(__.reject(e))
             )
           ).serve();
         }
@@ -65,7 +65,7 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
       (_:Noise,cont:Waypoint<O,E>) -> cont.receive(
           arw.forward(Noise).fold_mapp(
             (ok:O)          -> __.success(__.accept(ok)),
-            (no:Defect<E>)  -> __.success(__.reject(no.toErr()))
+            (no:Defect<E>)  -> __.success(__.reject(no.toError().except()))
           )
         )
     );
@@ -85,7 +85,7 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
       (_:Noise,cont:Terminal<Res<O,E>,Noise>) -> cont.receive(self.forward(Noise))
     ));
   }
-  public inline function environment(success:O->Void,failure:Err<E>->Void):Fiber{
+  public inline function environment(success:O->Void,failure:Exception<E>->Void):Fiber{
     return Fletcher._.environment(
       this,
       Noise,
@@ -121,7 +121,7 @@ class ProduceLift{
       )
     ));
   }
-  static public function errata<O,E,EE>(self:Produce<O,E>,fn:Err<E>->Err<EE>):Produce<O,EE>{
+  static public function errata<O,E,EE>(self:Produce<O,E>,fn:Exception<E>->Exception<EE>):Produce<O,EE>{
     return lift(self.then(
       Fletcher.fromFun1R(
         (oc:Res<O,E>) -> oc.errata(fn)
@@ -129,7 +129,7 @@ class ProduceLift{
     ));
   }
   static public function errate<O,E,EE>(self:Produce<O,E>,fn:E->EE):Produce<O,EE>{
-    return errata(self,(er) -> er.map(fn));
+    return errata(self,(er) -> er.errate(fn));
   }
   static public function point<O,E>(self:Produce<O,E>,success:O->Execute<E>):Execute<E>{
     return Execute.lift(
@@ -245,7 +245,7 @@ class ProduceLift{
       (Fletcher._.future(self,Noise)).map(
         (outcome:Outcome<Res<O,E>,Defect<Noise>>) -> (outcome.fold(
           (x:Res<O,E>)      -> x,
-          (e:Defect<Noise>) -> __.reject(e.elide().toErr())
+          (e:Defect<Noise>) -> __.reject(e.elide().toError().except())
         ))
       )
     );

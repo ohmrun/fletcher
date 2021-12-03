@@ -24,13 +24,13 @@ typedef CascadeDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 		return fromFun1R(fn);
 	}
   @:noUsing static inline public function fromFun1Res<I, O, E>(fn:I -> Res<O, E>):Cascade<I, O, E> {
-		return lift(Fletcher.fromFun1R((ocI:Res<I, E>) -> ocI.fold((i : I) -> fn(i), (e:Err<E>) -> __.reject(e))));
+		return lift(Fletcher.fromFun1R((ocI:Res<I, E>) -> ocI.fold((i : I) -> fn(i), (e:Exception<E>) -> __.reject(e))));
   }
   @:noUsing static public function fromFun1R<I, O, E>(fn:I -> O ):Cascade<I, O, E> {
-		return lift(Fletcher.fromFun1R((ocI:Res<I, E>) -> ocI.fold((i : I) -> __.accept(fn(i)), (e:Err<E>) -> __.reject(e))));
+		return lift(Fletcher.fromFun1R((ocI:Res<I, E>) -> ocI.fold((i : I) -> __.accept(fn(i)), (e:Exception<E>) -> __.reject(e))));
 	}
 	@:noUsing static public function fromRes<I, O, E>(ocO:Res<O, E>):Cascade<I, O, E> {
-		return lift(Fletcher.fromFun1R((ocI:Res<I, E>) -> ocI.fold((i : I) -> ocO, (e:Err<E>) -> __.reject(e))));
+		return lift(Fletcher.fromFun1R((ocI:Res<I, E>) -> ocI.fold((i : I) -> ocO, (e:Exception<E>) -> __.reject(e))));
 	}
 	@:from @:noUsing static public function fromFunResRes0<I,O,E>(fn:Res<I,E>->Res<O,E>):Cascade<I,O,E>{
 		return lift(Fletcher.Sync(
@@ -54,7 +54,7 @@ typedef CascadeDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 				p.fold(
 					ok -> arw.forward(ok).fold_mapp(
 						ok -> __.success(__.accept(ok)),
-						no -> __.success(__.reject(no.toErr())) 
+						no -> __.success(__.reject(no.toError().except())) 
 					),
 					no -> Receiver.value(__.reject(no))
 				)
@@ -94,12 +94,12 @@ typedef CascadeDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 	}
 
 	static private function typical_fail_handler<O, E>(cont:Terminal<Res<O, E>, Noise>) {
-		return (e:Err<E>) -> cont.receive(cont.value(__.reject(e)));
+		return (e:Exception<E>) -> cont.receive(cont.value(__.reject(e)));
 	}
 
 	@:to public inline function toFletcher():Fletcher<Res<I, E>, Res<O, E>, Noise> return this;
 
-	public inline function environment(i:I, success:O->Void, failure:Err<E>->Void):Fiber {
+	public inline function environment(i:I, success:O->Void, failure:Exception<E>->Void):Fiber {
 		return _.environment(this, i, success, failure);
 	}
 	public inline function split<Oi>(that:Cascade<I, Oi, E>):Cascade<I, Couple<O, Oi>, E> {
@@ -138,7 +138,7 @@ class CascadeLift {
 			)
 		);
 	}
-	static public function errata<I, O, E, EE>(self:Cascade<I, O, E>, fn:Err<E>->Err<EE>):Cascade<I, O, EE> {
+	static public function errata<I, O, E, EE>(self:Cascade<I, O, E>, fn:Exception<E>->Exception<EE>):Cascade<I, O, EE> {
 		return lift(
 			Fletcher.Anon(
 				(i:Res<I, EE>,cont:Waypoint<O,EE>) -> i.fold(
@@ -156,7 +156,7 @@ class CascadeLift {
 	}
 
 	static public function errate<I, O, E, EE>(self:Cascade<I, O, E>, fn:E->EE):Cascade<I, O, EE> {
-		return errata(self, (e) -> e.map(fn));
+		return errata(self, (e) -> e.errate(fn));
 	}
 
 	static public function reframe<I, O, E>(self:Cascade<I, O, E>):Reframe<I, O, E> {
@@ -190,11 +190,11 @@ class CascadeLift {
 		return lift(Cascade.fromFletcher(Fletcher.fromFun1R(fn)).then(self));
 	}
 
-	static function typical_fail_handler<O, E>(cont:Terminal<Res<O, E>, Noise>):Err<E>->Work {
-		return (e:Err<E>) ->  cont.receive(cont.value(__.reject(e)));
+	static function typical_fail_handler<O, E>(cont:Terminal<Res<O, E>, Noise>):Exception<E>->Work {
+		return (e:Exception<E>) ->  cont.receive(cont.value(__.reject(e)));
 	}
 
-	@:noUsing static public inline function environment<I, O, E>(self:Cascade<I, O, E>, i:I, success:O->Void, failure:Err<E>->Void):Fiber {
+	@:noUsing static public inline function environment<I, O, E>(self:Cascade<I, O, E>, i:I, success:O->Void, failure:Exception<E>->Void):Fiber {
 		return Fletcher._.environment(self, __.accept(i), (res) -> res.fold(success, failure), (err) -> throw err);
 	}
 

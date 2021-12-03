@@ -20,7 +20,7 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
   @:from static public function fromFun1Report<I,E>(fn:I->Report<E>):Command<I,E>{
     return lift(Fletcher.fromFun1R((i) -> fn(i)));
   }
-  static public function fromFun1Option<I,E>(fn:I->Option<Err<E>>):Command<I,E>{
+  static public function fromFun1Option<I,E>(fn:I->Option<Exception<E>>):Command<I,E>{
     return lift(Fletcher.fromFun1R((i) -> Report.fromOption(fn(i))));
   } 
   static public function fromFletcher<I,E>(self:Fletcher<I,Noise,E>):Command<I,E>{
@@ -28,7 +28,7 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
       (p:I,cont:Terminal<Report<E>,Noise>) -> cont.receive(
         self.forward(p).fold_mapp(
           _ -> __.success(__.report()),
-          e -> __.success(e.toErr().report())
+          e -> __.success(e.toError().except().report())
         )
       )
     );
@@ -69,7 +69,7 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
         that.toFletcher()).map((tp) -> tp.fst().merge(tp.snd()))
     );
   }
-  public function errata<EE>(fn:Err<E>->Err<EE>){
+  public function errata<EE>(fn:Exception<E>->Exception<EE>){
     return self.map((report) -> report.errata(fn));
   }
   public function provide(i:I):Execute<E>{

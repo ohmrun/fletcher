@@ -133,13 +133,13 @@ class ReframeLift{
     return lift(
       Fletcher.Anon(
         (i:Res<I,EE>,cont:Terminal<Res<Couple<O,I>,EE>,Noise>) -> i.fold(
-          (i) -> cont.receive(self.map(o -> o.errata((e) -> e.map(fn))).forward(__.accept(i))),
+          (i) -> cont.receive(self.map(o -> o.errata((e) -> e.errate(fn))).forward(__.accept(i))),
           (e) -> cont.value(__.reject(e)).serve()
         )
       )
     );
   }
-  static public inline function environment<I,O,E>(self:Reframe<I,O,E>,i:I,success:Couple<O,I>->Void,failure:Err<E>->Void):Fiber{
+  static public inline function environment<I,O,E>(self:Reframe<I,O,E>,i:I,success:Couple<O,I>->Void,failure:Exception<E>->Void):Fiber{
     return Cascade._.environment(
       self,
       i,

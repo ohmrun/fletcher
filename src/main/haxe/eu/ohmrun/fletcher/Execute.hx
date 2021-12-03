@@ -6,7 +6,7 @@ typedef ExecuteDef<E>                   = FletcherDef<Noise,Report<E>,Noise>;
 abstract Execute<E>(ExecuteDef<E>) from ExecuteDef<E> to ExecuteDef<E>{
   public inline function new(self) this = self;
   @:noUsing static public inline function lift<E>(self:ExecuteDef<E>):Execute<E> return new Execute(self);
-  @:noUsing static public inline function pure<E>(e:Err<E>):Execute<E> return lift(Fletcher.pure(Report.pure(e)));
+  @:noUsing static public inline function pure<E>(e:Exception<E>):Execute<E> return lift(Fletcher.pure(Report.pure(e)));
   @:noUsing static public inline function unit<E>():Execute<E> return lift(Fletcher.pure(Report.unit()));
 
   @:noUsing static public function bind_fold<T,E>(fn:T->Report<E>->Execute<E>,arr:Array<T>):Execute<E>{
@@ -47,13 +47,13 @@ abstract Execute<E>(ExecuteDef<E>) from ExecuteDef<E> to ExecuteDef<E>{
   private var self(get,never):Execute<E>;
   private function get_self():Execute<E> return lift(this);
 
-  @:noUsing static public function fromOption<E>(err:Option<Err<E>>):Execute<E>{
+  @:noUsing static public function fromOption<E>(err:Option<Exception<E>>):Execute<E>{
     return fromFunXR(() -> Report.fromOption(err));
   }
-  @:noUsing static public function fromErr<E>(err:Err<E>):Execute<E>{
+  @:noUsing static public function fromExcpetion<E>(err:Exception<E>):Execute<E>{
     return fromFunXR(() -> Report.pure(err));
   }
-  public inline function environment(success:Void->Void,failure:Err<E>->Void){
+  public inline function environment(success:Void->Void,failure:Exception<E>->Void){
     return Fletcher._.environment(
       this,
       Noise,
@@ -66,7 +66,7 @@ abstract Execute<E>(ExecuteDef<E>) from ExecuteDef<E> to ExecuteDef<E>{
   }
 }
 class ExecuteLift{
-  static public function errata<E,EE>(self:Execute<E>,fn:Err<E>->Err<EE>):Execute<EE>{
+  static public function errata<E,EE>(self:Execute<E>,fn:Exception<E>->Exception<EE>):Execute<EE>{
     return Execute.lift(self.toFletcher().then(
       Fletcher.Sync((report:Report<E>) -> report.errata(fn))
     ));
@@ -74,7 +74,7 @@ class ExecuteLift{
   static public function errate<E,EE>(self:Execute<E>,fn:E->EE):Execute<EE>{
     return Execute.lift(self.toFletcher().then(
       Fletcher.Sync((report:Report<E>) -> report.errata(
-        (e:Err<E>) -> e.map(fn)
+        (e:Exception<E>) -> e.errate(fn)
       ))
     ));
 

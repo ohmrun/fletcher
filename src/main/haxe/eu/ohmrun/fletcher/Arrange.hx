@@ -118,7 +118,7 @@ class ArrangeLift{
       )
     );
   }
-  static public function errata<I,S,O,E,EE>(self:Arrange<I,S,O,E>,fn:Err<E>->Err<EE>):Arrange<I,S,O,EE>{
+  static public function errata<I,S,O,E,EE>(self:Arrange<I,S,O,E>,fn:Exception<E>->Exception<EE>):Arrange<I,S,O,EE>{
     return Arrange.lift(
       Fletcher.Anon(
         (res:Res<Couple<I,S>,EE>,cont:Terminal<Res<O,EE>,Noise>) -> res.fold(
@@ -129,7 +129,7 @@ class ArrangeLift{
     );
   }
   static public function errate<I,S,O,E,EE>(self:Arrange<I,S,O,E>,fn:E->EE):Arrange<I,S,O,EE>{
-    return Arrange.lift(errata(self,(oc) -> oc.map(fn)));
+    return Arrange.lift(errata(self,(oc) -> oc.errate(fn)));
   }
   static public function convert<I,S,O,Oi,E>(self:Arrange<I,S,O,E>,that:Convert<O,Oi>):Arrange<I,S,Oi,E>{
     return Arrange.lift(
