@@ -25,11 +25,17 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
       (_:Noise,cont:Terminal<Res<O,E>,Noise>) -> cont.receive(self().forward(Noise))
     ));
   }
-  @:noUsing static public function fromException<O,E>(e:Exception<E>):Produce<O,E>{
+  @:noUsing static public function fromRejection<O,E>(e:Rejection<E>):Produce<O,E>{
     return Sync(__.reject(e));
   }
   @:noUsing static public function pure<O,E>(v:O):Produce<O,E>{
     return Sync(__.accept(v));
+  }
+  @:noUsing static public function accept<O,E>(v:O):Produce<O,E>{
+    return Sync(__.accept(v));
+  }
+  @:noUsing static public function reject<O,E>(e:Rejection<E>):Produce<O,E>{
+    return Sync(__.reject(e));
   }
   @:from @:noUsing static public function fromRes<O,E>(res:Res<O,E>):Produce<O,E>{
     return Sync(res);
@@ -85,7 +91,7 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
       (_:Noise,cont:Terminal<Res<O,E>,Noise>) -> cont.receive(self.forward(Noise))
     ));
   }
-  public inline function environment(success:O->Void,failure:Exception<E>->Void):Fiber{
+  public inline function environment(success:O->Void,failure:Rejection<E>->Void):Fiber{
     return Fletcher._.environment(
       this,
       Noise,
@@ -104,6 +110,9 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
   private var self(get,never):Produce<O,E>;
   private function get_self():Produce<O,E> return this;
 
+  public function prj():ProduceDef<O,E>{
+    return this;
+  }
   public inline function fudge<O,E>(){
     return _.fudge(this);
   }
@@ -121,7 +130,7 @@ class ProduceLift{
       )
     ));
   }
-  static public function errata<O,E,EE>(self:Produce<O,E>,fn:Exception<E>->Exception<EE>):Produce<O,EE>{
+  static public function errata<O,E,EE>(self:Produce<O,E>,fn:Rejection<E>->Rejection<EE>):Produce<O,EE>{
     return lift(self.then(
       Fletcher.fromFun1R(
         (oc:Res<O,E>) -> oc.errata(fn)
@@ -159,7 +168,7 @@ class ProduceLift{
   static public function convert<O,Oi,E>(self:Produce<O,E>,then:Convert<O,Oi>):Produce<Oi,E>{
     return lift(Fletcher.Then(self,then.toCascade()));
   }
-  static public function control<O,E>(self:Produce<O,E>,rec:Recover<O,E>):Provide<O>{
+  static public function recover<O,E>(self:Produce<O,E>,rec:Recover<O,E>):Provide<O>{
     return Provide.lift(self.then(rec.toRectify()));
   }
   static public function attempt<O,Oi,E>(self:Produce<O,E>,that:Attempt<O,Oi,E>):Produce<Oi,E>{
@@ -221,6 +230,14 @@ class ProduceLift{
           (o) -> that(o),
           (e) -> Produce.fromRes(__.reject(e))
         )
+      )
+    );
+  }
+  static public function fold_flat_map<O,Oi,E>(self:ProduceDef<O,E>,that:Res<O,E>->Produce<Oi,E>):Produce<Oi,E>{
+    return lift(
+      Fletcher.FlatMap(
+        self,
+        (res:Res<O,E>) -> that(res).prj()
       )
     );
   }

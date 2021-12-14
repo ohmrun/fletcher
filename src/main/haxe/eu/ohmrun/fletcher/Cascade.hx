@@ -1,5 +1,8 @@
 package eu.ohmrun.fletcher;
 
+interface CascadeApi<I, O, E> extends FletcherApi<Res<I, E>, Res<O, E>, Noise>{
+	
+}
 typedef CascadeDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 
 //@:using(eu.ohmrun.Fletcher.Lift)
@@ -9,7 +12,11 @@ typedef CascadeDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 
 	public inline function new(self) this = self;
 
-	@:noUsing static public inline function lift<I, O, E>(self:FletcherDef<Res<I, E>, Res<O, E>, Noise>):Cascade<I, O, E> {
+
+	@:from static public function fromApi<P,Pi,E>(self:CascadeApi<P,Pi,E>){
+    return lift(self.defer); 
+  }
+		@:noUsing static public inline function lift<I, O, E>(self:FletcherDef<Res<I, E>, Res<O, E>, Noise>):Cascade<I, O, E> {
 		return new Cascade(self);
 	}
 
@@ -24,13 +31,13 @@ typedef CascadeDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 		return fromFun1R(fn);
 	}
   @:noUsing static inline public function fromFun1Res<I, O, E>(fn:I -> Res<O, E>):Cascade<I, O, E> {
-		return lift(Fletcher.fromFun1R((ocI:Res<I, E>) -> ocI.fold((i : I) -> fn(i), (e:Exception<E>) -> __.reject(e))));
+		return lift(Fletcher.fromFun1R((ocI:Res<I, E>) -> ocI.fold((i : I) -> fn(i), (e:Rejection<E>) -> __.reject(e))));
   }
   @:noUsing static public function fromFun1R<I, O, E>(fn:I -> O ):Cascade<I, O, E> {
-		return lift(Fletcher.fromFun1R((ocI:Res<I, E>) -> ocI.fold((i : I) -> __.accept(fn(i)), (e:Exception<E>) -> __.reject(e))));
+		return lift(Fletcher.fromFun1R((ocI:Res<I, E>) -> ocI.fold((i : I) -> __.accept(fn(i)), (e:Rejection<E>) -> __.reject(e))));
 	}
 	@:noUsing static public function fromRes<I, O, E>(ocO:Res<O, E>):Cascade<I, O, E> {
-		return lift(Fletcher.fromFun1R((ocI:Res<I, E>) -> ocI.fold((i : I) -> ocO, (e:Exception<E>) -> __.reject(e))));
+		return lift(Fletcher.fromFun1R((ocI:Res<I, E>) -> ocI.fold((i : I) -> ocO, (e:Rejection<E>) -> __.reject(e))));
 	}
 	@:from @:noUsing static public function fromFunResRes0<I,O,E>(fn:Res<I,E>->Res<O,E>):Cascade<I,O,E>{
 		return lift(Fletcher.Sync(
@@ -94,12 +101,12 @@ typedef CascadeDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 	}
 
 	static private function typical_fail_handler<O, E>(cont:Terminal<Res<O, E>, Noise>) {
-		return (e:Exception<E>) -> cont.receive(cont.value(__.reject(e)));
+		return (e:Rejection<E>) -> cont.receive(cont.value(__.reject(e)));
 	}
 
 	@:to public inline function toFletcher():Fletcher<Res<I, E>, Res<O, E>, Noise> return this;
 
-	public inline function environment(i:I, success:O->Void, failure:Exception<E>->Void):Fiber {
+	public inline function environment(i:I, success:O->Void, failure:Rejection<E>->Void):Fiber {
 		return _.environment(this, i, success, failure);
 	}
 	public inline function split<Oi>(that:Cascade<I, Oi, E>):Cascade<I, Couple<O, Oi>, E> {
@@ -138,7 +145,7 @@ class CascadeLift {
 			)
 		);
 	}
-	static public function errata<I, O, E, EE>(self:Cascade<I, O, E>, fn:Exception<E>->Exception<EE>):Cascade<I, O, EE> {
+	static public function errata<I, O, E, EE>(self:Cascade<I, O, E>, fn:Rejection<E>->Rejection<EE>):Cascade<I, O, EE> {
 		return lift(
 			Fletcher.Anon(
 				(i:Res<I, EE>,cont:Waypoint<O,EE>) -> i.fold(
@@ -182,7 +189,7 @@ class CascadeLift {
 		return cascade(self, that.toCascade());
 	}
 
-	static public function postfix<I, O, Oi, E>(self:Cascade<I, O, E>, fn:O->Oi):Cascade<I, Oi, E> {
+	static public function map<I, O, Oi, E>(self:Cascade<I, O, E>, fn:O->Oi):Cascade<I, Oi, E> {
 		return convert(self, Convert.fromFun1R(fn));
 	}
 
@@ -190,16 +197,16 @@ class CascadeLift {
 		return lift(Cascade.fromFletcher(Fletcher.fromFun1R(fn)).then(self));
 	}
 
-	static function typical_fail_handler<O, E>(cont:Terminal<Res<O, E>, Noise>):Exception<E>->Work {
-		return (e:Exception<E>) ->  cont.receive(cont.value(__.reject(e)));
+	static function typical_fail_handler<O, E>(cont:Terminal<Res<O, E>, Noise>):Rejection<E>->Work {
+		return (e:Rejection<E>) ->  cont.receive(cont.value(__.reject(e)));
 	}
 
-	@:noUsing static public inline function environment<I, O, E>(self:Cascade<I, O, E>, i:I, success:O->Void, failure:Exception<E>->Void):Fiber {
+	@:noUsing static public inline function environment<I, O, E>(self:Cascade<I, O, E>, i:I, success:O->Void, failure:Rejection<E>->Void):Fiber {
 		return Fletcher._.environment(self, __.accept(i), (res) -> res.fold(success, failure), (err) -> throw err);
 	}
 
-	static public function produce<I, O, E>(self:Cascade<I, O, E>, i:I):Produce<O, E> {
-		return Produce.lift(Fletcher.Anon((_:Noise, cont) -> cont.receive(self.forward(__.accept(i)))));
+	static public function produce<I, O, E>(self:Cascade<I, O, E>, i:Res<I,E>):Produce<O, E> {
+		return Produce.lift(Fletcher.Anon((_:Noise, cont) -> cont.receive(self.forward(i))));
 	}
 
 	static public function reclaim<I, O, Oi, E>(self:Cascade<I, O, E>, that:Convert<O, Produce<Oi, E>>):Cascade<I, Oi, E> {

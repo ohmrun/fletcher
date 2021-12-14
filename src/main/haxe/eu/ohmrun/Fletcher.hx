@@ -236,6 +236,7 @@ typedef ConvertDef<I,O>         = eu.ohmrun.fletcher.Convert.ConvertDef<I,O>;
 typedef Provide<O>              = eu.ohmrun.fletcher.Provide<O>;
 typedef ProvideDef<O>           = eu.ohmrun.fletcher.Provide.ProvideDef<O>;
 
+typedef CascadeApi<I,O,E>       = eu.ohmrun.fletcher.Cascade.CascadeApi<I,O,E>;
 typedef CascadeDef<I,O,E>       = eu.ohmrun.fletcher.Cascade.CascadeDef<I,O,E>;
 typedef Cascade<I,O,E>          = eu.ohmrun.fletcher.Cascade<I,O,E>;
 
