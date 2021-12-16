@@ -151,7 +151,7 @@ class ArchLeaveValueDefer<I,O,E>{
 }
 class ArchError<I,O,E>{
   public function new(){}
-  public function get(self:Err<E>->Chunk<O,E>){
+  public function get(self:Rejection<E>->Chunk<O,E>){
     return Resolve.fromErrChunk(self);
   }
   public function defer(){
@@ -178,10 +178,10 @@ class ArchErrorDefer<I,O,E>{
   public function get(self:Resolve<I,E>){
     return self;
   }
-  public function cont(self:Err<E>->(Chunk<I,E> -> Void)->Void){
+  public function cont(self:Rejection<E>->(Chunk<I,E> -> Void)->Void){
     return Resolve.lift(Fletcher.fromFunSink(self));
   }
-  public function future(self:Err<E>->Future<Chunk<I,E>>){
+  public function future(self:Rejection<E>->Future<Chunk<I,E>>){
     return Resolve.lift(Fletcher.Fun1Future(self));
   }
 }

@@ -1,5 +1,6 @@
-package eu.ohmrun.flash.body;
+package eu.ohmrun.fletcher.flash;
 
+#if flash
 class Events{
   static public function once<T:FlashEvent>(dispatcher:IEventDispatcher,key:String,fn:T->Void):Void{
     function handler(e:T){
@@ -28,3 +29,4 @@ class Events{
     }
   }
 }
+#end

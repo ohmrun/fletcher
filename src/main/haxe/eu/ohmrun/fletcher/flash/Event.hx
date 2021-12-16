@@ -1,5 +1,6 @@
-package eu.ohmrun.flash.pack;
+package eu.ohmrun.fletcher.flash;
 
+#if flash
 abstract Event<T:FlashEvent>(Fletcher<IEventDispatcher,T>) from Fletcher<IEventDispatcher,T> to Fletcher<IEventDispatcher,T>{
   public function new(v){
     this = v;
@@ -13,3 +14,4 @@ abstract Event<T:FlashEvent>(Fletcher<IEventDispatcher,T>) from Fletcher<IEventD
     }
   }
 }
+#end

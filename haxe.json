@@ -3,6 +3,15 @@
     "-D"    : ["no-deprecation-warnings"],
     "-cp"   : ["src/main/haxe"],
     "-L"    : ["tink_core","stx_pico","stx_nano","stx_fn","stx_fp","stx_log","stx_test"],
+    "unit"  : {
+      "--macro" : [
+        "include('eu.ohmrun.Fletcher',true)",
+        "include('eu.ohmrun.fletcher',true)"
+      ],
+      "interp" : {
+        "--interp"  : true
+      }
+    },
     "main"  : {
       "-main"     : "Main",
       "interp"  : {
