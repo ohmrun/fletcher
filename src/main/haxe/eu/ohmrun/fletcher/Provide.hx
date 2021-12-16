@@ -109,5 +109,8 @@ class ProvideLift{
   static public inline function fudge<O>(self:Provide<O>):O{
     return Fletcher._.fudge(self,Noise);
   }
+  static public function then<O,Oi>(self:ProvideDef<O>,that:Fletcher<O,Oi,Noise>):Provide<Oi>{
+    return Provide.lift(Fletcher.Then(self,that));
+  }
   //static public inline function future<O>(self:Provide<O>)  
 }
