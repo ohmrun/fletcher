@@ -32,8 +32,8 @@ abstract Convert<I,O>(ConvertDef<I,O>) from ConvertDef<I,O> to ConvertDef<I,O>{
   private var self(get,never):Convert<I,O>;
   private function get_self():Convert<I,O> return lift(this);
 
-  public function toCascade<E>():Cascade<I,O,E>{
-    return Cascade.lift(
+  public function toModulate<E>():Modulate<I,O,E>{
+    return Modulate.lift(
       (p:Res<I,E>,cont:Waypoint<O,E>) -> p.fold(
         ok -> cont.receive(this.forward(ok).map(__.accept)),
         no -> cont.value(__.reject(no)).serve()

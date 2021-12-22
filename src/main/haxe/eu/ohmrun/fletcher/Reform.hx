@@ -8,8 +8,8 @@ typedef ReformDef<I,O,E>               = FletcherDef<Res<I,E>,O,Noise>;
   @:noUsing static public inline function lift<I,O,E>(self:ReformDef<I,O,E>){
     return new Reform(self);
   }
-  public function toCascade():Cascade<I,O,E>{
-    return Cascade.lift(
+  public function toModulate():Modulate<I,O,E>{
+    return Modulate.lift(
       Fletcher.lift(this).map(__.accept)
     );
   }

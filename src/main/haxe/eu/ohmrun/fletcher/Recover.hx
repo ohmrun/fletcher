@@ -9,7 +9,7 @@ typedef RecoverDef<I,E>                 = FletcherDef<Rejection<E>,I,Noise>;
   @:from static public function fromFunErrR<I,E>(fn:Rejection<E>->I):Recover<I,E>{
     return lift(Fletcher.Sync(fn));
   }
-  public function toCascade():Cascade<I,I,E> return Cascade.lift(
+  public function toModulate():Modulate<I,I,E> return Modulate.lift(
     (p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
       ok -> cont.value(__.accept(ok)).serve(),
       no -> cont.receive(
@@ -45,8 +45,8 @@ class RecoverLift{
       );
     });
   }
-  static public function toCascade<I,E>(self:Recover<I,E>):Cascade<I,I,E>{
-    return Cascade.lift(
+  static public function toModulate<I,E>(self:Recover<I,E>):Modulate<I,I,E>{
+    return Modulate.lift(
       (p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
         ok -> cont.value(__.accept(ok)).serve(),
         no -> cont.receive(self.forward(no).map(__.accept)))

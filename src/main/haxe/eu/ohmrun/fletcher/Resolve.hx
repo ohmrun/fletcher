@@ -44,8 +44,8 @@ abstract Resolve<I,E>(ResolveDef<I,E>) from ResolveDef<I,E> to ResolveDef<I,E>{
   }
 }
 class ResolveLift{
-  static public function toCascade<I,E>(self:Resolve<I,E>):Cascade<I,I,E>{
-    return Cascade.lift(
+  static public function toModulate<I,E>(self:Resolve<I,E>):Modulate<I,I,E>{
+    return Modulate.lift(
         (i:Res<I,E>,cont:Terminal<Res<I,E>,Noise>) -> 
           i.fold(
             (s) -> cont.value(__.accept(s)).serve(),

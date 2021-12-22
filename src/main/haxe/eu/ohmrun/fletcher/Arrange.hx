@@ -1,7 +1,7 @@
 package eu.ohmrun.fletcher;
 
 
-typedef ArrangeDef<I,S,O,E>             = CascadeDef<Couple<I,S>,O,E>;
+typedef ArrangeDef<I,S,O,E>             = ModulateDef<Couple<I,S>,O,E>;
 @:using(eu.ohmrun.fletcher.Arrange.ArrangeLift)
 @:forward abstract Arrange<I,S,O,E>(ArrangeDef<I,S,O,E>) from ArrangeDef<I,S,O,E> to ArrangeDef<I,S,O,E>{
   static public var _(default,never) = ArrangeLift;
@@ -46,7 +46,7 @@ typedef ArrangeDef<I,S,O,E>             = CascadeDef<Couple<I,S>,O,E>;
         )
     ));
   }
-  @:from static public function fromFun1Cascade<I,S,O,E>(f:I->Cascade<S,O,E>):Arrange<I,S,O,E>{
+  @:from static public function fromFun1Modulate<I,S,O,E>(f:I->Modulate<S,O,E>):Arrange<I,S,O,E>{
     return lift(Fletcher.Anon(
       (i:Res<Couple<I,S>,E>,cont:Terminal<Res<O,E>,Noise>) -> 
         i.fold(
@@ -55,7 +55,7 @@ typedef ArrangeDef<I,S,O,E>             = CascadeDef<Couple<I,S>,O,E>;
         )
     ));
   }
-  @:from static public function fromFunResCascade<I,S,O,E>(f:Res<I,E>->Cascade<S,O,E>):Arrange<Res<I,E>,S,O,E>{
+  @:from static public function fromFunResModulate<I,S,O,E>(f:Res<I,E>->Modulate<S,O,E>):Arrange<Res<I,E>,S,O,E>{
     return lift(Fletcher.Anon(
       (i:Res<Couple<Res<I,E>,S>,E>,cont:Terminal<Res<O,E>,Noise>) -> 
         i.fold(
@@ -64,11 +64,11 @@ typedef ArrangeDef<I,S,O,E>             = CascadeDef<Couple<I,S>,O,E>;
         )
     ));
   }
-  @:noUsing static public function bind_fold<I,S,E,T>(fn:T->I->Cascade<S,I,E>,iterable:Iterable<T>):Option<Arrange<I,S,I,E>>{
+  @:noUsing static public function bind_fold<I,S,E,T>(fn:T->I->Modulate<S,I,E>,iterable:Iterable<T>):Option<Arrange<I,S,I,E>>{
     return iterable
      .toIter()
-     .map((t:T) -> (fn.bind1(t):I->Cascade<S,I,E>))
-     .map(fromFun1Cascade)
+     .map((t:T) -> (fn.bind1(t):I->Modulate<S,I,E>))
+     .map(fromFun1Modulate)
      .lfold1(
        (next:Arrange<I,S,I,E>,memo:Arrange<I,S,I,E>) ->  {
          return Arrange.lift(_.state(memo).then(next.toFletcher()));
@@ -95,14 +95,14 @@ typedef ArrangeDef<I,S,O,E>             = CascadeDef<Couple<I,S>,O,E>;
    @:to public inline function toFletcher():Fletcher<Res<Couple<I,S>,E>,Res<O,E>,Noise>{
      return this;
    }
-   @:to public function toCascade():Cascade<Couple<I,S>,O,E>{
+   @:to public function toModulate():Modulate<Couple<I,S>,O,E>{
     return this;
   }
 
 }
 class ArrangeLift{
-  static public function state<I,S,O,E>(self:Arrange<I,S,O,E>):Cascade<Couple<I,S>,Couple<O,S>,E>{
-    return Cascade.lift(
+  static public function state<I,S,O,E>(self:Arrange<I,S,O,E>):Modulate<Couple<I,S>,Couple<O,S>,E>{
+    return Modulate.lift(
       self.broach().map(
       __.decouple(
         (tp:Res<Couple<I,S>,E>,chk:Res<O,E>) -> tp.map(_ -> _.snd()).zip(chk).map(
@@ -114,7 +114,7 @@ class ArrangeLift{
   static public function attempt<I,S,O,Oi,E>(self:Arrange<I,S,O,E>,attempt:Attempt<O,Oi,E>):Arrange<I,S,Oi,E>{
     return Arrange.lift(
       self.then(
-        attempt.toCascade()
+        attempt.toModulate()
       )
     );
   }
@@ -133,11 +133,11 @@ class ArrangeLift{
   }
   static public function convert<I,S,O,Oi,E>(self:Arrange<I,S,O,E>,that:Convert<O,Oi>):Arrange<I,S,Oi,E>{
     return Arrange.lift(
-      Cascade._.convert(self,that)     
+      Modulate._.convert(self,that)     
     );
   }
-  static public function cover<I,S,O,E>(self:Arrange<I,S,O,E>,i:I):Cascade<S,O,E>{
-    return Cascade.lift(
+  static public function cover<I,S,O,E>(self:Arrange<I,S,O,E>,i:I):Modulate<S,O,E>{
+    return Modulate.lift(
       Fletcher.Anon(
         (res:Res<S,E>,cont:Terminal<Res<O,E>,Noise>) ->  
           cont.receive(
@@ -157,14 +157,14 @@ class ArrangeLift{
         )
       ))
     );
-    var b = Cascade.lift(a.map(
+    var b = Modulate.lift(a.map(
       res -> res.map(tr -> tr.detriple(
         (a,b,c) -> __.couple(a,c)
       ))
     )).cascade(that);
     //$type(a);
     //$type(b);
-    var c = Cascade.lift(a.map(
+    var c = Modulate.lift(a.map(
       res -> res.map(tr -> tr.detriple(
         (a,b,c) -> b
       ))

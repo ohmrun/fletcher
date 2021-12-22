@@ -8,8 +8,8 @@ abstract Perform(PerformDef) from PerformDef to PerformDef{
   
   
   public inline function toFletcher():Fletcher<Noise,Noise,Noise> return this;
-  public function toCascade<E>():Cascade<Noise,Noise,E>{
-    return Cascade.lift(
+  public function toModulate<E>():Modulate<Noise,Noise,E>{
+    return Modulate.lift(
       Fletcher.Anon(
         (_:Res<Noise,E>,cont:Terminal<Res<Noise,E>,Noise>) -> {
           return cont.receive(

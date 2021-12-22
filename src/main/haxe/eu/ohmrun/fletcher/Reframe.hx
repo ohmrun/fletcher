@@ -1,6 +1,6 @@
 package eu.ohmrun.fletcher;
 
-typedef ReframeDef<I,O,E>               = CascadeDef<I,Couple<O,I>,E>;
+typedef ReframeDef<I,O,E>               = ModulateDef<I,Couple<O,I>,E>;
 
 @:using(eu.ohmrun.fletcher.Reframe.ReframeLift)
 @:forward abstract Reframe<I,O,E>(ReframeDef<I,O,E>) from ReframeDef<I,O,E> to ReframeDef<I,O,E>{
@@ -11,7 +11,7 @@ typedef ReframeDef<I,O,E>               = CascadeDef<I,Couple<O,I>,E>;
   @:noUsing static public inline function lift<I,O,E>(wml:ReframeDef<I,O,E>):Reframe<I,O,E> return new Reframe(wml);
   @:noUsing static public inline function pure<I,O,E>(o:O):Reframe<I,O,E>{
     return lift(Fletcher._.map(
-      Cascade.unit(),
+      Modulate.unit(),
       (oc:Res<I,E>) -> (oc.map(__.couple.bind(o)):Res<Couple<O,I>,E>)
     ));
   }
@@ -20,13 +20,13 @@ typedef ReframeDef<I,O,E>               = CascadeDef<I,Couple<O,I>,E>;
   private function get_self():Reframe<I,O,E> return this;
 
 
-  @:to public function toCascade():Cascade<I,Couple<O,I>,E>{
-    return Cascade.lift(this);
+  @:to public function toModulate():Modulate<I,Couple<O,I>,E>{
+    return Modulate.lift(this);
   }
   @:to public inline function toFletcher():Fletcher<Res<I,E>,Res<Couple<O,I>,E>,Noise>{
     return Fletcher.lift(this);
   }
-  @:from static public function fromCascade<I,O,E>(self:Cascade<I,Couple<O,I>,E>):Reframe<I,O,E>{
+  @:from static public function fromModulate<I,O,E>(self:Modulate<I,Couple<O,I>,E>):Reframe<I,O,E>{
     return lift(self);
   }
 }
@@ -34,8 +34,8 @@ typedef ReframeDef<I,O,E>               = CascadeDef<I,Couple<O,I>,E>;
 class ReframeLift{
   static private function lift<I,O,E>(wml:ReframeDef<I,O,E>):Reframe<I,O,E> return new Reframe(wml);
   
-  static public function cascade<I,Oi,Oii,E>(self:Reframe<I,Oi,E>,that:Cascade<Couple<Oi,I>,Oii,E>):Cascade<I,Oii,E>{
-    return Cascade.lift(Fletcher.Then(self,that));
+  static public function cascade<I,Oi,Oii,E>(self:Reframe<I,Oi,E>,that:Modulate<Couple<Oi,I>,Oii,E>):Modulate<I,Oii,E>{
+    return Modulate.lift(Fletcher.Then(self,that));
   }
   static public function attempt<I,O,Oi,E>(self:Reframe<I,O,E>,that:Attempt<O,Oi,E>):Reframe<I,Oi,E>{
     var fn = (chk:Res<Couple<Res<Oi,E>,I>,E>) -> (chk.flat_map(
@@ -44,7 +44,7 @@ class ReframeLift{
       )
     ):Res<Couple<Oi,I>,E>);
     var arw =  lift(
-      Fletcher._.map(self.toCascade().convert(
+      Fletcher._.map(self.toModulate().convert(
         Convert.lift(that.toFletcher().first())
       ),fn)
     );
@@ -122,12 +122,12 @@ class ReframeLift{
       )
     )));
   }
-  static public function evaluation<I,O,E>(self:Reframe<I,O,E>):Cascade<I,O,E>{
-    return Cascade.lift(self.map(o -> o.map(tp -> tp.fst())));
+  static public function evaluation<I,O,E>(self:Reframe<I,O,E>):Modulate<I,O,E>{
+    return Modulate.lift(self.map(o -> o.map(tp -> tp.fst())));
   }
 
-  static public function execution<I,O,E>(self:Reframe<I,O,E>):Cascade<I,I,E>{
-    return Cascade.lift(self.map(o -> o.map(tp -> tp.snd())));
+  static public function execution<I,O,E>(self:Reframe<I,O,E>):Modulate<I,I,E>{
+    return Modulate.lift(self.map(o -> o.map(tp -> tp.snd())));
   }
   static public function errate<I,O,E,EE>(self:Reframe<I,O,E>,fn:E->EE):Reframe<I,O,EE>{
     return lift(
@@ -140,7 +140,7 @@ class ReframeLift{
     );
   }
   static public inline function environment<I,O,E>(self:Reframe<I,O,E>,i:I,success:Couple<O,I>->Void,failure:Rejection<E>->Void):Fiber{
-    return Cascade._.environment(
+    return Modulate._.environment(
       self,
       i,
       success,
@@ -149,7 +149,7 @@ class ReframeLift{
   }
   static public function convert<I,O,Oi,E>(self:Reframe<I,O,E>,fn:Convert<O,Oi>):Reframe<I,Oi,E>{
     return lift(self.cascade(
-      fn.first().toCascade()
+      fn.first().toModulate()
     ));
   }
 }

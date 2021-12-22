@@ -2,7 +2,7 @@ package eu.ohmrun.fletcher;
 
 class Arch{
   static function make<I,O,E>():ArchCls<I,O,E> return new ArchCls();
-  static public function get<I,O,E>(self:Res<I,E>->Res<O,E>):Cascade<I,O,E>{
+  static public function get<I,O,E>(self:Res<I,E>->Res<O,E>):Modulate<I,O,E>{
     return make().get(self);
   }
   static public function defer<I,O,E>():ArchDefer<I,O,E>{
@@ -40,8 +40,8 @@ class Arch{
 }
 class ArchCls<I,O,E>{
   public function new(){}
-  public function get(self:Res<I,E>->Res<O,E>):Cascade<I,O,E>{
-    return Cascade.lift(Fletcher.Sync(self));
+  public function get(self:Res<I,E>->Res<O,E>):Modulate<I,O,E>{
+    return Modulate.lift(Fletcher.Sync(self));
   }
   public function defer(){
     return new ArchDefer();
@@ -124,8 +124,8 @@ class ArchCloseValueDefer<O>{
 }
 class ArchLeave<I,O,E>{
   public function new(){}
-  public function get(self:Res<I,E>->Res<O,E>):Cascade<I,O,E>{
-    return Cascade.lift(Fletcher.Sync(self));
+  public function get(self:Res<I,E>->Res<O,E>):Modulate<I,O,E>{
+    return Modulate.lift(Fletcher.Sync(self));
   }
   public function value(){
     return new ArchLeaveValue();
@@ -170,7 +170,7 @@ class ArchErrorValue<I,O,E>{
 class ArchErrorError<I,O,E,EE>{
   public function new(){}
   public function get(self:E->EE){
-    return Cascade.unit().errate(self);
+    return Modulate.unit().errate(self);
   }
 }
 class ArchErrorDefer<I,O,E>{
@@ -187,14 +187,14 @@ class ArchErrorDefer<I,O,E>{
 }
 class ArchDefer<I,O,E>{
   public function new(){}
-  public function get(self:Cascade<I,O,E>){
+  public function get(self:Modulate<I,O,E>){
     return self;
   }
   public function cont(self:Res<I,E>->(Res<O,E>->Void)->Void){
-    return Cascade.lift(Fletcher.fromFunSink(self));
+    return Modulate.lift(Fletcher.fromFunSink(self));
   }
   public function future(self:Res<I,E>->Future<Res<O,E>>){
-    return Cascade.lift(Fletcher.Fun1Future(self));
+    return Modulate.lift(Fletcher.Fun1Future(self));
   }
 }
 class ArchValueDefer<I,O,E>{

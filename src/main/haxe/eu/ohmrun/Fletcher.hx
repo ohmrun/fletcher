@@ -237,9 +237,9 @@ typedef ConvertDef<I,O>         = eu.ohmrun.fletcher.Convert.ConvertDef<I,O>;
 typedef Provide<O>              = eu.ohmrun.fletcher.Provide<O>;
 typedef ProvideDef<O>           = eu.ohmrun.fletcher.Provide.ProvideDef<O>;
 
-typedef CascadeApi<I,O,E>       = eu.ohmrun.fletcher.Cascade.CascadeApi<I,O,E>;
-typedef CascadeDef<I,O,E>       = eu.ohmrun.fletcher.Cascade.CascadeDef<I,O,E>;
-typedef Cascade<I,O,E>          = eu.ohmrun.fletcher.Cascade<I,O,E>;
+typedef ModulateApi<I,O,E>       = eu.ohmrun.fletcher.Modulate.ModulateApi<I,O,E>;
+typedef ModulateDef<I,O,E>       = eu.ohmrun.fletcher.Modulate.ModulateDef<I,O,E>;
+typedef Modulate<I,O,E>          = eu.ohmrun.fletcher.Modulate<I,O,E>;
 
 typedef ArrangeDef<I,S,O,E>     = eu.ohmrun.fletcher.Arrange.ArrangeDef<I,S,O,E>;
 typedef Arrange<I,S,O,E>        = eu.ohmrun.fletcher.Arrange<I,S,O,E>;
@@ -281,3 +281,6 @@ typedef TerminalInputDef<R,E>   = eu.ohmrun.fletcher.TerminalInput.TerminalInput
 typedef TerminalInput<R,E>      = eu.ohmrun.fletcher.TerminalInput<R,E>;
 
 typedef ReceiverSink<R,E>       = eu.ohmrun.fletcher.ReceiverSink<R,E>;
+
+typedef RegulateDef<R,E>        = eu.ohmrun.fletcher.Regulate.RegulateDef<R,E>;
+typedef Regulate<R,E>           = eu.ohmrun.fletcher.Regulate<R,E>;

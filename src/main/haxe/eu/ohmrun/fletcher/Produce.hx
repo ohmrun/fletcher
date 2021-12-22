@@ -166,13 +166,13 @@ class ProduceLift{
     );
   }
   static public function convert<O,Oi,E>(self:Produce<O,E>,then:Convert<O,Oi>):Produce<Oi,E>{
-    return lift(Fletcher.Then(self,then.toCascade()));
+    return lift(Fletcher.Then(self,then.toModulate()));
   }
   static public function recover<O,E>(self:Produce<O,E>,rec:Recover<O,E>):Provide<O>{
     return Provide.lift(self.then(rec.toReform()));
   }
   static public function attempt<O,Oi,E>(self:Produce<O,E>,that:Attempt<O,Oi,E>):Produce<Oi,E>{
-    return lift(self.then(that.toCascade()));
+    return lift(self.then(that.toModulate()));
   }
   static public function deliver<O,E>(self:Produce<O,E>,fn:O->Void):Execute<E>{
     return Execute.lift(self.then(
@@ -190,7 +190,7 @@ class ProduceLift{
   static public function reclaim<O,Oi,E>(self:Produce<O,E>,next:Convert<O,Produce<Oi,E>>):Produce<Oi,E>{
     return lift(
       self.then(
-        next.toCascade()
+        next.toModulate()
       )).attempt(
         Attempt.lift(Fletcher.Anon(
           (prd:Produce<Oi,E>,cont:Terminal<Res<Oi,E>,Noise>) -> cont.receive(prd.forward(Noise))
@@ -216,7 +216,7 @@ class ProduceLift{
       ) 
     );
   }
-  static public function cascade<O,Oi,E>(self:Produce<O,E>,that:Cascade<O,Oi,E>):Produce<Oi,E>{
+  static public function cascade<O,Oi,E>(self:Produce<O,E>,that:Modulate<O,Oi,E>):Produce<Oi,E>{
     return lift(self.then(that));
   }
   static public inline function fudge<O,E>(self:Produce<O,E>):O{

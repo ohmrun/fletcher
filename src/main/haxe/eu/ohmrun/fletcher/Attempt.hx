@@ -63,8 +63,8 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
   @:to public inline function toFletcher():Fletcher<I,Res<O,E>,Noise>{
     return this;
   }
-  public function toCascade():Cascade<I,O,E>{
-    return Cascade.lift(Fletcher.Anon(
+  public function toModulate():Modulate<I,O,E>{
+    return Modulate.lift(Fletcher.Anon(
       (i:Res<I,E>,cont:Waypoint<O,E>) -> 
         i.fold(
           (v) -> cont.receive(this.forward(v)),
@@ -73,7 +73,7 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
     ));  
   }
   public inline function environment(i:I,success:O->Void,failure:Rejection<E>->Void):Fiber{
-    return Cascade._.environment(toCascade(),i,success,failure);
+    return Modulate._.environment(toModulate(),i,success,failure);
   }
   public function mapi<Ii>(that:Ii->I):Attempt<Ii,O,E>{
     return Attempt._.mapi(this,that);
@@ -85,20 +85,20 @@ class AttemptLift{
   //static public inline function toFletcher<I,O,E>(self:Attempt<I,O,E>):Fletcher<I,O,E>{
     
   //}
-  static public function then<I,O,Oi,E>(self:Attempt<I,O,E>,that:Cascade<O,Oi,E>):Attempt<I,Oi,E>{
+  static public function then<I,O,Oi,E>(self:Attempt<I,O,E>,that:Modulate<O,Oi,E>):Attempt<I,Oi,E>{
     return lift(Fletcher.Then(self,that));
   }
   static public function rectify<I,O,Oi,E>(self:Attempt<I,O,E>,next:Reform<O,Oi,E>):Fletcher<I,Oi,Noise>{
     return Fletcher.lift(Fletcher.Then(self.toFletcher(),next.toFletcher()));
   }
   static public function resolve<I,O,E>(self:Attempt<I,O,E>,next:Resolve<O,E>):Attempt<I,O,E>{
-    return lift(self.then(next.toCascade()));
+    return lift(self.then(next.toModulate()));
   }
   static public function reclaim<I,O,Oi,E>(self:Attempt<I,O,E>,next:Convert<O,Produce<Oi,E>>):Attempt<I,Oi,E>{
     return lift(
       then(
         self,
-        next.toCascade()
+        next.toModulate()
       ).attempt(
         lift(Fletcher.Anon(
           (prd:Produce<Oi,E>,cont:Terminal<Res<Oi,E>,Noise>) ->
@@ -108,10 +108,10 @@ class AttemptLift{
     );
   }
   static public function recover<I,O,E>(self:Attempt<I,O,E>,next:Recover<O,E>):Attempt<I,O,E>{
-    return lift(self.then(next.toCascade()));
+    return lift(self.then(next.toModulate()));
   }
   static public function convert<I,O,Oi,E>(self:Attempt<I,O,E>,next:Convert<O,Oi>):Attempt<I,Oi,E>{
-    return then(self,next.toCascade());
+    return then(self,next.toModulate());
   }
   static public function errata<I,O,E,EE>(self:Attempt<I,O,E>,fn:Rejection<E>->Rejection<EE>):Attempt<I,O,EE>{
     return lift(Fletcher._.map(self,(oc) -> oc.errata(fn)));
@@ -120,10 +120,10 @@ class AttemptLift{
     return lift(Fletcher._.map(self,(oc) -> oc.errate(fn)));
   }
   static public function attempt<I,O,Oi,E>(self:Attempt<I,O,E>,next:Attempt<O,Oi,E>):Attempt<I,Oi,E>{
-    return then(self,next.toCascade());
+    return then(self,next.toModulate());
   }
   static public function reframe<I,O,E>(self:Attempt<I,O,E>):Reframe<I,O,E>{ 
-    return self.toCascade().reframe();
+    return self.toModulate().reframe();
   }
   static public function broach<I,O,E>(self:Attempt<I,O,E>):Attempt<I,Couple<I,O>,E>{
     return Attempt.lift(
@@ -157,7 +157,7 @@ class AttemptLift{
   static public function mapi<I,Ii,O,E>(self:Attempt<I,O,E>,that:Ii->I):Attempt<Ii,O,E>{
     return lift(Fletcher._.mapi(self.toFletcher(),that));
   }
-  static public function cascade<I,O,Oi,E>(self:Attempt<I,O,E>,that:Cascade<O,Oi,E>):Attempt<I,Oi,E>{
+  static public function cascade<I,O,Oi,E>(self:Attempt<I,O,E>,that:Modulate<O,Oi,E>):Attempt<I,Oi,E>{
     return lift(self.then(that));
   }
   static public function execute<I,O,E>(self:Attempt<I,O,E>,that:Execute<E>):Attempt<I,O,E>{

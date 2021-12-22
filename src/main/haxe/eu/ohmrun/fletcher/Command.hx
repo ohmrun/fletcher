@@ -40,8 +40,8 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
       )
     );
   }
-  public function toCascade():Cascade<I,I,E>{
-    return Cascade.lift(
+  public function toModulate():Modulate<I,I,E>{
+    return Modulate.lift(
       (p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
         ok -> cont.receive(
           this.forward(ok).fold_mapp(
@@ -82,8 +82,8 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
 
 } 
 class CommandLift{
-  static public function toCascade<I,O,E>(command:CommandDef<I,E>):Cascade<I,I,E>{
-    return Cascade.lift(
+  static public function toModulate<I,O,E>(command:CommandDef<I,E>):Modulate<I,I,E>{
+    return Modulate.lift(
       (p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
         (okI:I) -> cont.receive(command.forward(okI).fold_mapp(
           okII -> okII.fold(
