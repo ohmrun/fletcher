@@ -134,19 +134,19 @@ class ArchLeave<I,O,E>{
 class ArchLeaveValue<I,O,E>{
   public function new(){}
   public function get(self:Res<I,E>->O){
-    return Rectify.lift(Fletcher.Sync(self));
+    return Regulate.lift(Fletcher.Sync(self));
   }
 }
 class ArchLeaveValueDefer<I,O,E>{
   public function new(){}
-  public function get(self:Rectify<I,E,O>){
+  public function get(self:Regulate<I,E,O>){
     return self;
   }
   public function cont(self:Res<I,E>->(O->Void)->Void){
-    return Rectify.lift(Fletcher.fromFunSink(self));
+    return Regulate.lift(Fletcher.fromFunSink(self));
   }
   public function future(self:Res<I,E>->Future<O>){
-    return Rectify.lift(Fletcher.Fun1Future(self));
+    return Regulate.lift(Fletcher.Fun1Future(self));
   }
 }
 class ArchError<I,O,E>{
@@ -164,7 +164,7 @@ class ArchError<I,O,E>{
 class ArchErrorValue<I,O,E>{
   public function new(){}
   public function get(self:Res<I,E>->O){
-    return Rectify.lift(Fletcher.Sync(self));
+    return Regulate.lift(Fletcher.Sync(self));
   }
 }
 class ArchErrorError<I,O,E,EE>{

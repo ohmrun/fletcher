@@ -169,7 +169,7 @@ class ProduceLift{
     return lift(Fletcher.Then(self,then.toCascade()));
   }
   static public function recover<O,E>(self:Produce<O,E>,rec:Recover<O,E>):Provide<O>{
-    return Provide.lift(self.then(rec.toRectify()));
+    return Provide.lift(self.then(rec.toRegulate()));
   }
   static public function attempt<O,Oi,E>(self:Produce<O,E>,that:Attempt<O,Oi,E>):Produce<Oi,E>{
     return lift(self.then(that.toCascade()));
