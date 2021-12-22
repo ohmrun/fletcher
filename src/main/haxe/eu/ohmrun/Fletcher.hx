@@ -271,8 +271,8 @@ typedef Propose<O,E>            = eu.ohmrun.fletcher.Propose<O,E>;
 typedef RecoverDef<I,E>         = eu.ohmrun.fletcher.Recover.RecoverDef<I,E>;
 typedef Recover<I,E>            = eu.ohmrun.fletcher.Recover<I,E>;
 
-typedef RegulateDef<I,O,E>       = eu.ohmrun.fletcher.Regulate.RegulateDef<I,O,E>;
-typedef Regulate<I,O,E>          = eu.ohmrun.fletcher.Regulate<I,O,E>;
+typedef ReformDef<I,O,E>       = eu.ohmrun.fletcher.Reform.ReformDef<I,O,E>;
+typedef Reform<I,O,E>          = eu.ohmrun.fletcher.Reform<I,O,E>;
 
 typedef ResolveDef<I,E>         = eu.ohmrun.fletcher.Resolve.ResolveDef<I,E>;
 typedef Resolve<I,E>            = eu.ohmrun.fletcher.Resolve<I,E>;

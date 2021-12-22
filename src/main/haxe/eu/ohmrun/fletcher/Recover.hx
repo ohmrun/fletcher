@@ -17,7 +17,7 @@ typedef RecoverDef<I,E>                 = FletcherDef<Rejection<E>,I,Noise>;
       )
     )
   );
-  public function toRegulate():Regulate<I,I,E> return Regulate.lift(
+  public function toReform():Reform<I,I,E> return Reform.lift(
     (p:Res<I,E>,cont:Terminal<I,Noise>) -> p.fold(
       ok -> cont.value(ok).serve(),
       er -> cont.receive(this.forward(er))
@@ -32,8 +32,8 @@ typedef RecoverDef<I,E>                 = FletcherDef<Rejection<E>,I,Noise>;
   }
 } 
 class RecoverLift{
-  static public function toRegulate<I,E>(self:Recover<I,E>):Regulate<I,I,E>{
-    return Regulate.lift((p:Res<I,E>,cont:Terminal<I,Noise>) -> {
+  static public function toReform<I,E>(self:Recover<I,E>):Reform<I,I,E>{
+    return Reform.lift((p:Res<I,E>,cont:Terminal<I,Noise>) -> {
       return p.fold(
         ok -> cont.value(ok).serve(),
         no -> cont.receive(

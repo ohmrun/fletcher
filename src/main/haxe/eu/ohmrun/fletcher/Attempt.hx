@@ -88,7 +88,7 @@ class AttemptLift{
   static public function then<I,O,Oi,E>(self:Attempt<I,O,E>,that:Cascade<O,Oi,E>):Attempt<I,Oi,E>{
     return lift(Fletcher.Then(self,that));
   }
-  static public function rectify<I,O,Oi,E>(self:Attempt<I,O,E>,next:Regulate<O,Oi,E>):Fletcher<I,Oi,Noise>{
+  static public function rectify<I,O,Oi,E>(self:Attempt<I,O,E>,next:Reform<O,Oi,E>):Fletcher<I,Oi,Noise>{
     return Fletcher.lift(Fletcher.Then(self.toFletcher(),next.toFletcher()));
   }
   static public function resolve<I,O,E>(self:Attempt<I,O,E>,next:Resolve<O,E>):Attempt<I,O,E>{
