@@ -151,7 +151,8 @@ class FletcherLift{
         __.crack(no);
       }
     ).crunch();
-    trace(val);
+    __.assert().exists(val);
+    
     return val;
   }
   static public function then<Pi,Ri,Rii,E>(self:Fletcher<Pi,Ri,E>,that:Fletcher<Ri,Rii,E>):Fletcher<Pi,Rii,E>{
