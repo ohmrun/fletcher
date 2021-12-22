@@ -217,7 +217,20 @@ class FletcherLift{
       ).submit() 
     );
   }
-  //static public function provide<I,O>(self:FletcherDef<I,O>):
+  static public function produce<I,O,E>(self:Fletcher<I,O,E>,i:I):Produce<O,E>{
+    return Produce.lift(
+      Fletcher.Anon(
+        (_:Noise,cont:Terminal<Res<O,E>,Noise>) -> {
+          return cont.receive(
+            self.forward(i).fold_mapp(
+              (ok:O)          -> __.success(__.accept(ok)),
+              (no:Defect<E>)  -> __.success(__.reject(no.toError()))
+            )
+          );
+        }
+      )
+   );
+  } 	
 }
 
 typedef TerminalSinkDef<R,E>    = eu.ohmrun.fletcher.TerminalSink.TerminalSinkDef<R,E>;

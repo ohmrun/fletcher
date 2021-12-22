@@ -124,6 +124,9 @@ typedef ModulateDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 	public inline function flat_map<Oi>(fn:O->Modulate<I,Oi,E>):Modulate<I,Oi,E>{
 		return _.flat_map(this,fn);
 	}
+	public inline function prj():FletcherDef<Res<I,E>,Res<O,E>,Noise>{
+		return this;
+	}
 }
 
 class ModulateLift {
@@ -131,7 +134,7 @@ class ModulateLift {
 		return new Modulate(self);
 	}
 
-	static public function or<Ii, Iii, O, E>(self:Modulate<Ii, O, E>, that:Modulate<Iii, O, E>):Modulate<Either<Ii, Iii>, O, E> {
+	static public function or<Ii, Iii, O, E>(self:ModulateDef<Ii, O, E>, that:Modulate<Iii, O, E>):Modulate<Either<Ii, Iii>, O, E> {
 		return lift(
 			Fletcher.Anon(
 				(ipt:Res<Either<Ii, Iii>, E>, cont:Terminal<Res<O, E>, Noise>) -> 
@@ -145,7 +148,7 @@ class ModulateLift {
 			)
 		);
 	}
-	static public function errata<I, O, E, EE>(self:Modulate<I, O, E>, fn:Rejection<E>->Rejection<EE>):Modulate<I, O, EE> {
+	static public function errata<I, O, E, EE>(self:ModulateDef<I, O, E>, fn:Rejection<E>->Rejection<EE>):Modulate<I, O, EE> {
 		return lift(
 			Fletcher.Anon(
 				(i:Res<I, EE>,cont:Waypoint<O,EE>) -> i.fold(
@@ -162,11 +165,11 @@ class ModulateLift {
 		);
 	}
 
-	static public function errate<I, O, E, EE>(self:Modulate<I, O, E>, fn:E->EE):Modulate<I, O, EE> {
+	static public function errate<I, O, E, EE>(self:ModulateDef<I, O, E>, fn:E->EE):Modulate<I, O, EE> {
 		return errata(self, (e) -> e.errate(fn));
 	}
 
-	static public function reframe<I, O, E>(self:Modulate<I, O, E>):Reframe<I, O, E> {
+	static public function reframe<I, O, E>(self:ModulateDef<I, O, E>):Reframe<I, O, E> {
 		return lift(
 			(p:Res<I,E>,cont:Waypoint<Couple<O,I>,E>) -> cont.receive(
 				self.forward(p).fold_mapp(
@@ -177,23 +180,23 @@ class ModulateLift {
 		);
 	}
 
-	static public function cascade<I, O, Oi, E>(self:Modulate<I, O, E>, that:Modulate<O, Oi, E>):Modulate<I, Oi, E> {
+	static public function cascade<I, O, Oi, E>(self:ModulateDef<I, O, E>, that:Modulate<O, Oi, E>):Modulate<I, Oi, E> {
 		return lift(Fletcher.Then(self, that));
 	}
 
-	static public function attempt<I, O, Oi, E>(self:Modulate<I, O, E>, that:Attempt<O, Oi, E>):Modulate<I, Oi, E> {
+	static public function attempt<I, O, Oi, E>(self:ModulateDef<I, O, E>, that:Attempt<O, Oi, E>):Modulate<I, Oi, E> {
 		return cascade(self, that.toModulate());
 	}
 
-	static public function convert<I, O, Oi, E>(self:Modulate<I, O, E>, that:Convert<O, Oi>):Modulate<I, Oi, E> {
+	static public function convert<I, O, Oi, E>(self:ModulateDef<I, O, E>, that:Convert<O, Oi>):Modulate<I, Oi, E> {
 		return cascade(self, that.toModulate());
 	}
 
-	static public function map<I, O, Oi, E>(self:Modulate<I, O, E>, fn:O->Oi):Modulate<I, Oi, E> {
+	static public function map<I, O, Oi, E>(self:ModulateDef<I, O, E>, fn:O->Oi):Modulate<I, Oi, E> {
 		return convert(self, Convert.fromFun1R(fn));
 	}
 
-	static public function mapi<I, Ii, O, E>(self:Modulate<I, O, E>, fn:Ii->I):Modulate<Ii, O, E> {
+	static public function mapi<I, Ii, O, E>(self:ModulateDef<I, O, E>, fn:Ii->I):Modulate<Ii, O, E> {
 		return lift(Modulate.fromFletcher(Fletcher.fromFun1R(fn)).then(self));
 	}
 
@@ -201,15 +204,15 @@ class ModulateLift {
 		return (e:Rejection<E>) ->  cont.receive(cont.value(__.reject(e)));
 	}
 
-	@:noUsing static public inline function environment<I, O, E>(self:Modulate<I, O, E>, i:I, success:O->Void, failure:Rejection<E>->Void):Fiber {
+	@:noUsing static public inline function environment<I, O, E>(self:ModulateDef<I, O, E>, i:I, success:O->Void, failure:Rejection<E>->Void):Fiber {
 		return Fletcher._.environment(self, __.accept(i), (res) -> res.fold(success, failure), (err) -> throw err);
 	}
 
-	static public function produce<I, O, E>(self:Modulate<I, O, E>, i:Res<I,E>):Produce<O, E> {
+	static public function produce<I, O, E>(self:ModulateDef<I, O, E>, i:Res<I,E>):Produce<O, E> {
 		return Produce.lift(Fletcher.Anon((_:Noise, cont) -> cont.receive(self.forward(i))));
 	}
 
-	static public function reclaim<I, O, Oi, E>(self:Modulate<I, O, E>, that:Convert<O, Produce<Oi, E>>):Modulate<I, Oi, E> {
+	static public function reclaim<I, O, Oi, E>(self:ModulateDef<I, O, E>, that:Convert<O, Produce<Oi, E>>):Modulate<I, Oi, E> {
 		return lift(cascade(self,
 			that.toModulate()).attempt(
 				Attempt.lift(
@@ -221,7 +224,7 @@ class ModulateLift {
 		);
 	}
 
-	static public function arrange<I, O, Oi, E>(self:Modulate<I, O, E>, then:Arrange<O, I, Oi, E>):Modulate<I, Oi, E> {
+	static public function arrange<I, O, Oi, E>(self:ModulateDef<I, O, E>, then:Arrange<O, I, Oi, E>):Modulate<I, Oi, E> {
 		return lift(Fletcher.Anon((i:Res<I, E>, cont:Terminal<Res<Oi, E>, Noise>) -> cont.receive(self.forward(i).flat_fold(
 				res -> then.forward(res.zip(i)),
 				e 	-> cont.error(e)
@@ -229,11 +232,11 @@ class ModulateLift {
 		));
 	}
 
-	static public function split<I, Oi, Oii, E>(self:Modulate<I, Oi, E>, that:Modulate<I, Oii, E>):Modulate<I, Couple<Oi, Oii>, E> {
+	static public function split<I, Oi, Oii, E>(self:ModulateDef<I, Oi, E>, that:Modulate<I, Oii, E>):Modulate<I, Couple<Oi, Oii>, E> {
 		return lift(Fletcher._.split(self, that).map(__.decouple(Res._.zip)));
   }
   
-  static public function broach<I, O, E>(self:Modulate<I, O, E>):Modulate<I, Couple<I,O>,E>{
+  static public function broach<I, O, E>(self:ModulateDef<I, O, E>):Modulate<I, Couple<I,O>,E>{
     return lift(Fletcher._.broach(
       self
     ).then(
@@ -244,7 +247,7 @@ class ModulateLift {
       )
     ));
 	}
-	static public function flat_map<I,O,Oi,E>(self:Modulate<I,O,E>,fn:O->Modulate<I,Oi,E>):Modulate<I,Oi,E>{
+	static public function flat_map<I,O,Oi,E>(self:ModulateDef<I,O,E>,fn:O->Modulate<I,Oi,E>):Modulate<I,Oi,E>{
 		return lift(Fletcher.FlatMap(
 			self,
 			(res:Res<O,E>)->res.fold(
@@ -253,7 +256,7 @@ class ModulateLift {
 			)
 		));
 	}
-	static public function command<I,O,E>(self:Modulate<I,O,E>,that:Command<O,E>):Modulate<I,O,E>{
+	static public function command<I,O,E>(self:ModulateDef<I,O,E>,that:Command<O,E>):Modulate<I,O,E>{
     return Modulate.lift(
       Fletcher.Then(
         self,
@@ -266,11 +269,4 @@ class ModulateLift {
       )
     );
   }
-	static public function provide<I,O,E>(self:Modulate<I,O,E>,i:I):Produce<O,E>{
-    return Produce.lift(
-      Fletcher.Anon(
-        (_:Noise,cont) -> cont.receive(self.forward(__.accept(i)))
-      )
-   );
-  } 	
 }
