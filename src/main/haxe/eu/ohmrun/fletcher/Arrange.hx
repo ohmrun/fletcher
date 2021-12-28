@@ -161,7 +161,7 @@ class ArrangeLift{
       res -> res.map(tr -> tr.detriple(
         (a,b,c) -> __.couple(a,c)
       ))
-    )).cascade(that);
+    )).modulate(that);
     //$type(a);
     //$type(b);
     var c = Modulate.lift(a.map(

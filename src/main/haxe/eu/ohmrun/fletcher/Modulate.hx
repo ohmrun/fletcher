@@ -180,16 +180,16 @@ class ModulateLift {
 		);
 	}
 
-	static public function cascade<I, O, Oi, E>(self:ModulateDef<I, O, E>, that:Modulate<O, Oi, E>):Modulate<I, Oi, E> {
+	static public function modulate<I, O, Oi, E>(self:ModulateDef<I, O, E>, that:Modulate<O, Oi, E>):Modulate<I, Oi, E> {
 		return lift(Fletcher.Then(self, that));
 	}
 
 	static public function attempt<I, O, Oi, E>(self:ModulateDef<I, O, E>, that:Attempt<O, Oi, E>):Modulate<I, Oi, E> {
-		return cascade(self, that.toModulate());
+		return modulate(self, that.toModulate());
 	}
 
 	static public function convert<I, O, Oi, E>(self:ModulateDef<I, O, E>, that:Convert<O, Oi>):Modulate<I, Oi, E> {
-		return cascade(self, that.toModulate());
+		return modulate(self, that.toModulate());
 	}
 
 	static public function map<I, O, Oi, E>(self:ModulateDef<I, O, E>, fn:O->Oi):Modulate<I, Oi, E> {
@@ -213,7 +213,7 @@ class ModulateLift {
 	}
 
 	static public function reclaim<I, O, Oi, E>(self:ModulateDef<I, O, E>, that:Convert<O, Produce<Oi, E>>):Modulate<I, Oi, E> {
-		return lift(cascade(self,
+		return lift(modulate(self,
 			that.toModulate()).attempt(
 				Attempt.lift(
 				Fletcher.Anon(

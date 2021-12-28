@@ -216,7 +216,7 @@ class ProduceLift{
       ) 
     );
   }
-  static public function cascade<O,Oi,E>(self:ProduceDef<O,E>,that:Modulate<O,Oi,E>):Produce<Oi,E>{
+  static public function modulate<O,Oi,E>(self:ProduceDef<O,E>,that:Modulate<O,Oi,E>):Produce<Oi,E>{
     return lift(self.then(that));
   }
   static public inline function fudge<O,E>(self:ProduceDef<O,E>):O{

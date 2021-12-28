@@ -157,7 +157,7 @@ class AttemptLift{
   static public function mapi<I,Ii,O,E>(self:Attempt<I,O,E>,that:Ii->I):Attempt<Ii,O,E>{
     return lift(Fletcher._.mapi(self.toFletcher(),that));
   }
-  static public function cascade<I,O,Oi,E>(self:Attempt<I,O,E>,that:Modulate<O,Oi,E>):Attempt<I,Oi,E>{
+  static public function modulate<I,O,Oi,E>(self:Attempt<I,O,E>,that:Modulate<O,Oi,E>):Attempt<I,Oi,E>{
     return lift(self.then(that));
   }
   static public function execute<I,O,E>(self:Attempt<I,O,E>,that:Execute<E>):Attempt<I,O,E>{

@@ -34,7 +34,7 @@ typedef ReframeDef<I,O,E>               = ModulateDef<I,Couple<O,I>,E>;
 class ReframeLift{
   static private function lift<I,O,E>(wml:ReframeDef<I,O,E>):Reframe<I,O,E> return new Reframe(wml);
   
-  static public function cascade<I,Oi,Oii,E>(self:Reframe<I,Oi,E>,that:Modulate<Couple<Oi,I>,Oii,E>):Modulate<I,Oii,E>{
+  static public function modulate<I,Oi,Oii,E>(self:Reframe<I,Oi,E>,that:Modulate<Couple<Oi,I>,Oii,E>):Modulate<I,Oii,E>{
     return Modulate.lift(Fletcher.Then(self,that));
   }
   static public function attempt<I,O,Oi,E>(self:Reframe<I,O,E>,that:Attempt<O,Oi,E>):Reframe<I,Oi,E>{
@@ -68,7 +68,7 @@ class ReframeLift{
   static public function arrange<I,O,Oi,E>(self:Reframe<I,O,E>,that:Arrange<O,I,Oi,E>):Reframe<I,Oi,E>{
     var arw = 
       Fletcher._.map(
-        cascade(self,that).broach(),
+        modulate(self,that).broach(),
         (res:Res<Couple<I,Oi>,E>) -> {
             return res.map(tp -> tp.swap());
           }
@@ -148,7 +148,7 @@ class ReframeLift{
     );
   }
   static public function convert<I,O,Oi,E>(self:Reframe<I,O,E>,fn:Convert<O,Oi>):Reframe<I,Oi,E>{
-    return lift(self.cascade(
+    return lift(self.modulate(
       fn.first().toModulate()
     ));
   }
