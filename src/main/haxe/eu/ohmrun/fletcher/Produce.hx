@@ -222,6 +222,9 @@ class ProduceLift{
   static public inline function fudge<O,E>(self:ProduceDef<O,E>):O{
     return Fletcher._.fudge(self,Noise).fudge();
   }
+  static public inline function force<O,E>(self:ProduceDef<O,E>):Res<O,E>{
+    return Fletcher._.force(self,Noise).fudge();
+  }
   static public function flat_map<O,Oi,E>(self:ProduceDef<O,E>,that:O->Produce<Oi,E>):Produce<Oi,E>{
     return lift(
       Fletcher.FlatMap(
