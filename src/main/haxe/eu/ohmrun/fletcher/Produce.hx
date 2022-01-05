@@ -155,7 +155,7 @@ class ProduceLift{
       )
     );
   }
-  static public function crack<O,E>(self:ProduceDef<O,E>):Provide<O>{
+  static public function provide<O,E>(self:ProduceDef<O,E>):Provide<O>{
     return Provide.lift(
       Fletcher._.map(self,
         res -> res.fold(

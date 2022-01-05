@@ -155,6 +155,24 @@ class FletcherLift{
     
     return val;
   }
+  static public function force<P,R,E>(self:Fletcher<P,R,E>,p:P):Res<R,E>{
+    var val = null;
+    environment(
+      self,
+      p,
+      (ok) -> {
+        __.log().debug('fudged');
+        val = __.accept(ok);
+      },
+      (no) -> {
+        __.log().debug('fudged:fail');
+        val = __.reject(Rejection.fromDefect(no));
+      }
+    ).crunch();
+    __.assert().exists(val);
+    
+    return val;
+  }
   static public function then<Pi,Ri,Rii,E>(self:Fletcher<Pi,Ri,E>,that:Fletcher<Ri,Rii,E>):Fletcher<Pi,Rii,E>{
     return Fletcher.lift(
       (pI:Pi,cont:Terminal<Rii,E>) -> {
@@ -250,9 +268,9 @@ typedef ConvertDef<I,O>         = eu.ohmrun.fletcher.Convert.ConvertDef<I,O>;
 typedef Provide<O>              = eu.ohmrun.fletcher.Provide<O>;
 typedef ProvideDef<O>           = eu.ohmrun.fletcher.Provide.ProvideDef<O>;
 
-typedef ModulateApi<I,O,E>       = eu.ohmrun.fletcher.Modulate.ModulateApi<I,O,E>;
-typedef ModulateDef<I,O,E>       = eu.ohmrun.fletcher.Modulate.ModulateDef<I,O,E>;
-typedef Modulate<I,O,E>          = eu.ohmrun.fletcher.Modulate<I,O,E>;
+typedef ModulateApi<I,O,E>      = eu.ohmrun.fletcher.Modulate.ModulateApi<I,O,E>;
+typedef ModulateDef<I,O,E>      = eu.ohmrun.fletcher.Modulate.ModulateDef<I,O,E>;
+typedef Modulate<I,O,E>         = eu.ohmrun.fletcher.Modulate<I,O,E>;
 
 typedef ArrangeDef<I,S,O,E>     = eu.ohmrun.fletcher.Arrange.ArrangeDef<I,S,O,E>;
 typedef Arrange<I,S,O,E>        = eu.ohmrun.fletcher.Arrange<I,S,O,E>;
@@ -284,8 +302,8 @@ typedef Propose<O,E>            = eu.ohmrun.fletcher.Propose<O,E>;
 typedef RecoverDef<I,E>         = eu.ohmrun.fletcher.Recover.RecoverDef<I,E>;
 typedef Recover<I,E>            = eu.ohmrun.fletcher.Recover<I,E>;
 
-typedef ReformDef<I,O,E>       = eu.ohmrun.fletcher.Reform.ReformDef<I,O,E>;
-typedef Reform<I,O,E>          = eu.ohmrun.fletcher.Reform<I,O,E>;
+typedef ReformDef<I,O,E>        = eu.ohmrun.fletcher.Reform.ReformDef<I,O,E>;
+typedef Reform<I,O,E>           = eu.ohmrun.fletcher.Reform<I,O,E>;
 
 typedef ResolveDef<I,E>         = eu.ohmrun.fletcher.Resolve.ResolveDef<I,E>;
 typedef Resolve<I,E>            = eu.ohmrun.fletcher.Resolve<I,E>;
