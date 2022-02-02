@@ -34,7 +34,7 @@ abstract Execute<E>(ExecuteDef<E>) from ExecuteDef<E> to ExecuteDef<E>{
   @:to public function toProvide():Provide<Report<E>>{
     return this;
   }
-  public inline function toFletcher():Fletcher<Noise,Report<E>,Noise>{
+  @:to public inline function toFletcher():Fletcher<Noise,Report<E>,Noise>{
     return this;
   }
   @:from static public function fromFunXR<E>(fn:Void->Report<E>):Execute<E>{
