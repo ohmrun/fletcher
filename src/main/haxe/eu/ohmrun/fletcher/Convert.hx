@@ -32,14 +32,6 @@ abstract Convert<I,O>(ConvertDef<I,O>) from ConvertDef<I,O> to ConvertDef<I,O>{
   private var self(get,never):Convert<I,O>;
   private function get_self():Convert<I,O> return lift(this);
 
-  public function toModulate<E>():Modulate<I,O,E>{
-    return Modulate.lift(
-      (p:Res<I,E>,cont:Waypoint<O,E>) -> p.fold(
-        ok -> cont.receive(this.forward(ok).map(__.accept)),
-        no -> cont.value(__.reject(no)).serve()
-      ) 
-    );
-  }
   @:from static public function fromFun1R<I,O>(fn:I->O):Convert<I,O>{
     return lift(Fletcher.fromFun1R(fn));
   }
@@ -57,6 +49,14 @@ abstract Convert<I,O>(ConvertDef<I,O>) from ConvertDef<I,O> to ConvertDef<I,O>{
   }
 }
 class ConvertLift{
+  static public function toModulate<I,O,E>(self:Convert<I,O>):Modulate<I,O,E>{
+    return Modulate.lift(
+      (p:Res<I,E>,cont:Waypoint<O,E>) -> p.fold(
+        ok -> cont.receive(self.forward(ok).map(__.accept)),
+        no -> cont.value(__.reject(no)).serve()
+      ) 
+    );
+  }
   static public function then<I,O,Oi>(self:ConvertDef<I,O>,that:Convert<O,Oi>):Convert<I,Oi>{
     return Convert.lift(Fletcher._.then(
       self,

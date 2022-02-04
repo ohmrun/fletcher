@@ -44,13 +44,13 @@ typedef FletcherDef<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
   static public function forward<P,Pi,E>(f:P -> Terminal<Pi,E> -> Work,p:P):Receiver<Pi,E>{
     return Receiver.lift(
       function(k:ReceiverSink<Pi,E>){
-        __.log().trace('forward called');
+        //__.log().trace('forward called');
         var ft : FutureTrigger<ArwOut<Pi,E>> = Future.trigger();
         var fst = f(
           p,
           Terminal.lift(
             (t_sink:TerminalSink<Pi,E>) -> {
-              __.log().trace('forwarding');
+              //__.log().trace('forwarding');
               __.assert().exists(t_sink);
               return t_sink(ft);
             }
@@ -58,7 +58,7 @@ typedef FletcherDef<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
         );
         var snd = k(ft.asFuture().map(
           x -> {
-            __.log().debug('forwarded: $x');
+            //__.log().debug('forwarded: $x');
             return x;
           }
         ));
@@ -66,18 +66,18 @@ typedef FletcherDef<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
       }
     );
   }
-  static public inline function Sync<P,R,E>(fn:P->R):Fletcher<P,R,E>{
+  @:noUsing static public inline function Sync<P,R,E>(fn:P->R):Fletcher<P,R,E>{
     return lift(
       (p:P,cont:Terminal<R,E>) -> {
         var res   = fn(p);
-      __.log().debug(_ -> _.pure(res));
+      //__.log().debug(_ -> _.pure(res));
         var resI  = cont.value(res);
         return resI.serve();
       }
     );
   }
 
-  static public function FlatMap<P,R,Ri,E>(self:Fletcher<P,R,E>,fn:R->Fletcher<P,Ri,E>):Fletcher<P,Ri,E>{
+  @:noUsing static public function FlatMap<P,R,Ri,E>(self:Fletcher<P,R,E>,fn:R->Fletcher<P,Ri,E>):Fletcher<P,Ri,E>{
     return lift(
       (p:P,cont:Terminal<Ri,E>) -> cont.receive(self.forward(p).flat_fold(
         (ok:R)  -> fn(ok).forward(p),
@@ -85,13 +85,13 @@ typedef FletcherDef<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
       ))
     );
   }
-  static public function Anon<P,R,E>(self:FletcherDef<P,R,E>):Fletcher<P,R,E>{
+  @:noUsing static public function Anon<P,R,E>(self:FletcherDef<P,R,E>):Fletcher<P,R,E>{
     return lift(self);
   }
-  static public inline function Then<P,Ri,Rii,E>(self:Fletcher<P,Ri,E>,that:Fletcher<Ri,Rii,E>):Fletcher<P,Rii,E>{
+  @:noUsing static public inline function Then<P,Ri,Rii,E>(self:Fletcher<P,Ri,E>,that:Fletcher<Ri,Rii,E>):Fletcher<P,Rii,E>{
     return _.then(self,that);
   }
-  static public inline function Delay<I,E>(ms):Fletcher<I,I,E>{
+  @:noUsing static public inline function Delay<I,E>(ms):Fletcher<I,I,E>{
     return lift(
       (ipt:I,cont:Terminal<I,E>) -> {
         var bang = Work.wait();
@@ -115,12 +115,12 @@ class FletcherLift{
       (_:Noise,cont:Terminal<Noise,Noise>) -> {
         return cont.apply(
           (trg) -> {
-            __.log().debug("fiber");
+            //__.log().debug("fiber");
             return self(
               p,
               Terminal.lift(
                 (fn:TerminalSink<Pi,E>) -> {
-                  __.log().debug("fiber:lifted");
+                  //__.log().debug("fiber:lifted");
                   var ft = Future.trigger();
                       ft.handle(
                         (x:ArwOut<Pi,E>) -> x.fold(

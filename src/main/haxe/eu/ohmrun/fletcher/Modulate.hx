@@ -104,7 +104,7 @@ typedef ModulateDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 		return (e:Rejection<E>) -> cont.receive(cont.value(__.reject(e)));
 	}
 
-	@:to public inline function toFletcher():Fletcher<Res<I, E>, Res<O, E>, Noise> return this;
+	@:to public function toFletcher():Fletcher<Res<I, E>, Res<O, E>, Noise> return this;
 
 	public inline function environment(i:I, success:O->Void, failure:Rejection<E>->Void):Fiber {
 		return _.environment(this, i, success, failure);

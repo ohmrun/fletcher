@@ -166,7 +166,7 @@ class ProduceLift{
     );
   }
   static public function convert<O,Oi,E>(self:ProduceDef<O,E>,then:Convert<O,Oi>):Produce<Oi,E>{
-    return lift(Fletcher.Then(self,then.toModulate()));
+    return lift(Fletcher.Then(self,(Convert._.toModulate(then).toFletcher())));
   }
   static public function recover<O,E>(self:ProduceDef<O,E>,rec:Recover<O,E>):Provide<O>{
     return Provide.lift(self.then(rec.toReform()));
@@ -190,7 +190,7 @@ class ProduceLift{
   static public function reclaim<O,Oi,E>(self:ProduceDef<O,E>,next:Convert<O,Produce<Oi,E>>):Produce<Oi,E>{
     return lift(
       self.then(
-        next.toModulate()
+        next.toModulate().toFletcher()
       )).attempt(
         Attempt.lift(Fletcher.Anon(
           (prd:Produce<Oi,E>,cont:Terminal<Res<Oi,E>,Noise>) -> cont.receive(prd.forward(Noise))
