@@ -39,7 +39,7 @@ abstract Provide<O>(ProvideDef<O>) from ProvideDef<O> to ProvideDef<O>{
       (_:Noise,cont:Terminal<O,Noise>) -> fn(cont)
     );
   }
-  static public inline function bind_fold<T,O>(fn:Convert<Couple<T,O>,O>,arr:Array<T>,seed:O):Provide<O>{
+  static public inline function bind_fold<T,O>(fn:Convert<Couple<T,O>,O>,arr:Cluster<T>,seed:O):Provide<O>{
     return arr.lfold(
       (next:T,memo:Provide<O>) -> {
         return memo.convert(
@@ -109,7 +109,7 @@ class ProvideLift{
   static public inline function fudge<O>(self:Provide<O>):O{
     return Fletcher._.fudge(self,Noise);
   }
-  static public function then<O,Oi>(self:ProvideDef<O>,that:Fletcher<O,Oi,Noise>):Provide<Oi>{
+static public function then<O,Oi>(self:ProvideDef<O>,that:Fletcher<O,Oi,Noise>):Provide<Oi>{
     return Provide.lift(Fletcher.Then(self,that));
   }
   //static public inline function future<O>(self:Provide<O>)  

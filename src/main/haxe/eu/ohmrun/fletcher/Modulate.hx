@@ -94,14 +94,10 @@ typedef ModulateDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 				(i:Res<I, E>, cont:Waypoint<O,E>) -> 
 					i.fold(
 						(i) -> cont.receive(arw(i).forward(Noise)), 
-						typical_fail_handler(cont)				
+						e -> cont.receive(cont.value(__.reject(e)))
 					)
 			)
 		);
-	}
-
-	static private function typical_fail_handler<O, E>(cont:Terminal<Res<O, E>, Noise>) {
-		return (e:Rejection<E>) -> cont.receive(cont.value(__.reject(e)));
 	}
 
 	@:to public function toFletcher():Fletcher<Res<I, E>, Res<O, E>, Noise> return this;
@@ -198,10 +194,6 @@ class ModulateLift {
 
 	static public function mapi<I, Ii, O, E>(self:ModulateDef<I, O, E>, fn:Ii->I):Modulate<Ii, O, E> {
 		return lift(Modulate.fromFletcher(Fletcher.fromFun1R(fn)).then(self));
-	}
-
-	static function typical_fail_handler<O, E>(cont:Terminal<Res<O, E>, Noise>):Rejection<E>->Work {
-		return (e:Rejection<E>) ->  cont.receive(cont.value(__.reject(e)));
 	}
 
 	@:noUsing static public inline function environment<I, O, E>(self:ModulateDef<I, O, E>, i:I, success:O->Void, failure:Rejection<E>->Void):Fiber {

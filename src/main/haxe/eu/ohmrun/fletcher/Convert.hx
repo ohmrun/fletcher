@@ -32,7 +32,10 @@ abstract Convert<I,O>(ConvertDef<I,O>) from ConvertDef<I,O> to ConvertDef<I,O>{
   private var self(get,never):Convert<I,O>;
   private function get_self():Convert<I,O> return lift(this);
 
-  @:from static public function fromFun1R<I,O>(fn:I->O):Convert<I,O>{
+  @:from static public function Fun<I,O>(fn:I->O):Convert<I,O>{
+    return fromFun1R(fn);
+  }
+  @:from static inline public function fromFun1R<I,O>(fn:I->O):Convert<I,O>{
     return lift(Fletcher.fromFun1R(fn));
   }
   
