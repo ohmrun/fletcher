@@ -170,7 +170,7 @@ class ArrangeLift{
       ))
     ));
     //$type(c);
-    var d = Arrange.lift(b.split(c).convert(Fletcher.Sync((tp:Couple<Oi,O>) -> tp.swap())));
+    var d = Arrange.lift(b.split(c).map((tp:Couple<Oi,O>) -> tp.swap()));
     //$type(d);
     return d;
   }
