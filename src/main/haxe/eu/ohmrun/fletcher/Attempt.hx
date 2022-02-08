@@ -194,4 +194,16 @@ class AttemptLift{
       )
     );
   }
+  static public function flat_map<I,O,Oi,E>(self:Attempt<I,O,E>,fn:O->Attempt<I,Oi,E>):Attempt<I,Oi,E>{
+    return Attempt.lift(Fletcher.Anon(
+      (ipt:I,cont:Terminal<Res<Oi,E>,Noise>) -> cont.receive(
+        self.forward(ipt).flat_map(
+          res -> res.fold(
+            ok -> fn(ok).forward(ipt),
+            no -> Receiver.issue(__.success(__.reject(no)))
+          )
+        )
+      )
+    ));
+  }
 }
