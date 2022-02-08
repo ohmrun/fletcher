@@ -35,6 +35,13 @@ abstract Receiver<R,E>(ReceiverDef<R,E>) to ReceiverDef<R,E>{
       }
     );
   }
+  @:noUsing static public function defer<R,E>(self:Void->Receiver<R,E>,?pos:Pos):Receiver<R,E>{
+    return new Receiver(
+      (fn:ReceiverInput<R,E>->Work) -> {
+        return self().apply(fn);
+      }
+    );
+  }
   @:noUsing static public function value<R,E>(r:R,?pos:Pos):Receiver<R,E>{
     return issue(__.success(r));
   }
@@ -105,6 +112,13 @@ class ReceiverLift{
       self,
       out -> out.map(x -> x.map(fn))
     ));
+  }
+  static public function flat_map<P,Pi,E>(self:ReceiverDef<P,E>,fn:P->Receiver<Pi,E>):Receiver<Pi,E>{
+    return flat_fold(
+      self,
+      fn,
+      e -> Receiver.issue(Failure(e))
+    );
   }
   static public function tap<P,Pi,E>(self:ReceiverDef<P,E>,fn:P->Void):Receiver<P,E>{
     return map(self,__.command(fn));
