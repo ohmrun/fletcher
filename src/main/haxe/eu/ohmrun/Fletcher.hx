@@ -299,6 +299,8 @@ typedef Perform                 = eu.ohmrun.fletcher.Perform;
 
 typedef ProduceDef<O,E>         = eu.ohmrun.fletcher.Produce.ProduceDef<O,E>;
 typedef Produce<O,E>            = eu.ohmrun.fletcher.Produce<O,E>;
+typedef ProduceArgSum<O,E>      = eu.ohmrun.fletcher.Produce.ProduceArgSum<O,E>;
+typedef ProduceArg<O,E>         = eu.ohmrun.fletcher.Produce.ProduceArg<O,E>;
 
 typedef ProposeDef<O,E>         = eu.ohmrun.fletcher.Propose.ProposeDef<O,E>;
 typedef Propose<O,E>            = eu.ohmrun.fletcher.Propose<O,E>;
@@ -319,3 +321,9 @@ typedef ReceiverSink<R,E>       = eu.ohmrun.fletcher.ReceiverSink<R,E>;
 
 typedef RegulateDef<R,E>        = eu.ohmrun.fletcher.Regulate.RegulateDef<R,E>;
 typedef Regulate<R,E>           = eu.ohmrun.fletcher.Regulate<R,E>;
+
+class FletcherWildcards{
+  static public function attempt<P,R,E>(wildcard:Wildcard,self:AttemptArg<P,R,E>):Attempt<P,R,E>{
+    return Attempt.bump(self);
+  }
+}

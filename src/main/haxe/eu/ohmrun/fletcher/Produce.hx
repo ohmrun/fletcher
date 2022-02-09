@@ -1,5 +1,44 @@
 package eu.ohmrun.fletcher;
 
+enum ProduceArgSum<O,E>{
+  ProduceArgPure(o:O);
+  ProduceArgSync(res:Res<O,E>);
+  ProduceArgThunk(fn:Thunk<Res<O,E>>);
+  ProduceArgRejection(rejection:Rejection<E>);
+  ProduceArgPledge(pledge:Pledge<O,E>);
+  ProduceArgFunXProduce(fn:Void->Produce<O,E>);
+  ProduceArgFletcher(fletcher:Fletcher<Noise,O,E>);
+}
+abstract ProduceArg<O,E>(ProduceArgSum<O,E>) from ProduceArgSum<O,E> to ProduceArgSum<O,E>{
+  public function new(self) this = self;
+  static public function lift<O,E>(self:ProduceArgSum<O,E>):ProduceArg<O,E> return new ProduceArg(self);
+
+  public function prj():ProduceArgSum<O,E> return this;
+  private var self(get,never):ProduceArg<O,E>;
+  private function get_self():ProduceArg<O,E> return lift(this);
+  
+  @:from static public function fromFunXProduce<O,E>(fn:Void->Produce<O,E>):ProduceArg<O,E>{
+    return ProduceArgFunXProduce(fn);
+  }
+  @:from static public function fromFletcher<O,E>(fletcher:Fletcher<Noise,O,E>):ProduceArg<O,E>{
+    return ProduceArgFletcher(fletcher);
+  }
+  @:from static public function fromPledge<O,E>(pledge:Pledge<O,E>):ProduceArg<O,E>{
+    return ProduceArgPledge(pledge);
+  }
+  @:from static public function fromRejection<O,E>(rejection:Rejection<E>):ProduceArg<O,E>{
+    return ProduceArgRejection(rejection);
+  }
+  @:from static public function fromThunk<O,E>(fn:Thunk<Res<O,E>>):ProduceArg<O,E>{
+    return ProduceArgThunk(fn);
+  }
+  @:from static public function fromSync<O,E>(res:Res<O,E>):ProduceArg<O,E>{
+    return ProduceArgSync(res);
+  }
+  @:from static public function fromPure<O,E>(o:O):ProduceArg<O,E>{
+    return ProduceArgPure(o);
+  }
+}
 typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
 
 @:using(eu.ohmrun.fletcher.Produce.ProduceLift)
@@ -10,6 +49,17 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
 
   @:noUsing static public inline function lift<O,E>(self:ProduceDef<O,E>):Produce<O,E> return new Produce(self);
 
+  @:noUsing static public inline function bump<O,E>(self:ProduceArg<O,E>):Produce<O,E>{
+    return switch(self){
+      case ProduceArgPure(o)              : pure(o);
+      case ProduceArgSync(res)            : Sync(res);
+      case ProduceArgThunk(fn)            : Thunk(fn);
+      case ProduceArgRejection(rejection) : fromRejection(rejection);
+      case ProduceArgPledge(pledge)       : fromPledge(pledge);
+      case ProduceArgFunXProduce(fn)      : fromFunXProduce(fn);
+      case ProduceArgFletcher(fletcher)   : fromFletcher(fletcher);
+    }
+  }
   @:noUsing static public function Sync<O,E>(result:Res<O,E>):Produce<O,E>{
     return Produce.lift(
       (_:Noise,cont) -> cont.value(result).serve()
