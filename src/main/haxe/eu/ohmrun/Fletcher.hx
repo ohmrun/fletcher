@@ -274,12 +274,16 @@ typedef Modulate<I,O,E>         = eu.ohmrun.fletcher.Modulate<I,O,E>;
 
 typedef ArrangeDef<I,S,O,E>     = eu.ohmrun.fletcher.Arrange.ArrangeDef<I,S,O,E>;
 typedef Arrange<I,S,O,E>        = eu.ohmrun.fletcher.Arrange<I,S,O,E>;
+typedef ArrangeArgSum<I,S,O,E>  = eu.ohmrun.fletcher.Arrange.ArrangeArgSum<I,S,O,E>;
+typedef ArrangeArg<I,S,O,E>     = eu.ohmrun.fletcher.Arrange.ArrangeArg<I,S,O,E>;
 
 typedef ReframeDef<I,O,E>       = eu.ohmrun.fletcher.Reframe.ReframeDef<I,O,E>;
 typedef Reframe<I,O,E>          = eu.ohmrun.fletcher.Reframe<I,O,E>;
 
 typedef AttemptDef<I,O,E>       = eu.ohmrun.fletcher.Attempt.AttemptDef<I,O,E>;
 typedef Attempt<I,O,E>          = eu.ohmrun.fletcher.Attempt<I,O,E>;
+typedef AttemptArgSum<P,R,E>    = eu.ohmrun.fletcher.Attempt.AttemptArgSum<P,R,E>;
+typedef AttemptArg<P,R,E>       = eu.ohmrun.fletcher.Attempt.AttemptArg<P,R,E>;
 
 typedef CommandDef<I,E>         = eu.ohmrun.fletcher.Command.CommandDef<I,E>;
 typedef Command<I,E>            = eu.ohmrun.fletcher.Command<I,E>;

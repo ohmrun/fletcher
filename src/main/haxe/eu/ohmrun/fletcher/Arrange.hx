@@ -1,6 +1,32 @@
 package eu.ohmrun.fletcher;
 
 
+enum ArrangeArgSum<I,S,O,E>{
+  ArrangeArgPure(o:O);
+  ArrangeArgRes(res:Res<O,E>);
+  ArrangeArgFun1Attempt(f:I->Attempt<S,O,E>);
+  ArrangeArgFun1Modulate(f:I->Modulate<S,O,E>);
+}
+abstract ArrangeArg<I,S,O,E>(ArrangeArgSum<I,S,O,E>) from ArrangeArgSum<I,S,O,E>{
+  public function new(self) this = self;
+  static public function lift<I,S,O,E>(self:ArrangeArgSum<I,S,O,E>):ArrangeArg<I,S,O,E> return new ArrangeArg(self);
+
+  @:from static public function fromArgFun1Modulate<I,S,O,E>(f:I->Modulate<S,O,E>):ArrangeArg<I,S,O,E>{
+    return ArrangeArgFun1Modulate(f);
+  }
+  @:from static public function fromArgFun1Attempt<I,S,O,E>(f:I->Attempt<S,O,E>):ArrangeArg<I,S,O,E>{
+    return ArrangeArgFun1Attempt(f);
+  }
+  @:from static public function fromArgRes<I,S,O,E>(res:Res<O,E>):ArrangeArg<I,S,O,E>{
+    return ArrangeArgRes(res);
+  }
+  @:from static public function fromArgPure<I,S,O,E>(o:O):ArrangeArg<I,S,O,E>{
+    return ArrangeArgPure(o);
+  }
+  public function prj():ArrangeArgSum<I,S,O,E> return this;
+  private var self(get,never):ArrangeArg<I,S,O,E>;
+  private function get_self():ArrangeArg<I,S,O,E> return lift(this);
+}
 typedef ArrangeDef<I,S,O,E>             = ModulateDef<Couple<I,S>,O,E>;
 @:using(eu.ohmrun.fletcher.Arrange.ArrangeLift)
 @:forward abstract Arrange<I,S,O,E>(ArrangeDef<I,S,O,E>) from ArrangeDef<I,S,O,E> to ArrangeDef<I,S,O,E>{
@@ -10,6 +36,14 @@ typedef ArrangeDef<I,S,O,E>             = ModulateDef<Couple<I,S>,O,E>;
   @:noUsing static public inline function lift<I,S,O,E>(self:ArrangeDef<I,S,O,E>):Arrange<I,S,O,E>                         
     return new Arrange(self);
 
+  @:noUsing static public inline function bump<I,S,O,E>(self:ArrangeArg<I,S,O,E>):Arrange<I,S,O,E>{
+    return switch(self){
+      case ArrangeArgPure(o)            : Arrange.pure(o);
+      case ArrangeArgRes(res)           : Arrange.fromRes(res);
+      case ArrangeArgFun1Attempt(f)     : Arrange.fromFun1Attempt(f);  
+      case ArrangeArgFun1Modulate(f)    : Arrange.fromFun1Modulate(f);  
+    }
+  }
   @:noUsing static public function pure<I,S,O,E>(o:O):Arrange<I,S,O,E>{
     return lift(Fletcher.Anon(
       (i:Res<Couple<I,S>,E>,cont:Terminal<Res<O,E>,Noise>) -> 

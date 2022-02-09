@@ -1,5 +1,40 @@
 package eu.ohmrun.fletcher;
-        
+  
+enum AttemptArgSum<P,R,E>{
+  AttemptArgPure(r:R);
+  AttemptArgRes(res:Res<R,E>);
+  AttemptArgFun1Res(fn:P->Res<R,E>);
+  AttemptArgFun1Produce(fn:P->Produce<R,E>);
+  AttemptArgUnary1Produce(fn:Unary<P,Produce<R,E>>);
+  AttemptArgFun1Provide(fn:P->Provide<R>);
+}
+abstract AttemptArg<I,O,E>(AttemptArgSum<I,O,E>) from AttemptArgSum<I,O,E> to AttemptArgSum<I,O,E>{
+  public function new(self) this = self;
+  static public function lift<I,O,E>(self:AttemptArgSum<I,O,E>):AttemptArg<I,O,E> return new AttemptArg(self);
+
+  public function prj():AttemptArgSum<I,O,E> return this;
+  private var self(get,never):AttemptArg<I,O,E>;
+  private function get_self():AttemptArg<I,O,E> return lift(this);
+
+  @:from static public function fromArgFun1Provide<P,R,E>(fn:P->Provide<R>):AttemptArg<P,R,E>{
+    return AttemptArgFun1Provide(fn);
+  }
+  @:from static public function fromArgUnary1Produce<P,R,E>(fn:Unary<P,Produce<R,E>>):AttemptArg<P,R,E>{
+    return AttemptArgUnary1Produce(fn);
+  }
+  @:from static public function fromArgFun1Produce<P,R,E>(fn:P->Produce<R,E>):AttemptArg<P,R,E>{
+    return AttemptArgFun1Produce(fn);
+  }
+  @:from static public function fromArgFun1Res<P,R,E>(fn:P->Res<R,E>):AttemptArg<P,R,E>{
+    return AttemptArgFun1Res(fn);
+  }
+  @:from static public function fromArgRes<P,R,E>(fn:Res<R,E>):AttemptArg<P,R,E>{
+    return AttemptArgRes(fn);
+  }
+  @:from static public function fromArgPure<P,R,E>(fn:Res<R,E>):AttemptArg<P,R,E>{
+    return AttemptArgRes(fn);
+  }
+}
 typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
 
 @:using(eu.ohmrun.fletcher.Attempt.AttemptLift)
@@ -8,7 +43,14 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
   
   public inline function new(self) this = self;
   
-
+  static public inline function bump<I,O,E>(self:AttemptArg<I,O,E>) return switch(self){
+    case AttemptArgPure(r)            : pure(r); 
+    case AttemptArgRes(res)           : fromRes(res);
+    case AttemptArgFun1Res(fn)        : fromFun1Res(fn);
+    case AttemptArgFun1Produce(fn)    : fromFun1Produce(fn); 
+    case AttemptArgUnary1Produce(fn)  : fromUnary1Produce(fn);
+    case AttemptArgFun1Provide(fn)    : fromFun1Provide(fn);
+  }
   static public inline function lift<I,O,E>(self:AttemptDef<I,O,E>) return new Attempt(self);
 
   static public function unit<I,E>():Attempt<I,I,E>{
