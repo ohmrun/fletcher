@@ -326,4 +326,7 @@ class FletcherWildcards{
   static public function attempt<P,R,E>(wildcard:Wildcard,self:AttemptArg<P,R,E>):Attempt<P,R,E>{
     return Attempt.bump(self);
   }
+  static public function produce<R,E>(wildcard:Wildcard,self:ProduceArg<R,E>):Produce<R,E>{
+    return Produce.bump(self);
+  }
 }
