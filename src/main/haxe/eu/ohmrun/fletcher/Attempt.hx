@@ -31,8 +31,8 @@ abstract AttemptArg<I,O,E>(AttemptArgSum<I,O,E>) from AttemptArgSum<I,O,E> to At
   @:from static public function fromArgRes<P,R,E>(fn:Res<R,E>):AttemptArg<P,R,E>{
     return AttemptArgRes(fn);
   }
-  @:from static public function fromArgPure<P,R,E>(fn:Res<R,E>):AttemptArg<P,R,E>{
-    return AttemptArgRes(fn);
+  @:from static public function fromArgPure<P,R,E>(r:R):AttemptArg<P,R,E>{
+    return AttemptArgPure(r);
   }
 }
 typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
@@ -124,19 +124,19 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
 class AttemptLift{
   static private function lift<I,O,E>(self:AttemptDef<I,O,E>)          return new Attempt(self);
 
-  //static public inline function toFletcher<I,O,E>(self:Attempt<I,O,E>):Fletcher<I,O,E>{
+  //static public inline function toFletcher<I,O,E>(self:AttemptDef<I,O,E>):Fletcher<I,O,E>{
     
   //}
-  static public function then<I,O,Oi,E>(self:Attempt<I,O,E>,that:Modulate<O,Oi,E>):Attempt<I,Oi,E>{
+  static public function then<I,O,Oi,E>(self:AttemptDef<I,O,E>,that:Modulate<O,Oi,E>):Attempt<I,Oi,E>{
     return lift(Fletcher.Then(self,that));
   }
-  static public function rectify<I,O,Oi,E>(self:Attempt<I,O,E>,next:Reform<O,Oi,E>):Fletcher<I,Oi,Noise>{
-    return Fletcher.lift(Fletcher.Then(self.toFletcher(),next.toFletcher()));
+  static public function rectify<I,O,Oi,E>(self:AttemptDef<I,O,E>,next:Reform<O,Oi,E>):Fletcher<I,Oi,Noise>{
+    return Fletcher.lift(Fletcher.Then(lift(self).toFletcher(),next.toFletcher()));
   }
-  static public function resolve<I,O,E>(self:Attempt<I,O,E>,next:Resolve<O,E>):Attempt<I,O,E>{
+  static public function resolve<I,O,E>(self:AttemptDef<I,O,E>,next:Resolve<O,E>):Attempt<I,O,E>{
     return lift(self.then(next.toModulate()));
   }
-  static public function reclaim<I,O,Oi,E>(self:Attempt<I,O,E>,next:Convert<O,Produce<Oi,E>>):Attempt<I,Oi,E>{
+  static public function reclaim<I,O,Oi,E>(self:AttemptDef<I,O,E>,next:Convert<O,Produce<Oi,E>>):Attempt<I,Oi,E>{
     return lift(
       then(
         self,
@@ -149,30 +149,30 @@ class AttemptLift{
       )
     );
   }
-  static public function recover<I,O,E>(self:Attempt<I,O,E>,next:Recover<O,E>):Attempt<I,O,E>{
+  static public function recover<I,O,E>(self:AttemptDef<I,O,E>,next:Recover<O,E>):Attempt<I,O,E>{
     return lift(self.then(next.toModulate()));
   }
-  static public function convert<I,O,Oi,E>(self:Attempt<I,O,E>,next:Convert<O,Oi>):Attempt<I,Oi,E>{
+  static public function convert<I,O,Oi,E>(self:AttemptDef<I,O,E>,next:Convert<O,Oi>):Attempt<I,Oi,E>{
     return then(self,next.toModulate());
   }
-  static public function errata<I,O,E,EE>(self:Attempt<I,O,E>,fn:Rejection<E>->Rejection<EE>):Attempt<I,O,EE>{
+  static public function errata<I,O,E,EE>(self:AttemptDef<I,O,E>,fn:Rejection<E>->Rejection<EE>):Attempt<I,O,EE>{
     return lift(Fletcher._.map(self,(oc) -> oc.errata(fn)));
   }
-  static public function errate<I,O,E,EE>(self:Attempt<I,O,E>,fn:E->EE):Attempt<I,O,EE>{
+  static public function errate<I,O,E,EE>(self:AttemptDef<I,O,E>,fn:E->EE):Attempt<I,O,EE>{
     return lift(Fletcher._.map(self,(oc) -> oc.errate(fn)));
   }
-  static public function attempt<I,O,Oi,E>(self:Attempt<I,O,E>,next:Attempt<O,Oi,E>):Attempt<I,Oi,E>{
+  static public function attempt<I,O,Oi,E>(self:AttemptDef<I,O,E>,next:Attempt<O,Oi,E>):Attempt<I,Oi,E>{
     return then(self,next.toModulate());
   }
-  static public function reframe<I,O,E>(self:Attempt<I,O,E>):Reframe<I,O,E>{ 
-    return self.toModulate().reframe();
+  static public function reframe<I,O,E>(self:AttemptDef<I,O,E>):Reframe<I,O,E>{ 
+    return lift(self).toModulate().reframe();
   }
-  static public function broach<I,O,E>(self:Attempt<I,O,E>):Attempt<I,Couple<I,O>,E>{
+  static public function broach<I,O,E>(self:AttemptDef<I,O,E>):Attempt<I,Couple<I,O>,E>{
     return Attempt.lift(
       Fletcher.Anon(
         (ipt:I,cont:Terminal<Res<Couple<I,O>,E>,Noise>) -> {
           return cont.receive(
-            self.map(
+            lift(self).map(
               (o:O) -> __.couple(ipt,o)
             ).forward(ipt)
           );
@@ -180,14 +180,14 @@ class AttemptLift{
       )
     );
   }
-  static public function provide<I,O,E>(self:Attempt<I,O,E>,i:I):Produce<O,E>{
+  static public function provide<I,O,E>(self:AttemptDef<I,O,E>,i:I):Produce<O,E>{
     return Produce.lift(
       Fletcher.Anon(
         (_:Noise,cont) -> cont.receive(self.forward(i))
       )
    );
   }  
-  static public function arrange<I,O,Oi,E>(self:Attempt<I,O,E>,then:Arrange<O,I,Oi,E>):Attempt<I,Oi,E>{
+  static public function arrange<I,O,Oi,E>(self:AttemptDef<I,O,E>,then:Arrange<O,I,Oi,E>):Attempt<I,Oi,E>{
     return lift(
       (p:I,cont:Waypoint<Oi,E>) -> 
         self.forward(p).flat_fold(
@@ -196,13 +196,13 @@ class AttemptLift{
         ).serve()
     );
   }
-  static public function mapi<I,Ii,O,E>(self:Attempt<I,O,E>,that:Ii->I):Attempt<Ii,O,E>{
-    return lift(Fletcher._.mapi(self.toFletcher(),that));
+  static public function mapi<I,Ii,O,E>(self:AttemptDef<I,O,E>,that:Ii->I):Attempt<Ii,O,E>{
+    return lift(Fletcher._.mapi(lift(self).toFletcher(),that));
   }
-  static public function modulate<I,O,Oi,E>(self:Attempt<I,O,E>,that:Modulate<O,Oi,E>):Attempt<I,Oi,E>{
+  static public function modulate<I,O,Oi,E>(self:AttemptDef<I,O,E>,that:Modulate<O,Oi,E>):Attempt<I,Oi,E>{
     return lift(self.then(that));
   }
-  static public function execute<I,O,E>(self:Attempt<I,O,E>,that:Execute<E>):Attempt<I,O,E>{
+  static public function execute<I,O,E>(self:AttemptDef<I,O,E>,that:Execute<E>):Attempt<I,O,E>{
     return Attempt.lift(
       Fletcher.Then(
         self,
@@ -215,7 +215,7 @@ class AttemptLift{
       )
     );
   }
-  static public function command<I,O,E>(self:Attempt<I,O,E>,that:Command<O,E>):Attempt<I,O,E>{
+  static public function command<I,O,E>(self:AttemptDef<I,O,E>,that:Command<O,E>):Attempt<I,O,E>{
     return Attempt.lift(
       Fletcher.Then(
         self,
@@ -228,7 +228,7 @@ class AttemptLift{
       )
     );
   }
-  static public function map<I,O,Oi,E>(self:Attempt<I,O,E>,fn:O->Oi):Attempt<I,Oi,E>{
+  static public function map<I,O,Oi,E>(self:AttemptDef<I,O,E>,fn:O->Oi):Attempt<I,Oi,E>{
     return Attempt.lift(
       Fletcher._.map(
         self,
@@ -236,7 +236,7 @@ class AttemptLift{
       )
     );
   }
-  static public function flat_map<I,O,Oi,E>(self:Attempt<I,O,E>,fn:O->Attempt<I,Oi,E>):Attempt<I,Oi,E>{
+  static public function flat_map<I,O,Oi,E>(self:AttemptDef<I,O,E>,fn:O->Attempt<I,Oi,E>):Attempt<I,Oi,E>{
     return Attempt.lift(Fletcher.Anon(
       (ipt:I,cont:Terminal<Res<Oi,E>,Noise>) -> cont.receive(
         self.forward(ipt).flat_map(
@@ -248,4 +248,7 @@ class AttemptLift{
       )
     ));
   }
+  static public function produce<P, R, E>(self:AttemptDef<P, R, E>, i:P):Produce<R, E> {
+		return Produce.lift(Fletcher.Anon((_:Noise, cont) -> cont.receive(self.forward(i))));
+	}
 }
