@@ -251,4 +251,10 @@ class AttemptLift{
   static public function produce<P, R, E>(self:AttemptDef<P, R, E>, i:P):Produce<R, E> {
 		return Produce.lift(Fletcher.Anon((_:Noise, cont) -> cont.receive(self.forward(i))));
 	}
+  static public function adjust<P,R,Ri,E>(self:AttemptDef<P,R,E>,fn:R->Res<Ri,E>):Attempt<P,Ri,E>{
+    return lift(Fletcher._.then(
+      self,
+      Fletcher.fromFun1R((res:Res<R,E>) -> res.flat_map(fn))
+    ));
+  }
 }

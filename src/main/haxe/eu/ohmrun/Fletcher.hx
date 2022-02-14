@@ -51,17 +51,22 @@ typedef FletcherDef<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
           Terminal.lift(
             (t_sink:TerminalSink<Pi,E>) -> {
               //__.log().trace('forwarding');
+              #if debug
               __.assert().exists(t_sink);
+              #end
               return t_sink(ft);
             }
           )
         );
-        var snd = k(ft.asFuture().map(
+        var snd = k(ft.asFuture());
+        #if debug
+        snd = snd.map(
           x -> {
             //__.log().debug('forwarded: $x');
             return x;
           }
-        ));
+        )
+        #end
         return fst.seq(snd);
       }
     );
