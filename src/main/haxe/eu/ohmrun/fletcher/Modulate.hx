@@ -1,5 +1,17 @@
 package eu.ohmrun.fletcher;
 
+
+enum ModulateArgSum<P,R,E>{
+
+}
+abstract ModulateArg<P,R,E>(ModulateArgSum<P,R,E>) from ModulateArgSum<P,R,E> to ModulateArgSum<P,R,E>{
+	public function new(self) this = self;
+	static public function lift<P,R,E>(self:ModulateArgSum<P,R,E>):ModulateArg<P,R,E> return new ModulateArg(self);
+
+	public function prj():ModulateArgSum<P,R,E> return this;
+	private var self(get,never):ModulateArg<P,R,E>;
+	private function get_self():ModulateArg<P,R,E> return lift(this);
+}
 interface ModulateApi<I, O, E> extends FletcherApi<Res<I, E>, Res<O, E>, Noise>{
 	
 }

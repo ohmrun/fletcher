@@ -334,4 +334,7 @@ class FletcherWildcards{
   static public function produce<R,E>(wildcard:Wildcard,self:ProduceArg<R,E>):Produce<R,E>{
     return Produce.bump(self);
   }
+  static public function arrange<P,S,R,E>(wildcard:Wildcard,self:ArrangeArg<P,S,R,E>):Arrange<P,S,R,E>{
+    return Arrange.bump(self);
+  }
 }
