@@ -320,4 +320,11 @@ class ProduceLift{
       )
     );
   }
+  static public function toModulate<P,R,E>(self:ProduceDef<R,E>):Modulate<P,R,E>{
+    return Modulate.lift(
+      Fletcher.Anon(
+        (p:Res<P,E>,cont:Waypoint<R,E>) -> cont.receive(self.forward(Noise))
+      )
+    );
+  }
 }
