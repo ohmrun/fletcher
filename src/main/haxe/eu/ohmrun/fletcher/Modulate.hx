@@ -273,4 +273,10 @@ class ModulateLift {
       )
     );
   }
+	static public function adjust<P,R,Ri,E>(self:Modulate<P,R,E>,fn:R->Res<Ri,E>):Modulate<P,Ri,E>{
+		return lift(Fletcher._.map(
+			self,
+			(res:Res<R,E>) -> res.flat_map(fn)
+		));
+	}
 }
