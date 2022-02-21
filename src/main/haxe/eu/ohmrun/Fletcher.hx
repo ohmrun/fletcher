@@ -276,6 +276,8 @@ typedef ProvideDef<O>           = eu.ohmrun.fletcher.Provide.ProvideDef<O>;
 typedef ModulateApi<I,O,E>      = eu.ohmrun.fletcher.Modulate.ModulateApi<I,O,E>;
 typedef ModulateDef<I,O,E>      = eu.ohmrun.fletcher.Modulate.ModulateDef<I,O,E>;
 typedef Modulate<I,O,E>         = eu.ohmrun.fletcher.Modulate<I,O,E>;
+typedef ModulateArgSum<P,R,E>   = eu.ohmrun.fletcher.Modulate.ModulateArgSum<P,R,E>;
+typedef ModulateArg<P,R,E>      = eu.ohmrun.fletcher.Modulate.ModulateArg<P,R,E>;
 
 typedef ArrangeDef<I,S,O,E>     = eu.ohmrun.fletcher.Arrange.ArrangeDef<I,S,O,E>;
 typedef Arrange<I,S,O,E>        = eu.ohmrun.fletcher.Arrange<I,S,O,E>;
@@ -336,5 +338,8 @@ class FletcherWildcards{
   }
   static public function arrange<P,S,R,E>(wildcard:Wildcard,self:ArrangeArg<P,S,R,E>):Arrange<P,S,R,E>{
     return Arrange.bump(self);
+  }
+  static public function modulate<P,R,E>(wildcard:Wildcard,self:ModulateArg<P,R,E>):Modulate<P,R,E>{
+    return Modulate.bump(self);
   }
 }

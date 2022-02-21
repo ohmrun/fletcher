@@ -2,7 +2,15 @@ package eu.ohmrun.fletcher;
 
 
 enum ModulateArgSum<P,R,E>{
-
+	ModulateArgFun1Produce(arw:P->Produce<R, E>);
+	ModulateArgAttempt(self:Attempt<P,R,E>);
+	ModulateArgFletcher(arw:Fletcher<P, R, E>);
+	//ModulateArgFunResRes(fn:Res<P,E>->Res<R,EE>);
+	ModulateArgFunResRes0(fn:Res<P,E>->Res<R,E>);
+	ModulateArgFun1Res(fn:P -> Res<R, E>);
+	ModulateArgFun1R(fn:P -> R );
+	ModulateArgRes(ocR:Res<R, E>);
+	ModulateArgPure(o:R);
 }
 abstract ModulateArg<P,R,E>(ModulateArgSum<P,R,E>) from ModulateArgSum<P,R,E> to ModulateArgSum<P,R,E>{
 	public function new(self) this = self;
@@ -11,6 +19,43 @@ abstract ModulateArg<P,R,E>(ModulateArgSum<P,R,E>) from ModulateArgSum<P,R,E> to
 	public function prj():ModulateArgSum<P,R,E> return this;
 	private var self(get,never):ModulateArg<P,R,E>;
 	private function get_self():ModulateArg<P,R,E> return lift(this);
+
+	@:from static public function fromModulateArgFun1Produce<P,R,E>(self:P->Produce<R, E>){
+	return lift(ModulateArgFun1Produce(self));
+	}
+	@:from static public function fromModulateArgAttempt<P,R,E>(self:Attempt<P,R,E>){
+		return lift(ModulateArgAttempt(self));
+	}
+	@:from static public function fromModulateArgFletcher<P,R,E>(self:Fletcher<P, R, E>){
+		return lift(ModulateArgFletcher(self));
+	}
+	@:from static public function fromModulateArgFunResRes0<P,R,E>(self:Res<P,E>->Res<R,E>){
+		return lift(ModulateArgFunResRes0(self));
+	}
+	@:from static public function fromModulateArgFun1Res<P,R,E>(self:P -> Res<R, E>){
+		return lift(ModulateArgFun1Res(self));
+	}
+	@:from static public function fromModulateArgFun1R<P,R,E>(self:P -> R ){
+		return lift(ModulateArgFun1R(self));
+	}
+	@:from static public function fromModulateArgRes<P,R,E>(self:Res<R, E>){
+		return lift(ModulateArgRes(self));
+	}
+	@:from static public function fromModulateArgPure<P,R,E>(o:R){
+		return lift(ModulateArgPure(o));
+	}
+	@:to public function toModulate(){
+		return switch(this){
+			case ModulateArgFun1Produce(arw)		: Modulate.fromFun1Produce(arw);
+			case ModulateArgAttempt(self) 			: Modulate.fromAttempt(self);
+			case ModulateArgFletcher(arw) 			: Modulate.fromFletcher(arw);
+			case ModulateArgFunResRes0(fn) 			: Modulate.fromFunResRes0(fn);
+			case ModulateArgFun1Res(fn)					: Modulate.fromFun1Res(fn);
+			case ModulateArgFun1R(fn) 					: Modulate.fromFun1R(fn);
+			case ModulateArgRes(ocR) 						: Modulate.fromRes(ocR);
+			case ModulateArgPure(o) 						: Modulate.pure(o);
+		}
+	}
 }
 interface ModulateApi<I, O, E> extends FletcherApi<Res<I, E>, Res<O, E>, Noise>{
 	
@@ -28,10 +73,12 @@ typedef ModulateDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 	@:from static public function fromApi<P,Pi,E>(self:ModulateApi<P,Pi,E>){
     return lift(self.defer); 
   }
-		@:noUsing static public inline function lift<I, O, E>(self:FletcherDef<Res<I, E>, Res<O, E>, Noise>):Modulate<I, O, E> {
+	@:noUsing static public inline function lift<I, O, E>(self:FletcherDef<Res<I, E>, Res<O, E>, Noise>):Modulate<I, O, E> {
 		return new Modulate(self);
 	}
-
+	@:noUsing static public inline function bump<I, O, E>(self:ModulateArg<I,O,E>):Modulate<I, O, E> {
+		return self.toModulate();
+	}
 	static public function unit<I, O, E>():Modulate<I, I, E> {
 		return lift(Fletcher.fromFun1R((oc:Res<I, E>) -> oc));
 	}
@@ -67,11 +114,11 @@ typedef ModulateDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 			)
 		));
 	}
-	@:noUsing static public function fromFletcher<I, O, E>(arw:Fletcher<I, O, E>):Modulate<I, O, E> {
+	@:noUsing static public function fromFletcher<I, O, E>(self:Fletcher<I, O, E>):Modulate<I, O, E> {
 		return lift(
 			(p:Res<I,E>,cont:Waypoint<O,E>) -> cont.receive(
 				p.fold(
-					ok -> arw.forward(ok).fold_mapp(
+					ok -> self.forward(ok).fold_mapp(
 						ok -> __.success(__.accept(ok)),
 						no -> __.success(__.reject(no.toError().except())) 
 					),
@@ -87,16 +134,6 @@ typedef ModulateDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 				ok -> cont.receive(self.forward(ok)),
 				no -> cont.receive(cont.value(__.reject(no)))
 			)
-		);
-	}
-
-	@:noUsing static public function fromProduce<O, E>(arw:Fletcher<Noise, Res<O, E>, Noise>):Modulate<Noise, O, E> {
-		return lift(
-			(p:Res<Noise,E>,cont:Waypoint<O,E>) -> 
-				p.fold(
-					_ -> cont.receive(arw.forward(Noise)),
-					e -> cont.receive(cont.value(__.reject(e)))
-				)
 		);
 	}
 
