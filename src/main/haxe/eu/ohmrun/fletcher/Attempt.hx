@@ -56,7 +56,7 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
   static public function unit<I,E>():Attempt<I,I,E>{
     return lift(
       (i:I,cont:Terminal<Res<I,E>,Noise>) -> {
-        return cont.value(__.accept(i)).serve();
+        return cont.receive(cont.value(__.accept(i)));
       }
     );
   }
@@ -66,7 +66,7 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
   @:noUsing static public function fromRes<I,O,E>(res:Res<O,E>):Attempt<I,O,E>{
     return lift(
       (_:I,cont:Waypoint<O,E>) -> {
-        return cont.value(res).serve();
+        return cont.receive(cont.value(res));
       }
     );
   }
@@ -74,7 +74,7 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
   @:from static public function fromFun1Res<Pi,O,E>(fn:Pi->Res<O,E>):Attempt<Pi,O,E>{
     return lift(Fletcher.Anon(
       (pI:Pi,cont:Waypoint<O,E>) -> {
-        return cont.value(fn(pI)).serve();
+        return cont.receive(cont.value(fn(pI)));
       }
     ));
   }
@@ -190,10 +190,12 @@ class AttemptLift{
   static public function arrange<I,O,Oi,E>(self:AttemptDef<I,O,E>,then:Arrange<O,I,Oi,E>):Attempt<I,Oi,E>{
     return lift(
       (p:I,cont:Waypoint<Oi,E>) -> 
-        self.forward(p).flat_fold(
-          ok -> then.forward(ok.map(__.couple.bind(_,p))),
-          no -> cont.error(no) 
-        ).serve()
+        cont.receive(
+          self.forward(p).flat_fold(
+            ok -> then.forward(ok.map(__.couple.bind(_,p))),
+            no -> cont.error(no) 
+          )
+        )
     );
   }
   static public function mapi<I,Ii,O,E>(self:AttemptDef<I,O,E>,that:Ii->I):Attempt<Ii,O,E>{
