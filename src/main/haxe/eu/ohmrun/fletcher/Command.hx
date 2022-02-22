@@ -1,5 +1,40 @@
 package eu.ohmrun.fletcher;
-        
+
+enum CommandArgSum<I,E>{
+  CommandArgFun1Void(fn:I->Void);
+  CommandArgFun1Report(fn:I->Report<E>);
+  CommandArgFun1OptionRejection(fn:I->Option<Rejection<E>>);
+  CommandFun1Execute(fn:I->Execute<E>);
+}
+abstract CommandArg<I,E>(CommandArgSum<I,E>) from CommandArgSum<I,E> to CommandArgSum<I,E>{
+  public function new(self) this = self;
+  static public function lift<I,E>(self:CommandArgSum<I,E>):CommandArg<I,E> return new CommandArg(self);
+
+  public function prj():CommandArgSum<I,E> return this;
+  private var self(get,never):CommandArg<I,E>;
+  private function get_self():CommandArg<I,E> return lift(this);
+
+  @:from static public function fromCommandFun1Execute<I,E>(fn:I->Execute<E>):CommandArg<I,E>{
+    return lift(CommandFun1Execute(fn));
+  }
+  @:from static public function fromCommandArgFun1Report<I,E>(fn:I->Report<E>):CommandArg<I,E>{
+    return CommandArgFun1Report(fn);
+  }
+  @:from static public function fromCommandArgFun1OptionRejection<I,E>(fn:I->Option<Rejection<E>>):CommandArg<I,E>{
+    return CommandArgFun1OptionRejection(fn);
+  }
+  @:from static public function fromCommandArgFun1Void<I,E>(fn:I->Void):CommandArg<I,E>{
+    return CommandArgFun1Void(fn);
+  }
+  @:to public function toCommand(){
+    return switch(this){
+      case CommandFun1Execute(x)            : Command.fromFun1Execute(x);
+      case CommandArgFun1Void(x)            : Command.fromFun1Void(x);
+      case CommandArgFun1Report(x)          : Command.fromFun1Report(x);
+      case CommandArgFun1OptionRejection(x) : Command.fromFun1OptionRejection(x);
+    }
+  }
+}
 typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
 
 @:using(eu.ohmrun.fletcher.Command.CommandLift)
@@ -14,13 +49,17 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
   static public inline function lift<I,E>(self:CommandDef<I,E>):Command<I,E>{
     return new Command(self);
   }
-  @:from static public function fromFun1Void<I,E>(fn:I->Void):Command<I,E>{
+  static public inline function bump<I,E>(self:CommandArg<I,E>):Command<I,E>{
+    return self.toCommand();
+  }
+
+  static public function fromFun1Void<I,E>(fn:I->Void):Command<I,E>{
     return lift(Fletcher.Sync(__.passthrough(fn).fn().then((_)->Report.unit())));
   }
-  @:from static public function fromFun1Report<I,E>(fn:I->Report<E>):Command<I,E>{
+  static public function fromFun1Report<I,E>(fn:I->Report<E>):Command<I,E>{
     return lift(Fletcher.fromFun1R((i) -> fn(i)));
   }
-  static public function fromFun1Option<I,E>(fn:I->Option<Rejection<E>>):Command<I,E>{
+  static public function fromFun1OptionRejection<I,E>(fn:I->Option<Rejection<E>>):Command<I,E>{
     return lift(Fletcher.fromFun1R((i) -> Report.fromOption(fn(i))));
   } 
   static public function fromFletcher<I,E>(self:Fletcher<I,Noise,E>):Command<I,E>{
@@ -33,10 +72,13 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
       )
     );
   }
-  @:from static public function fromFun1Execute<I,E>(fn:I->Execute<E>):Command<I,E>{
+  static public function fromFun1Execute<I,E>(fn:I->Execute<E>):Command<I,E>{
     return lift(
       Fletcher.Anon(
-        (i:I,cont) -> cont.receive(fn(i).forward(Noise))
+        (i:I,cont:Terminal<Report<E>,Noise>) -> {
+          __.log().debug(_ -> _.pure(i));
+          return cont.receive(fn(i).forward(Noise));
+        }
       )
     );
   }

@@ -121,7 +121,7 @@ class ReceiverLift{
     );
   }
   static public function tap<P,Pi,E>(self:ReceiverDef<P,E>,fn:P->Void):Receiver<P,E>{
-    return map(self,__.command(fn));
+    return map(self,__.nano().command(fn));
   }
   static public function fold_bind<P,Pi,E,EE>(self:ReceiverDef<P,E>,ok:P->ReceiverInput<Pi,EE>,no:Defect<E>->ReceiverInput<Pi,EE>):Receiver<Pi,EE>{
     return Receiver.lift((cont:ReceiverInput<Pi,EE>->Work) -> Receiver.lift(self).apply(

@@ -288,6 +288,8 @@ typedef AttemptArg<P,R,E>       = eu.ohmrun.fletcher.Attempt.AttemptArg<P,R,E>;
 
 typedef CommandDef<I,E>         = eu.ohmrun.fletcher.Command.CommandDef<I,E>;
 typedef Command<I,E>            = eu.ohmrun.fletcher.Command<I,E>;
+typedef CommandArgSum<I,E>      = eu.ohmrun.fletcher.Command.CommandArgSum<I,E>;
+typedef CommandArg<I,E>         = eu.ohmrun.fletcher.Command.CommandArg<I,E>;
 
 typedef DiffuseDef<I,O,E>       = eu.ohmrun.fletcher.Diffuse.DiffuseDef<I,O,E>;
 typedef Diffuse<I,O,E>          = eu.ohmrun.fletcher.Diffuse<I,O,E>;
@@ -335,5 +337,8 @@ class FletcherWildcards{
   }
   static public function modulate<P,R,E>(wildcard:Wildcard,self:ModulateArg<P,R,E>):Modulate<P,R,E>{
     return Modulate.bump(self);
+  }
+  static public function command<P,E>(wildcard:Wildcard,self:CommandArg<P,E>):Command<P,E>{
+    return Command.bump(self);
   }
 }
