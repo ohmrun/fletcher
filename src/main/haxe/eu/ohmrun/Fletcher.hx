@@ -77,7 +77,7 @@ typedef FletcherDef<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
         var res   = fn(p);
       //__.log().debug(_ -> _.pure(res));
         var resI  = cont.value(res);
-        return resI.serve();
+        return cont.receive(resI);
       }
     );
   }
@@ -99,14 +99,8 @@ typedef FletcherDef<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
   @:noUsing static public inline function Delay<I,E>(ms):Fletcher<I,I,E>{
     return lift(
       (ipt:I,cont:Terminal<I,E>) -> {
-        var bang = Work.wait();
-        haxe.Timer.delay(
-          () -> {
-            bang.fill(cont.value(ipt).serve().toCycle());
-          },
-          ms
-        );
-        return bang;
+        var bang = new stx.stream.Timeout(ms).prj().map(_ -> __.success(ipt));
+        return cont.receive(cont.later(bang));
       }
     );
   }

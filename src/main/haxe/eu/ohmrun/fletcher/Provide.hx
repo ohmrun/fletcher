@@ -16,7 +16,7 @@ abstract Provide<O>(ProvideDef<O>) from ProvideDef<O> to ProvideDef<O>{
   // }
   @:noUsing static public inline function pure<O>(v:O):Provide<O>{
     return lift(
-      (_:Noise,cont:Terminal<O,Noise>) -> cont.value(v).serve()
+      (_:Noise,cont:Terminal<O,Noise>) -> cont.receive(cont.value(v))
     );
   }
   @:noUsing static public inline function fromFuture<O>(future:Future<O>):Provide<O>{

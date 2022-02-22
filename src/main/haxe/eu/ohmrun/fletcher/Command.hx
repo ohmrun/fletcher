@@ -52,7 +52,7 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
             (e) -> __.failure(e)
           )
         ),
-        no -> cont.value(__.reject(no)).serve()
+        no -> cont.receive(cont.value(__.reject(no)))
       )
     );
   }
@@ -92,19 +92,22 @@ class CommandLift{
           ),
           er -> __.failure(er) 
         )),
-        er -> cont.value(__.reject(er)).serve()
+        er -> cont.receive(cont.value(__.reject(er)))
       )
     );
   }
-  static public function produce<I,O,E>(command:Command<I,E>,produce:Produce<O,E>):Attempt<I,O,E>{
+  static public function produce<I,O,E>(command:Command<I,E>,prod:Produce<O,E>):Attempt<I,O,E>{
     return Attempt.lift(
       Fletcher.Then(
         command.toFletcher(),
         Fletcher.Anon(
-          (ipt:Report<E>,cont:Terminal<Res<O,E>,Noise>) -> ipt.fold(
-            e   -> cont.value(__.reject(e)).serve(),
-            ()  -> cont.receive(produce.forward(Noise))
-          )
+          (ipt:Report<E>,cont:Terminal<Res<O,E>,Noise>) -> {
+            __.log().debug(_ -> _.pure(ipt));
+            return ipt.fold(
+              e   -> cont.receive(cont.value(__.reject(e))),
+              ()  -> cont.receive(prod.forward(Noise))
+            );
+          }
         )
       )
     );

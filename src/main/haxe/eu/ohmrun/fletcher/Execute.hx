@@ -115,7 +115,7 @@ class ExecuteLift{
       self,
       Fletcher.Anon(
         (ipt:Report<E>,cont:Terminal<Report<E>,Noise>) -> ipt.fold(
-          (e) -> cont.value(Report.pure(e)).serve(),
+          (e) -> cont.receive(cont.value(Report.pure(e))),
           ()  -> cont.receive(next.forward(Noise))
         )
       )
@@ -127,7 +127,7 @@ class ExecuteLift{
         self,
         Fletcher.Anon(
           (ipt:Report<E>,cont:Waypoint<O,E>) -> ipt.fold(
-            (e) -> cont.value(__.reject(e)).serve(),
+            (e) -> cont.receive(cont.value(__.reject(e))),
             ()  -> cont.receive(next.forward(Noise))
           )
         )
@@ -140,7 +140,7 @@ class ExecuteLift{
         self,
         Fletcher.Anon(
           (ipt:Report<E>,cont:Terminal<Chunk<O,E>,Noise>) -> ipt.fold(
-            (e) -> cont.value(End(e)).serve(),
+            (e) -> cont.receive(cont.value(End(e))),
             ()  -> cont.receive(next.forward(Noise))
           )
         )

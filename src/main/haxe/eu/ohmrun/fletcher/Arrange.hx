@@ -47,18 +47,22 @@ typedef ArrangeDef<I,S,O,E>             = ModulateDef<Couple<I,S>,O,E>;
   @:noUsing static public function pure<I,S,O,E>(o:O):Arrange<I,S,O,E>{
     return lift(Fletcher.Anon(
       (i:Res<Couple<I,S>,E>,cont:Terminal<Res<O,E>,Noise>) -> 
-        i.fold(
-          i -> cont.value(__.accept(o)).serve(),
-          e -> cont.value(__.reject(e)).serve()
+        cont.receive(
+          i.fold(
+            i -> cont.value(__.accept(o)),
+            e -> cont.value(__.reject(e))
+          )
         )
     ));
   }
   @:noUsing static public function fromRes<I,S,O,E>(res:Res<O,E>):Arrange<I,S,O,E>{
     return lift(Fletcher.Anon(
       (i:Res<Couple<I,S>,E>,cont:Terminal<Res<O,E>,Noise>) -> 
-        i.fold(
-          i -> cont.value(res).serve(),
-          e -> cont.value(__.reject(e)).serve()
+        cont.receive(
+          i.fold(
+            i -> cont.value(res),
+            e -> cont.value(__.reject(e))
+          )
         )
     ));
   }

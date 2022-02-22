@@ -62,12 +62,12 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
   }
   @:noUsing static public function Sync<O,E>(result:Res<O,E>):Produce<O,E>{
     return Produce.lift(
-      (_:Noise,cont) -> cont.value(result).serve()
+      (_:Noise,cont) -> cont.receive(cont.value(result))
     );
   }
   @:noUsing static public function Thunk<O,E>(result:Thunk<Res<O,E>>):Produce<O,E>{
     return Produce.lift(
-      (_:Noise,cont) -> cont.value(result()).serve()
+      (_:Noise,cont) -> cont.receive(cont.value(result()))
     );
   }
   @:from @:noUsing static public function fromFunXProduce<O,E>(self:Void->Produce<O,E>):Produce<O,E>{
@@ -98,12 +98,12 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
     return lift(
       Fletcher.Anon(      
         (_:Noise,cont:Terminal<Res<O,E>,Noise>) -> {
-          return cont.later(
+          return cont.receive(cont.later(
             pl.fold(
               (x) -> __.success(__.accept(x)),
               (e) -> __.success(__.reject(e))
             )
-          ).serve();
+          ));
         }
       )
     );
@@ -259,10 +259,10 @@ class ProduceLift{
     return Attempt.lift(
       Fletcher.Anon(
         (i:S,cont:Terminal<Res<Oi,E>,Noise>) -> 
-          self.forward(Noise).flat_fold(
+          cont.receive(self.forward(Noise).flat_fold(
             res -> next.forward(__.accept(__.couple(res,i))),
             no  -> cont.error(no)
-          ).serve()
+          ))
       ) 
     );
   }

@@ -19,10 +19,10 @@ abstract Convert<I,O>(ConvertDef<I,O>) from ConvertDef<I,O> to ConvertDef<I,O>{
   }
   @:noUsing static public function fromConvertProvide<P,R>(self:Convert<P,Provide<R>>):Convert<P,R>{
     return lift(
-      (p:P,con) -> self.forward(p).flat_fold(
+      (p:P,cont) -> cont.receive(self.forward(p).flat_fold(
         (ok:Provide<R>)   -> ok.forward(Noise),
         (er)              -> Receiver.error(er)
-      ).serve()
+      ))
     );
   }
   
@@ -56,7 +56,7 @@ class ConvertLift{
     return Modulate.lift(
       (p:Res<I,E>,cont:Waypoint<O,E>) -> p.fold(
         ok -> cont.receive(self.forward(ok).map(__.accept)),
-        no -> cont.value(__.reject(no)).serve()
+        no -> cont.receive(cont.value(__.reject(no)))
       ) 
     );
   }

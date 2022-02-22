@@ -99,7 +99,7 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
   }
   @:noUsing static public function fromFun1R<I,O,E>(fn:I->O):Attempt<I,O,E>{
     return lift(
-      Fletcher.Anon((i,cont) -> cont.value(__.accept(fn(i))).serve())
+      Fletcher.Anon((i,cont) -> cont.receive(cont.value(__.accept(fn(i)))))
     );
   }
   @:to public inline function toFletcher():Fletcher<I,Res<O,E>,Noise>{
@@ -110,7 +110,7 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
       (i:Res<I,E>,cont:Waypoint<O,E>) -> 
         i.fold(
           (v) -> cont.receive(this.forward(v)),
-          (e) -> cont.value(__.reject(e)).serve()
+          (e) -> cont.receive(cont.value(__.reject(e)))
         )
     ));  
   }
@@ -211,7 +211,7 @@ class AttemptLift{
         Fletcher.Anon(
           (ipt:Res<O,E>,cont:Waypoint<O,E>) -> ipt.fold(
             o -> cont.receive(that.produce(Produce.pure(o)).forward(Noise)),
-            e -> cont.value(__.reject(e)).serve()
+            e -> cont.receive(cont.value(__.reject(e)))
           )
         )
       )
@@ -220,12 +220,15 @@ class AttemptLift{
   static public function command<I,O,E>(self:AttemptDef<I,O,E>,that:Command<O,E>):Attempt<I,O,E>{
     return Attempt.lift(
       Fletcher.Then(
-        self,
+        lift(self).mapi(x -> __.tracer()(x)).map(x -> __.tracer()(x)),
         Fletcher.Anon(
-          (ipt:Res<O,E>,cont:Waypoint<O,E>) -> ipt.fold(
-            o -> cont.receive(that.produce(Produce.pure(o)).forward(o)),
-            e -> cont.value(__.reject(e)).serve()
-          )
+          (ipt:Res<O,E>,cont:Waypoint<O,E>) -> {
+            __.log().debug(_ -> _.pure(ipt));
+              return ipt.fold(
+                o -> cont.receive(that.produce(Produce.pure(o)).map(__.tracer()).forward(o)),
+                e -> cont.receive(cont.value(__.reject(e)))
+             );
+          }
         )
       )
     );

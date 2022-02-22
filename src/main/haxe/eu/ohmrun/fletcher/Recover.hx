@@ -11,7 +11,9 @@ typedef RecoverDef<I,E>                 = FletcherDef<Rejection<E>,I,Noise>;
   }
   public function toModulate():Modulate<I,I,E> return Modulate.lift(
     (p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
-      ok -> cont.value(__.accept(ok)).serve(),
+      ok -> cont.receive(
+        cont.value(__.accept(ok))
+      ),
       no -> cont.receive(
         this.forward(no).map(__.accept)
       )
@@ -19,7 +21,7 @@ typedef RecoverDef<I,E>                 = FletcherDef<Rejection<E>,I,Noise>;
   );
   public function toReform():Reform<I,I,E> return Reform.lift(
     (p:Res<I,E>,cont:Terminal<I,Noise>) -> p.fold(
-      ok -> cont.value(ok).serve(),
+      ok -> cont.receive(cont.value(ok)),
       er -> cont.receive(this.forward(er))
     )
   );
