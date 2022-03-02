@@ -13,9 +13,9 @@ abstract Resolve<I,E>(ResolveDef<I,E>) from ResolveDef<I,E> to ResolveDef<I,E>{
   @:from static public function fromResolvePropose<I,E>(self:Fletcher<Rejection<E>,Propose<I,E>,Noise>):Resolve<I,E>{
     return lift(
       self.then(
-        (i:Propose<I,E>,cont:Terminal<Chunk<I,E>,Noise>) -> cont.receive(
+        Fletcher.Anon((i:Propose<I,E>,cont:Terminal<Chunk<I,E>,Noise>) -> cont.receive(
           i.forward(Noise)
-        )
+        ))
       )
     );
   }
@@ -46,7 +46,7 @@ abstract Resolve<I,E>(ResolveDef<I,E>) from ResolveDef<I,E> to ResolveDef<I,E>{
 class ResolveLift{
   static public function toModulate<I,E>(self:Resolve<I,E>):Modulate<I,I,E>{
     return Modulate.lift(
-        (i:Res<I,E>,cont:Terminal<Res<I,E>,Noise>) -> 
+      Fletcher.Anon((i:Res<I,E>,cont:Terminal<Res<I,E>,Noise>) -> 
           i.fold(
             (s) -> cont.value(__.accept(s)).serve(),
             (e) -> {
@@ -60,6 +60,6 @@ class ResolveLift{
               return cont.receive(next.forward(e));
             }
           )
-    );
+    ));
   }
 }

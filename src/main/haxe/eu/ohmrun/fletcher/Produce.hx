@@ -62,12 +62,12 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
   }
   @:noUsing static public function Sync<O,E>(result:Res<O,E>):Produce<O,E>{
     return Produce.lift(
-      (_:Noise,cont) -> cont.receive(cont.value(result))
+      Fletcher.Anon((_:Noise,cont) -> cont.receive(cont.value(result)))
     );
   }
   @:noUsing static public function Thunk<O,E>(result:Thunk<Res<O,E>>):Produce<O,E>{
     return Produce.lift(
-      (_:Noise,cont) -> cont.receive(cont.value(result()))
+      Fletcher.Anon((_:Noise,cont) -> cont.receive(cont.value(result())))
     );
   }
   @:from @:noUsing static public function fromFunXProduce<O,E>(self:Void->Produce<O,E>):Produce<O,E>{
@@ -118,13 +118,13 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
   }
   @:noUsing static public function fromFletcher<O,E>(arw:Fletcher<Noise,O,E>):Produce<O,E>{
     return lift(
-      (_:Noise,cont:Waypoint<O,E>) -> cont.receive(
+      Fletcher.Anon((_:Noise,cont:Waypoint<O,E>) -> cont.receive(
           arw.forward(Noise).fold_mapp(
             (ok:O)          -> __.success(__.accept(ok)),
             (no:Defect<E>)  -> __.success(__.reject(no.toError().except()))
           )
         )
-    );
+    ));
   }
   static public function bind_fold<P,O,R,E>(data:Iter<P>,fn:P->R->Produce<R,E>,r:R):Produce<R,E>{
     return data.lfold(

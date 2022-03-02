@@ -71,7 +71,7 @@ typedef ModulateDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 
 
 	@:from static public function fromApi<P,Pi,E>(self:ModulateApi<P,Pi,E>){
-    return lift(self.defer); 
+    return lift(self); 
   }
 	@:noUsing static public inline function lift<I, O, E>(self:FletcherDef<Res<I, E>, Res<O, E>, Noise>):Modulate<I, O, E> {
 		return new Modulate(self);
@@ -116,7 +116,7 @@ typedef ModulateDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 	}
 	@:noUsing static public function fromFletcher<I, O, E>(self:Fletcher<I, O, E>):Modulate<I, O, E> {
 		return lift(
-			(p:Res<I,E>,cont:Waypoint<O,E>) -> cont.receive(
+			Fletcher.Anon((p:Res<I,E>,cont:Waypoint<O,E>) -> cont.receive(
 				p.fold(
 					ok -> self.forward(ok).fold_mapp(
 						ok -> __.success(__.accept(ok)),
@@ -125,15 +125,15 @@ typedef ModulateDef<I, O, E> = FletcherDef<Res<I, E>, Res<O, E>, Noise>;
 					no -> Receiver.value(__.reject(no))
 				)
 			)
-		);
+		));
 	}
 
 	@:noUsing static public function fromAttempt<I, O, E>(self:Attempt<I,O,E>):Modulate<I, O, E> {
 		return lift(
-			(p:Res<I,E>,cont:Waypoint<O,E>) -> p.fold(
+			Fletcher.Anon((p:Res<I,E>,cont:Waypoint<O,E>) -> p.fold(
 				ok -> cont.receive(self.forward(ok)),
 				no -> cont.receive(cont.value(__.reject(no)))
-			)
+			))
 		);
 	}
 
@@ -216,13 +216,13 @@ class ModulateLift {
 
 	static public function reframe<I, O, E>(self:ModulateDef<I, O, E>):Reframe<I, O, E> {
 		return lift(
-			(p:Res<I,E>,cont:Waypoint<Couple<O,I>,E>) -> cont.receive(
+			Fletcher.Anon((p:Res<I,E>,cont:Waypoint<Couple<O,I>,E>) -> cont.receive(
 				self.forward(p).fold_mapp(
 					ok -> __.success(ok.zip(p)),
 					e  -> __.failure(e)
 				)
 			)
-		);
+		));
 	}
 
 	static public function modulate<I, O, Oi, E>(self:ModulateDef<I, O, E>, that:Modulate<O, Oi, E>):Modulate<I, Oi, E> {

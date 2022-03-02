@@ -14,15 +14,16 @@ abstract Convert<I,O>(ConvertDef<I,O>) from ConvertDef<I,O> to ConvertDef<I,O>{
 
   @:noUsing static public function fromFun1Provide<I,O>(self:I->Provide<O>):Convert<I,O>{
     return lift(
-      (i:I,cont:Terminal<O,Noise>) -> cont.receive(self(i).forward(Noise))
+      Fletcher.Anon((i:I,cont:Terminal<O,Noise>) -> cont.receive(self(i).forward(Noise)))
     );
   }
   @:noUsing static public function fromConvertProvide<P,R>(self:Convert<P,Provide<R>>):Convert<P,R>{
     return lift(
-      (p:P,cont) -> cont.receive(self.forward(p).flat_fold(
-        (ok:Provide<R>)   -> ok.forward(Noise),
-        (er)              -> Receiver.error(er)
-      ))
+      Fletcher.Anon(
+        (p:P,cont) -> cont.receive(self.forward(p).flat_fold(
+          (ok:Provide<R>)   -> ok.forward(Noise),
+          (er)              -> Receiver.error(er)
+      )))
     );
   }
   
@@ -54,10 +55,10 @@ abstract Convert<I,O>(ConvertDef<I,O>) from ConvertDef<I,O> to ConvertDef<I,O>{
 class ConvertLift{
   static public function toModulate<I,O,E>(self:Convert<I,O>):Modulate<I,O,E>{
     return Modulate.lift(
-      (p:Res<I,E>,cont:Waypoint<O,E>) -> p.fold(
+      Fletcher.Anon((p:Res<I,E>,cont:Waypoint<O,E>) -> p.fold(
         ok -> cont.receive(self.forward(ok).map(__.accept)),
         no -> cont.receive(cont.value(__.reject(no)))
-      ) 
+      ))
     );
   }
   static public function then<I,O,Oi>(self:ConvertDef<I,O>,that:Convert<O,Oi>):Convert<I,Oi>{
@@ -68,7 +69,7 @@ class ConvertLift{
   }
   static public function provide<I,O,Oi>(self:ConvertDef<I,O>,i:I):Provide<O>{
     return Provide.lift(
-      (_:Noise,cont:Terminal<O,Noise>) -> self(i,cont)
+      Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> self.defer(i,cont))
     );
   }
   static public function convert<I,O,Oi>(self:ConvertDef<I,O>,that:ConvertDef<O,Oi>):Convert<I,Oi>{

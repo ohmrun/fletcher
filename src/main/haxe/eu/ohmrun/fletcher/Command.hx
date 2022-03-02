@@ -64,13 +64,13 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
   } 
   static public function fromFletcher<I,E>(self:Fletcher<I,Noise,E>):Command<I,E>{
     return lift(
-      (p:I,cont:Terminal<Report<E>,Noise>) -> cont.receive(
+      Fletcher.Anon((p:I,cont:Terminal<Report<E>,Noise>) -> cont.receive(
         self.forward(p).fold_mapp(
           _ -> __.success(__.report()),
           e -> __.success(e.toError().except().report())
         )
       )
-    );
+    ));
   }
   static public function fromFun1Execute<I,E>(fn:I->Execute<E>):Command<I,E>{
     return lift(
@@ -84,7 +84,7 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
   }
   public function toModulate():Modulate<I,I,E>{
     return Modulate.lift(
-      (p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
+      Fletcher.Anon((p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
         ok -> cont.receive(
           this.forward(ok).fold_mapp(
             report -> report.fold(
@@ -96,7 +96,7 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
         ),
         no -> cont.receive(cont.value(__.reject(no)))
       )
-    );
+    ));
   }
   public function prj():CommandDef<I,E>{
     return this;
@@ -126,7 +126,7 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
 class CommandLift{
   static public function toModulate<I,O,E>(command:CommandDef<I,E>):Modulate<I,I,E>{
     return Modulate.lift(
-      (p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
+      Fletcher.Anon((p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
         (okI:I) -> cont.receive(command.forward(okI).fold_mapp(
           okII -> okII.fold(
             er -> __.success(__.reject(er)),
@@ -136,7 +136,7 @@ class CommandLift{
         )),
         er -> cont.receive(cont.value(__.reject(er)))
       )
-    );
+    ));
   }
   static public function produce<I,O,E>(command:Command<I,E>,prod:Produce<O,E>):Attempt<I,O,E>{
     return Attempt.lift(

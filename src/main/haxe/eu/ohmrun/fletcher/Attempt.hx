@@ -55,9 +55,9 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
 
   static public function unit<I,E>():Attempt<I,I,E>{
     return lift(
-      (i:I,cont:Terminal<Res<I,E>,Noise>) -> {
+      Fletcher.Anon((i:I,cont:Terminal<Res<I,E>,Noise>) -> {
         return cont.receive(cont.value(__.accept(i)));
-      }
+      })
     );
   }
   @:noUsing static public function pure<I,O,E>(o:O):Attempt<I,O,E>{
@@ -65,9 +65,9 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
   }
   @:noUsing static public function fromRes<I,O,E>(res:Res<O,E>):Attempt<I,O,E>{
     return lift(
-      (_:I,cont:Waypoint<O,E>) -> {
+      Fletcher.Anon((_:I,cont:Waypoint<O,E>) -> {
         return cont.receive(cont.value(res));
-      }
+      })
     );
   }
   
@@ -80,9 +80,9 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
   }
   @:from static public function fromFun1Produce<Pi,O,E>(fn:Pi->Produce<O,E>):Attempt<Pi,O,E>{
     return lift(
-      (pI:Pi,cont:Waypoint<O,E>) -> {
+      Fletcher.Anon((pI:Pi,cont:Waypoint<O,E>) -> {
         return cont.receive(fn(pI).forward(Noise));
-      }
+      })
     );
   }
   @:from static public function fromUnary1Produce<Pi,O,E>(fn:Unary<Pi,Produce<O,E>>):Attempt<Pi,O,E>{
@@ -189,14 +189,14 @@ class AttemptLift{
   }  
   static public function arrange<I,O,Oi,E>(self:AttemptDef<I,O,E>,then:Arrange<O,I,Oi,E>):Attempt<I,Oi,E>{
     return lift(
-      (p:I,cont:Waypoint<Oi,E>) -> 
+      Fletcher.Anon((p:I,cont:Waypoint<Oi,E>) -> 
         cont.receive(
           self.forward(p).flat_fold(
             ok -> then.forward(ok.map(__.couple.bind(_,p))),
             no -> cont.error(no) 
           )
         )
-    );
+    ));
   }
   static public function mapi<I,Ii,O,E>(self:AttemptDef<I,O,E>,that:Ii->I):Attempt<Ii,O,E>{
     return lift(Fletcher._.mapi(lift(self).toFletcher(),that));

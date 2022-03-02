@@ -9,7 +9,7 @@ typedef FiberDef = Fletcher<Noise,Noise,Noise>;
     return self;
   }
   public inline function cycle():Cycle{
-    return this(
+    return this.defer(
       Noise,
       Terminal.unit()
     ).toCycle();
@@ -21,7 +21,7 @@ typedef FiberDef = Fletcher<Noise,Noise,Noise>;
     cycle().crunch();
   }
   @:from static public function fromCompletion<P,R,E>(self:Completion<P,R,E>){
-    return lift(Fletcher.lift(self.defer));
+    return lift(Fletcher.lift(self));
   }
   public function prj():FletcherDef<Noise,Noise,Noise>{
     return this;

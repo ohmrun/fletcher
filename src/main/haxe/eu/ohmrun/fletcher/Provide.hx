@@ -16,27 +16,27 @@ abstract Provide<O>(ProvideDef<O>) from ProvideDef<O> to ProvideDef<O>{
   // }
   @:noUsing static public inline function pure<O>(v:O):Provide<O>{
     return lift(
-      (_:Noise,cont:Terminal<O,Noise>) -> cont.receive(cont.value(v))
+      Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> cont.receive(cont.value(v)))
     );
   }
   @:noUsing static public inline function fromFuture<O>(future:Future<O>):Provide<O>{
     return lift(
-      (_:Noise,cont:Terminal<O,Noise>) -> cont.later(future.map(__.success)).serve()
+      Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> cont.receive(cont.later(future.map(__.success))))
     );
   }
   @:from static public inline function fromFunXR<O>(fn:Void->O):Provide<O>{
     return lift(
-      (_:Noise,cont:Terminal<O,Noise>) -> cont.value(fn()).serve()
+      Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> cont.value(fn()).serve())
     );
   }
   @:from static public inline function fromFunXFuture<O>(fn:Void->Future<O>):Provide<O>{
     return lift(
-      (_:Noise,cont:Terminal<O,Noise>) -> cont.later(fn().map(__.success)).serve()
+      Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> cont.later(fn().map(__.success)).serve())
     );
   }
   @:noUsing static public inline function fromFunTerminalWork<O>(fn:Terminal<O,Noise>->Work):Provide<O>{
     return lift(
-      (_:Noise,cont:Terminal<O,Noise>) -> fn(cont)
+      Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> fn(cont))
     );
   }
   static public inline function bind_fold<T,O>(fn:Convert<Couple<T,O>,O>,arr:Cluster<T>,seed:O):Provide<O>{

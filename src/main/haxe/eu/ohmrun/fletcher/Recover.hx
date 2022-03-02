@@ -10,20 +10,20 @@ typedef RecoverDef<I,E>                 = FletcherDef<Rejection<E>,I,Noise>;
     return lift(Fletcher.Sync(fn));
   }
   public function toModulate():Modulate<I,I,E> return Modulate.lift(
-    (p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
+    Fletcher.Anon((p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
       ok -> cont.receive(
         cont.value(__.accept(ok))
       ),
       no -> cont.receive(
         this.forward(no).map(__.accept)
       )
-    )
+    ))
   );
   public function toReform():Reform<I,I,E> return Reform.lift(
-    (p:Res<I,E>,cont:Terminal<I,Noise>) -> p.fold(
+    Fletcher.Anon((p:Res<I,E>,cont:Terminal<I,Noise>) -> p.fold(
       ok -> cont.receive(cont.value(ok)),
       er -> cont.receive(this.forward(er))
-    )
+    ))
   );
 
   public inline function prj():RecoverDef<I,E>{
@@ -35,7 +35,7 @@ typedef RecoverDef<I,E>                 = FletcherDef<Rejection<E>,I,Noise>;
 } 
 class RecoverLift{
   static public function toReform<I,E>(self:Recover<I,E>):Reform<I,I,E>{
-    return Reform.lift((p:Res<I,E>,cont:Terminal<I,Noise>) -> {
+    return Reform.lift(Fletcher.Anon((p:Res<I,E>,cont:Terminal<I,Noise>) -> {
       return p.fold(
         ok -> cont.value(ok).serve(),
         no -> cont.receive(
@@ -45,13 +45,13 @@ class RecoverLift{
           )
         )
       );
-    });
+    }));
   }
   static public function toModulate<I,E>(self:Recover<I,E>):Modulate<I,I,E>{
     return Modulate.lift(
-      (p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
+      Fletcher.Anon((p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
         ok -> cont.value(__.accept(ok)).serve(),
         no -> cont.receive(self.forward(no).map(__.accept)))
-    );
+    ));
   }
 }
