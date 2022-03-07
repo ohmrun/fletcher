@@ -4,6 +4,7 @@ typedef ReceiverInputDef<R,E> = Future<ArwOut<R,E>>;
 
 @:using(eu.ohmrun.fletcher.ReceiverInput.ReceiverInputLift)
 @:forward abstract ReceiverInput<R,E>(ReceiverInputDef<R,E>) from ReceiverInputDef<R,E> to ReceiverInputDef<R,E>{
+  static public var _(default,never) = ReceiverInputLift;
   public function new(self) this = self;
   static public function lift<R,E>(self:ReceiverInputDef<R,E>):ReceiverInput<R,E> return new ReceiverInput(self);
 
@@ -26,6 +27,11 @@ class ReceiverInputLift{
   static public function fold_mapp<R,Z,E,EE>(self:ReceiverInput<R,E>,ok:R->ArwOut<Z,EE>,no:Defect<E>->ArwOut<Z,EE>):ReceiverInput<Z,EE>{
     return self.map(
       (oc) -> oc.fold(ok,no)
+    );
+  }
+  static public function map<R,Ri,E>(self:ReceiverInput<R,E>,fn:R->Ri):ReceiverInput<Ri,E>{
+    return self.map(
+      oc -> oc.map(fn)
     );
   }
 }

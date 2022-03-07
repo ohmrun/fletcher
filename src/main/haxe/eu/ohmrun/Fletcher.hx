@@ -1,10 +1,18 @@
 package eu.ohmrun;
 
+using eu.ohmrun.fletcher.Core;
+
 typedef ArwOutDef<R,E>    = Outcome<R,Defect<E>>;
 typedef ArwOut<R,E>       = ArwOutDef<R,E>; 
 
-interface FletcherApi<P,Pi,E> {
+interface FletcherApi<P,Pi,E> extends StxMemberApi{
   public function defer(p:P,cont:Terminal<Pi,E>):Work;
+}
+abstract class FletcherCls<P,R,E> implements FletcherApi<P,R,E> extends StxMemberCls{
+  public function get_stx_tag(){
+    return 1;
+  }
+  abstract public function defer(p:P,cont:Terminal<R,E>):Work;
 }
 typedef FletcherFun<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
 typedef FletcherDef<P,Pi,E> = FletcherApi<P,Pi,E>;
@@ -44,22 +52,22 @@ typedef FletcherDef<P,Pi,E> = FletcherApi<P,Pi,E>;
   }
   static public function forward<P,Pi,E>(f:FletcherApi<P,Pi,E>,p:P):Receiver<Pi,E>{
     return Receiver.lift(
-      function(k:ReceiverSink<Pi,E>){
+      Cont.Anon(function(k:ReceiverSinkApi<Pi,E>){
         //__.log().trace('forward called');
         var ft : FutureTrigger<ArwOut<Pi,E>> = Future.trigger();
         var fst = f.defer(
           p,
           Terminal.lift(
-            (t_sink:TerminalSink<Pi,E>) -> {
+            Cont.AnonAnon((t_sink:TerminalSink<Pi,E>) -> {
               //__.log().trace('forwarding');
               #if debug
               __.assert().exists(t_sink);
               #end
               return t_sink(ft);
-            }
+            })
           )
         );
-        var snd = k(ft.asFuture());
+        var snd = k.apply(ft.asFuture());
         #if debug
         snd = snd.map(
           x -> {
@@ -69,7 +77,7 @@ typedef FletcherDef<P,Pi,E> = FletcherApi<P,Pi,E>;
         )
         #end
         return fst.seq(snd);
-      }
+      })
     );
   }
   @:noUsing static public inline function Sync<P,R,E>(fn:P->R):Fletcher<P,R,E>{
@@ -114,12 +122,12 @@ class FletcherLift{
     return Fiber.lift(
       Fletcher.Anon((_:Noise,cont:Terminal<Noise,Noise>) -> {
         return cont.apply(
-          (trg) -> {
+          Apply.Anon((trg) -> {
             //__.log().debug("fiber");
             return self.defer(
               p,
               Terminal.lift(
-                (fn:TerminalSink<Pi,E>) -> {
+                Cont.AnonAnon((fn:TerminalSink<Pi,E>) -> {
                   //__.log().debug("fiber:lifted");
                   var ft = Future.trigger();
                       ft.handle(
@@ -129,10 +137,10 @@ class FletcherLift{
                         )
                       );
                   return fn(ft); 
-                }
+                })
               )
             );
-          }
+          })
         );
       }
     ));
@@ -254,9 +262,13 @@ class FletcherLift{
 
 typedef TerminalSinkDef<R,E>    = eu.ohmrun.fletcher.TerminalSink.TerminalSinkDef<R,E>;
 typedef TerminalSink<R,E>       = eu.ohmrun.fletcher.TerminalSink<R,E>;
+//typedef ReceiverApi<R,E>        = eu.ohmrun.fletcher.Receiver.ReceiverApi<R,E>;
+typedef ReceiverCls<R,E>        = eu.ohmrun.fletcher.Receiver.ReceiverCls<R,E>;
 typedef ReceiverDef<R,E>        = eu.ohmrun.fletcher.Receiver.ReceiverDef<R,E>;
 typedef Receiver<R,E>           = eu.ohmrun.fletcher.Receiver<R,E>;
-typedef TerminalDef<R,E>        = eu.ohmrun.fletcher.Terminal.TerminalDef<R,E>;
+typedef TerminalAbs<R,E>        = eu.ohmrun.fletcher.Terminal.TerminalAbs<R,E>;
+typedef TerminalCls<R,E>        = eu.ohmrun.fletcher.Terminal.TerminalCls<R,E>;
+typedef TerminalApi<R,E>        = eu.ohmrun.fletcher.Terminal.TerminalApi<R,E>;
 typedef Terminal<R,E>           = eu.ohmrun.fletcher.Terminal<R,E>;
 typedef Waypoint<R,E>           = Terminal<Res<R,E>,Noise>;
 
@@ -323,6 +335,8 @@ typedef TerminalInputDef<R,E>   = eu.ohmrun.fletcher.TerminalInput.TerminalInput
 typedef TerminalInput<R,E>      = eu.ohmrun.fletcher.TerminalInput<R,E>;
 
 typedef ReceiverSink<R,E>       = eu.ohmrun.fletcher.ReceiverSink<R,E>;
+typedef ReceiverSinkCls<R,E>    = eu.ohmrun.fletcher.ReceiverSink.ReceiverSinkCls<R,E>;
+typedef ReceiverSinkApi<R,E>    = eu.ohmrun.fletcher.ReceiverSink.ReceiverSinkApi<R,E>;
 
 typedef RegulateDef<R,E>        = eu.ohmrun.fletcher.Regulate.RegulateDef<R,E>;
 typedef Regulate<R,E>           = eu.ohmrun.fletcher.Regulate<R,E>;

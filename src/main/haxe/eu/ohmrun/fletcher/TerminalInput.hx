@@ -10,6 +10,9 @@ typedef TerminalInputDef<R,E> = FutureTrigger<ArwOut<R,E>>;
   private var self(get,never):TerminalInput<R,E>;
   private function get_self():TerminalInput<R,E> return lift(this);
 
+  public inline function toReceiverInput(){
+    return ReceiverInput.lift(this.asFuture());
+  }
   @:noUsing static public inline function unit<R,E>():TerminalInput<R,E>{
     return Future.trigger();
   }

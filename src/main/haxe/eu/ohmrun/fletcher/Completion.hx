@@ -1,7 +1,8 @@
 package eu.ohmrun.fletcher;
 
-class Completion<P,R,E> implements FletcherApi<Noise,Noise,Noise>{
+class Completion<P,R,E> extends FletcherCls<Noise,Noise,Noise>{
   public function new(context,process){
+    super();
     this.context = context;
     this.process = process;
   }

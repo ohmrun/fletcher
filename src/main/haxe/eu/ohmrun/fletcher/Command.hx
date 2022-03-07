@@ -108,7 +108,7 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
     return lift(
       Fletcher._.split(
         self,
-        that.toFletcher()).map((tp) -> tp.fst().merge(tp.snd()))
+        that.toFletcher()).map((tp) -> tp.fst().concat(tp.snd()))
     );
   }
   public function errata<EE>(fn:Rejection<E>->Rejection<EE>){
