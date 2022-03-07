@@ -47,6 +47,17 @@ typedef ReceiverDef<R,E> = Cont<ReceiverInput<R,E>,Work>;
   }
 }
 class ReceiverLift{
+  static public function defer<P,Pi,E,EE>(self:ReceiverApi<P,E>,that:Receiver<Pi,EE>):Receiver<P,E>{
+    return Receiver.lift(
+      Cont.AnonAnon(
+        (f:ReceiverInput<P,E>->Work) -> {
+          var lhs = that.reply();
+          //__.log().debug("lhs called"); 
+          return lhs.seq(Receiver.lift(self).apply(Apply.Anon(f)));
+        }
+      )
+    );
+  }
   static function lift<P,E>(self:ReceiverApi<P,E>):Receiver<P,E>{
     return Receiver.lift(self);
   }
