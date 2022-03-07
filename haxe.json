@@ -17,6 +17,12 @@
       "interp"  : {
         "--interp"  : true
       }
+    },
+    "test"  : {
+      "-main"     : "eu.ohmrun.Test",
+      "interp"  : {
+        "--interp"  : true
+      }
     }
   }
 }

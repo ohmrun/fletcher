@@ -342,6 +342,9 @@ typedef RegulateDef<R,E>        = eu.ohmrun.fletcher.Regulate.RegulateDef<R,E>;
 typedef Regulate<R,E>           = eu.ohmrun.fletcher.Regulate<R,E>;
 
 class FletcherWildcards{
+  // static public function arw<P,R,E>(wildcard:Wildcard,fn:F<P,R>):Fletcher<P,R,E>{
+  //   return Fletcher.Sync(fn.toUnary().prj());
+  // }
   static public function attempt<P,R,E>(wildcard:Wildcard,self:AttemptArg<P,R,E>):Attempt<P,R,E>{
     return Attempt.bump(self);
   }

@@ -24,16 +24,16 @@ typedef ReceiverDef<R,E> = Cont<ReceiverInput<R,E>,Work>;
       })
     );
   }
-  @:noUsing static public function thunk<R,E>(self:Void->Receiver<R,E>,?pos:Pos):Receiver<R,E>{
+  @:noUsing static public inline function thunk<R,E>(self:Void->Receiver<R,E>,?pos:Pos):Receiver<R,E>{
     return lift(new eu.ohmrun.fletcher.receiver.term.Thunk(self));
   }
-  @:noUsing static public function value<R,E>(r:R,?pos:Pos):Receiver<R,E>{
+  @:noUsing static public inline function value<R,E>(r:R,?pos:Pos):Receiver<R,E>{
     return issue(__.success(r));
   }
-  @:noUsing static public function error<R,E>(err:Defect<E>,?pos:Pos):Receiver<R,E>{
+  @:noUsing static public inline function error<R,E>(err:Defect<E>,?pos:Pos):Receiver<R,E>{
     return issue(__.failure(err));
   }
-  @:noUsing static public function later<R,E>(ft:Future<Outcome<R,Defect<E>>>,?pos:Pos):Receiver<R,E>{
+  @:noUsing static public inline function later<R,E>(ft:Future<Outcome<R,Defect<E>>>,?pos:Pos):Receiver<R,E>{
     return Receiver.lift(Cont.Anon((fn:ReceiverSinkApi<R,E>) -> fn.apply(ft)));
   }
   public inline function serve():Work{
