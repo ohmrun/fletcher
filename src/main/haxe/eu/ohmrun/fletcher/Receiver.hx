@@ -47,33 +47,40 @@ typedef ReceiverDef<R,E> = Cont<ReceiverInput<R,E>,Work>;
   }
 }
 class ReceiverLift{
-  static public function defer<P,Pi,E,EE>(self:ReceiverApi<P,E>,that:Receiver<Pi,EE>):Receiver<P,E>{
+  // static public function defer<P,Pi,E,EE>(self:ReceiverApi<P,E>,that:Receiver<Pi,EE>):Receiver<P,E>{
+  //   return Receiver.lift(
+  //     Cont.AnonAnon(
+  //       (f:ReceiverInput<P,E>->Work) -> {
+  //         var lhs = that.reply();
+  //         //__.log().debug("lhs called"); 
+  //         return lhs.seq(Receiver.lift(self).apply(Apply.Anon(f)));
+  //       }
+  //     )
+  //   );
+  // }
+  @:noUsing static public function defer<R,E>(self:Void->Receiver<R,E>):Receiver<R,E>{
     return Receiver.lift(
-      Cont.AnonAnon(
-        (f:ReceiverInput<P,E>->Work) -> {
-          var lhs = that.reply();
-          //__.log().debug("lhs called"); 
-          return lhs.seq(Receiver.lift(self).apply(Apply.Anon(f)));
-        }
-      )
+      Cont.AnonAnon((fn:ReceiverInput<R,E>->Work) -> {
+        return self().apply(Apply.Anon(fn));
+      })
     );
   }
   static function lift<P,E>(self:ReceiverApi<P,E>):Receiver<P,E>{
     return Receiver.lift(self);
   }
   static public function flat_fold<P,Pi,E>(self:ReceiverApi<P,E>,ok:P->Receiver<Pi,E>,no:Defect<E>->Receiver<Pi,E>):Receiver<Pi,E>{
-    //final uuid = __.uuid('xxxx');
-    //__.log().trace('set up flat_fold: $uuid');
+    final uuid = __.uuid('xxxx');
+    __.log().trace('set up flat_fold: $uuid');
     return Receiver.lift(
       Cont.Anon((cont : Apply<ReceiverInput<Pi,E>,Work>) -> {
-        //__.log().trace('call flat_fold $uuid');
+        __.log().trace('call flat_fold $uuid');
         return Receiver.lift(self).apply(
           Apply.Anon(
             (p:ReceiverInput<P,E>) -> {
-              //__.log().trace('inside flat_fold $uuid');
+              __.log().trace('inside flat_fold $uuid');
               return Work.fromFutureWork(p.flatMap(
                 (out:Outcome<P,Defect<E>>) -> {
-                  //__.log().trace('flat_fold:end $uuid');
+                  __.log().trace('flat_fold:end $uuid');
                   return out.fold(ok,no);
                 }
               ).flatMap(

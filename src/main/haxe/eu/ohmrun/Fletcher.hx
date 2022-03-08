@@ -52,32 +52,26 @@ typedef FletcherDef<P,Pi,E> = FletcherApi<P,Pi,E>;
   }
   static public function forward<P,Pi,E>(f:FletcherApi<P,Pi,E>,p:P):Receiver<Pi,E>{
     return Receiver.lift(
-      Cont.Anon(function(k:ReceiverSinkApi<Pi,E>){
-        //__.log().trace('forward called');
-        var ft : FutureTrigger<ArwOut<Pi,E>> = Future.trigger();
-        var fst = f.defer(
-          p,
-          Terminal.lift(
-            Cont.AnonAnon((t_sink:TerminalSink<Pi,E>) -> {
-              //__.log().trace('forwarding');
-              #if debug
-              __.assert().exists(t_sink);
-              #end
-              return t_sink(ft);
-            })
-          )
-        );
-        var snd = k.apply(ft.asFuture());
-        #if debug
-        snd = snd.map(
-          x -> {
-            //__.log().debug('forwarded: $x');
-            return x;
-          }
-        )
-        #end
-        return fst.seq(snd);
-      })
+      Cont.Anon(
+        function(k:ReceiverSinkApi<Pi,E>){
+          //__.log().trace('forward called');
+          var ft : FutureTrigger<ArwOut<Pi,E>> = Future.trigger();
+          var fst = f.defer(
+            p,
+            Terminal.lift(
+              Cont.AnonAnon((t_sink:TerminalSink<Pi,E>) -> {
+                #if debug
+                  __.log().trace('forwarding');
+                  __.assert().exists(t_sink);
+                #end
+                return t_sink(ft);
+              })
+            )
+          );
+          var snd = k.apply(ft.asFuture());
+          return fst.seq(snd);
+        }
+      )
     );
   }
   @:noUsing static public inline function Sync<P,R,E>(fn:P->R):Fletcher<P,R,E>{
