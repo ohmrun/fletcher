@@ -43,13 +43,19 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
   
   public inline function new(self) this = self;
   
-  static public inline function bump<I,O,E>(self:AttemptArg<I,O,E>) return switch(self){
-    case AttemptArgPure(r)            : pure(r); 
-    case AttemptArgRes(res)           : fromRes(res);
-    case AttemptArgFun1Res(fn)        : fromFun1Res(fn);
-    case AttemptArgFun1Produce(fn)    : fromFun1Produce(fn); 
-    case AttemptArgUnary1Produce(fn)  : fromUnary1Produce(fn);
-    case AttemptArgFun1Provide(fn)    : fromFun1Provide(fn);
+  static public inline function bump<I,O,E>(self:AttemptArg<I,O,E>) {
+    #if debug
+      __.assert().exists(self); 
+    #end
+    //__.log().debug(_ -> _.pure(pos));
+    return switch(self){
+      case AttemptArgPure(r)            : pure(r); 
+      case AttemptArgRes(res)           : fromRes(res);
+      case AttemptArgFun1Res(fn)        : fromFun1Res(fn);
+      case AttemptArgFun1Produce(fn)    : fromFun1Produce(fn); 
+      case AttemptArgUnary1Produce(fn)  : fromUnary1Produce(fn);
+      case AttemptArgFun1Provide(fn)    : fromFun1Provide(fn);
+    }
   }
   static public inline function lift<I,O,E>(self:AttemptDef<I,O,E>) return new Attempt(self);
 
@@ -70,7 +76,6 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
       })
     );
   }
-  
   @:from static public function fromFun1Res<Pi,O,E>(fn:Pi->Res<O,E>):Attempt<Pi,O,E>{
     return lift(Fletcher.Anon(
       (pI:Pi,cont:Waypoint<O,E>) -> {
@@ -89,13 +94,22 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
     return fromFun1Produce(fn);
   }
   @:from static public function fromFun1Provide<Pi,O,E>(fn:Pi->Provide<O>):Attempt<Pi,O,E>{
-    return lift(Fletcher.Anon(
-      (pI:Pi,cont:Waypoint<O,E>) -> cont.receive(
-        Produce.lift(
-          fn(pI).convert(Fletcher.Sync(__.accept))
-        ).forward(Noise)
+    //__.log().debug(_ -> _.pure(pos));
+    return lift(
+      Fletcher.Anon(
+        (pI:Pi,cont:Waypoint<O,E>) -> {
+          final rest = fn(pI);
+          #if debug
+            __.assert().exists(rest);
+          #end 
+          return cont.receive(
+            Produce.lift(
+              rest.convert(Fletcher.Sync(__.accept))
+            ).forward(Noise)
+          );
+        }
       )
-    ));
+    );
   }
   @:noUsing static public function fromFun1R<I,O,E>(fn:I->O):Attempt<I,O,E>{
     return lift(
@@ -220,12 +234,12 @@ class AttemptLift{
   static public function command<I,O,E>(self:AttemptDef<I,O,E>,that:Command<O,E>):Attempt<I,O,E>{
     return Attempt.lift(
       Fletcher.Then(
-        lift(self).mapi(x -> __.tracer()(x)).map(x -> __.tracer()(x)),
+        lift(self),
         Fletcher.Anon(
           (ipt:Res<O,E>,cont:Waypoint<O,E>) -> {
             __.log().debug(_ -> _.pure(ipt));
               return ipt.fold(
-                o -> cont.receive(that.produce(Produce.pure(o)).map(__.tracer()).forward(o)),
+                o -> cont.receive(that.produce(Produce.pure(o)).forward(o)),
                 e -> cont.receive(cont.value(__.reject(e)))
              );
           }

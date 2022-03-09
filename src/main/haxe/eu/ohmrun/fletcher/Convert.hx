@@ -62,6 +62,7 @@ class ConvertLift{
     );
   }
   static public function then<I,O,Oi>(self:ConvertDef<I,O>,that:Convert<O,Oi>):Convert<I,Oi>{
+    //__.log().debug(_ -> _.pure(pos));
     return Convert.lift(Fletcher._.then(
       self,
       that

@@ -50,7 +50,12 @@ typedef FletcherDef<P,Pi,E> = FletcherApi<P,Pi,E>;
   static public inline function fromFunXR<R,E>(self:Void->R):Fletcher<Noise,R,E>{
     return Sync((_:Noise) -> self());
   }
+  //?pos:haxe.PosInfos
   static public function forward<P,Pi,E>(f:FletcherApi<P,Pi,E>,p:P):Receiver<Pi,E>{
+    #if debug
+      //__.log().debug(_ -> _.pure(pos));
+      __.assert().exists(f);
+    #end
     return Receiver.lift(
       Cont.Anon(
         function(k:ReceiverSinkApi<Pi,E>){
@@ -61,7 +66,7 @@ typedef FletcherDef<P,Pi,E> = FletcherApi<P,Pi,E>;
             Terminal.lift(
               Cont.AnonAnon((t_sink:TerminalSink<Pi,E>) -> {
                 #if debug
-                  __.log().trace('forwarding');
+                  //__.log().trace('forwarding');
                   __.assert().exists(t_sink);
                 #end
                 return t_sink(ft);
@@ -176,6 +181,7 @@ class FletcherLift{
     return val;
   }
   static public function then<Pi,Ri,Rii,E>(self:Fletcher<Pi,Ri,E>,that:Fletcher<Ri,Rii,E>):Fletcher<Pi,Rii,E>{
+    //__.log().debug(_ -> _.pure(pos));
     return Fletcher.Anon(
       (pI:Pi,cont:Terminal<Rii,E>) -> {
         var a = self.forward(pI);
@@ -339,19 +345,20 @@ class FletcherWildcards{
   // static public function arw<P,R,E>(wildcard:Wildcard,fn:F<P,R>):Fletcher<P,R,E>{
   //   return Fletcher.Sync(fn.toUnary().prj());
   // }
-  static public function attempt<P,R,E>(wildcard:Wildcard,self:AttemptArg<P,R,E>):Attempt<P,R,E>{
+  static public inline function attempt<P,R,E>(wildcard:Wildcard,self:AttemptArg<P,R,E>,?pos:Pos):Attempt<P,R,E>{
+    __.log().debug(_ -> _.pure(pos));
     return Attempt.bump(self);
   }
-  static public function produce<R,E>(wildcard:Wildcard,self:ProduceArg<R,E>):Produce<R,E>{
+  static public inline function produce<R,E>(wildcard:Wildcard,self:ProduceArg<R,E>):Produce<R,E>{
     return Produce.bump(self);
   }
-  static public function arrange<P,S,R,E>(wildcard:Wildcard,self:ArrangeArg<P,S,R,E>):Arrange<P,S,R,E>{
+  static public inline function arrange<P,S,R,E>(wildcard:Wildcard,self:ArrangeArg<P,S,R,E>):Arrange<P,S,R,E>{
     return Arrange.bump(self);
   }
-  static public function modulate<P,R,E>(wildcard:Wildcard,self:ModulateArg<P,R,E>):Modulate<P,R,E>{
+  static public inline function modulate<P,R,E>(wildcard:Wildcard,self:ModulateArg<P,R,E>):Modulate<P,R,E>{
     return Modulate.bump(self);
   }
-  static public function command<P,E>(wildcard:Wildcard,self:CommandArg<P,E>):Command<P,E>{
+  static public inline function command<P,E>(wildcard:Wildcard,self:CommandArg<P,E>):Command<P,E>{
     return Command.bump(self);
   }
 }

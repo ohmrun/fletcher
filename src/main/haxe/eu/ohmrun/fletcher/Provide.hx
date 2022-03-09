@@ -87,6 +87,7 @@ class ProvideLift{
     ));
   }
   static public function convert<O,Oi>(self:ProvideDef<O>,that:Convert<O,Oi>):Provide<Oi>{
+    //__.log().debug(_ -> _.pure(pos));
     return Provide.lift(Convert._.then(
       self,
       that
