@@ -244,13 +244,13 @@ class FletcherLift{
       ).submit() 
     );
   }
-  static public function produce<I,O,E>(self:Fletcher<I,O,E>,i:I):Produce<O,E>{
+  static public function produce<P,R,E>(self:Fletcher<P,R,E>,i:P):Produce<R,E>{
     return Produce.lift(
       Fletcher.Anon(
-        (_:Noise,cont:Terminal<Res<O,E>,Noise>) -> {
+        (_:Noise,cont:Terminal<Res<R,E>,Noise>) -> {
           return cont.receive(
             self.forward(i).fold_mapp(
-              (ok:O)          -> __.success(__.accept(ok)),
+              (ok:R)          -> __.success(__.accept(ok)),
               (no:Defect<E>)  -> __.success(__.reject(no.toError()))
             )
           );
@@ -281,9 +281,9 @@ typedef ConvertDef<I,O>         = eu.ohmrun.fletcher.Convert.ConvertDef<I,O>;
 typedef Provide<O>              = eu.ohmrun.fletcher.Provide<O>;
 typedef ProvideDef<O>           = eu.ohmrun.fletcher.Provide.ProvideDef<O>;
 
-typedef ModulateApi<I,O,E>      = eu.ohmrun.fletcher.Modulate.ModulateApi<I,O,E>;
-typedef ModulateDef<I,O,E>      = eu.ohmrun.fletcher.Modulate.ModulateDef<I,O,E>;
-typedef Modulate<I,O,E>         = eu.ohmrun.fletcher.Modulate<I,O,E>;
+typedef ModulateApi<P,R,E>      = eu.ohmrun.fletcher.Modulate.ModulateApi<P,R,E>;
+typedef ModulateDef<P,R,E>      = eu.ohmrun.fletcher.Modulate.ModulateDef<P,R,E>;
+typedef Modulate<P,R,E>         = eu.ohmrun.fletcher.Modulate<P,R,E>;
 typedef ModulateArgSum<P,R,E>   = eu.ohmrun.fletcher.Modulate.ModulateArgSum<P,R,E>;
 typedef ModulateArg<P,R,E>      = eu.ohmrun.fletcher.Modulate.ModulateArg<P,R,E>;
 
@@ -292,11 +292,11 @@ typedef Arrange<I,S,O,E>        = eu.ohmrun.fletcher.Arrange<I,S,O,E>;
 typedef ArrangeArgSum<I,S,O,E>  = eu.ohmrun.fletcher.Arrange.ArrangeArgSum<I,S,O,E>;
 typedef ArrangeArg<I,S,O,E>     = eu.ohmrun.fletcher.Arrange.ArrangeArg<I,S,O,E>;
 
-typedef ReframeDef<I,O,E>       = eu.ohmrun.fletcher.Reframe.ReframeDef<I,O,E>;
-typedef Reframe<I,O,E>          = eu.ohmrun.fletcher.Reframe<I,O,E>;
+typedef ReframeDef<P,R,E>       = eu.ohmrun.fletcher.Reframe.ReframeDef<P,R,E>;
+typedef Reframe<P,R,E>          = eu.ohmrun.fletcher.Reframe<P,R,E>;
 
-typedef AttemptDef<I,O,E>       = eu.ohmrun.fletcher.Attempt.AttemptDef<I,O,E>;
-typedef Attempt<I,O,E>          = eu.ohmrun.fletcher.Attempt<I,O,E>;
+typedef AttemptDef<P,R,E>       = eu.ohmrun.fletcher.Attempt.AttemptDef<P,R,E>;
+typedef Attempt<P,R,E>          = eu.ohmrun.fletcher.Attempt<P,R,E>;
 typedef AttemptArgSum<P,R,E>    = eu.ohmrun.fletcher.Attempt.AttemptArgSum<P,R,E>;
 typedef AttemptArg<P,R,E>       = eu.ohmrun.fletcher.Attempt.AttemptArg<P,R,E>;
 
@@ -305,8 +305,8 @@ typedef Command<I,E>            = eu.ohmrun.fletcher.Command<I,E>;
 typedef CommandArgSum<I,E>      = eu.ohmrun.fletcher.Command.CommandArgSum<I,E>;
 typedef CommandArg<I,E>         = eu.ohmrun.fletcher.Command.CommandArg<I,E>;
 
-typedef DiffuseDef<I,O,E>       = eu.ohmrun.fletcher.Diffuse.DiffuseDef<I,O,E>;
-typedef Diffuse<I,O,E>          = eu.ohmrun.fletcher.Diffuse<I,O,E>;
+typedef DiffuseDef<P,R,E>       = eu.ohmrun.fletcher.Diffuse.DiffuseDef<P,R,E>;
+typedef Diffuse<P,R,E>          = eu.ohmrun.fletcher.Diffuse<P,R,E>;
 
 typedef ExecuteDef<E>           = eu.ohmrun.fletcher.Execute.ExecuteDef<E>;
 typedef Execute<E>              = eu.ohmrun.fletcher.Execute<E>;
@@ -325,8 +325,8 @@ typedef Propose<O,E>            = eu.ohmrun.fletcher.Propose<O,E>;
 typedef RecoverDef<I,E>         = eu.ohmrun.fletcher.Recover.RecoverDef<I,E>;
 typedef Recover<I,E>            = eu.ohmrun.fletcher.Recover<I,E>;
 
-typedef ReformDef<I,O,E>        = eu.ohmrun.fletcher.Reform.ReformDef<I,O,E>;
-typedef Reform<I,O,E>           = eu.ohmrun.fletcher.Reform<I,O,E>;
+typedef ReformDef<P,R,E>        = eu.ohmrun.fletcher.Reform.ReformDef<P,R,E>;
+typedef Reform<P,R,E>           = eu.ohmrun.fletcher.Reform<P,R,E>;
 
 typedef ResolveDef<I,E>         = eu.ohmrun.fletcher.Resolve.ResolveDef<I,E>;
 typedef Resolve<I,E>            = eu.ohmrun.fletcher.Resolve<I,E>;
@@ -340,6 +340,11 @@ typedef ReceiverSinkApi<R,E>    = eu.ohmrun.fletcher.ReceiverSink.ReceiverSinkAp
 
 typedef RegulateDef<R,E>        = eu.ohmrun.fletcher.Regulate.RegulateDef<R,E>;
 typedef Regulate<R,E>           = eu.ohmrun.fletcher.Regulate<R,E>;
+
+typedef SequentDef<P,R,E>       = eu.ohmrun.fletcher.Sequent.SequentDef<P,R,E>;
+typedef Sequent<P,R,E>          = eu.ohmrun.fletcher.Sequent<P,R,E>;
+typedef SequentArgSum<P,R,E>    = eu.ohmrun.fletcher.Sequent.SequentArgSum<P,R,E>;
+typedef SequentArg<P,R,E>       = eu.ohmrun.fletcher.Sequent.SequentArg<P,R,E>;
 
 class FletcherWildcards{
   // static public function arw<P,R,E>(wildcard:Wildcard,fn:F<P,R>):Fletcher<P,R,E>{
@@ -360,5 +365,8 @@ class FletcherWildcards{
   }
   static public inline function command<P,E>(wildcard:Wildcard,self:CommandArg<P,E>):Command<P,E>{
     return Command.bump(self);
+  }
+  static public inline function sequent<P,R,E>(wildcard:Wildcard,self:SequentArg<P,R,E>):Sequent<P,R,E>{
+    return Sequent.bump(self);
   }
 }
