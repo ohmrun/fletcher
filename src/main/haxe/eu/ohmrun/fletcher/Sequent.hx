@@ -2,6 +2,7 @@ package eu.ohmrun.fletcher;
 
 enum SequentArgSum<P,R,E>{
   SequentArgP(r:P);
+  //SequentFunEquityProvide(fn:Equity<P,R,E> -> Provide<Equity<P,R,E>>);
 }
 abstract SequentArg<P,R,E>(SequentArgSum<P,R,E>) from SequentArgSum<P,R,E> to SequentArgSum<P,R,E>{
   public function new(self) this = self;
@@ -36,4 +37,7 @@ class SequentLift{
   static public function provide<P,R,E>(self:SequentDef<P,R,E>,v:Equity<P,R,E>):Provide<Equity<P,R,E>>{
     return Convert.lift(self).provide(v);
   }
+  // static public function reframe<P,R,E>(self:SequentDef<P,R,E>):Reframe<P,R,E>{
+  //   return 
+  // }
 }

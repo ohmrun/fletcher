@@ -4,7 +4,7 @@ enum ProduceArgSum<O,E>{
   ProduceArgPure(o:O);
   ProduceArgSync(res:Res<O,E>);
   ProduceArgThunk(fn:Thunk<Res<O,E>>);
-  ProduceArgRejection(rejection:Rejection<E>);
+  ProduceArgRefuse(Refuse:Refuse<E>);
   ProduceArgPledge(pledge:Pledge<O,E>);
   ProduceArgFunXProduce(fn:Void->Produce<O,E>);
   ProduceArgFletcher(fletcher:Fletcher<Noise,O,E>);
@@ -26,8 +26,8 @@ abstract ProduceArg<O,E>(ProduceArgSum<O,E>) from ProduceArgSum<O,E> to ProduceA
   @:from static public function fromPledge<O,E>(pledge:Pledge<O,E>):ProduceArg<O,E>{
     return ProduceArgPledge(pledge);
   }
-  @:from static public function fromRejection<O,E>(rejection:Rejection<E>):ProduceArg<O,E>{
-    return ProduceArgRejection(rejection);
+  @:from static public function fromRefuse<O,E>(Refuse:Refuse<E>):ProduceArg<O,E>{
+    return ProduceArgRefuse(Refuse);
   }
   @:from static public function fromThunk<O,E>(fn:Thunk<Res<O,E>>):ProduceArg<O,E>{
     return ProduceArgThunk(fn);
@@ -54,7 +54,7 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
       case ProduceArgPure(o)              : pure(o);
       case ProduceArgSync(res)            : Sync(res);
       case ProduceArgThunk(fn)            : Thunk(fn);
-      case ProduceArgRejection(rejection) : fromRejection(rejection);
+      case ProduceArgRefuse(refuse)       : fromRefuse(refuse);
       case ProduceArgPledge(pledge)       : fromPledge(pledge);
       case ProduceArgFunXProduce(fn)      : fromFunXProduce(fn);
       case ProduceArgFletcher(fletcher)   : fromFletcher(fletcher);
@@ -75,7 +75,7 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
       (_:Noise,cont:Terminal<Res<O,E>,Noise>) -> cont.receive(self().forward(Noise))
     ));
   }
-  @:noUsing static public function fromRejection<O,E>(e:Rejection<E>):Produce<O,E>{
+  @:noUsing static public function fromRefuse<O,E>(e:Refuse<E>):Produce<O,E>{
     return Sync(__.reject(e));
   }
   @:noUsing static public function pure<O,E>(v:O):Produce<O,E>{
@@ -84,7 +84,7 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
   @:noUsing static public function accept<O,E>(v:O):Produce<O,E>{
     return Sync(__.accept(v));
   }
-  @:noUsing static public function reject<O,E>(e:Rejection<E>):Produce<O,E>{
+  @:noUsing static public function reject<O,E>(e:Refuse<E>):Produce<O,E>{
     return Sync(__.reject(e));
   }
   @:from @:noUsing static public function fromRes<O,E>(res:Res<O,E>):Produce<O,E>{
@@ -121,7 +121,7 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
       Fletcher.Anon((_:Noise,cont:Waypoint<O,E>) -> cont.receive(
           arw.forward(Noise).fold_mapp(
             (ok:O)          -> __.success(__.accept(ok)),
-            (no:Defect<E>)  -> __.success(__.reject(no.toError().except()))
+            (no:Defect<E>)  -> __.success(__.reject(no.toRefuse()))
           )
         )
     ));
@@ -136,20 +136,52 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
       pure(r)
     );
   }
+  static public function parallel<P,O,R,E>(data:Iter<P>,fn:P->Cell<Res<R,E>>->Produce<R,E>,r:R):Produce<R,E>{
+    return lift(Fletcher.Anon(
+      (_:Noise,cont:Waypoint<R,E>) -> {
+        var memo                          = r;
+        var fail    : Null<Refuse<E>>  = null;
+        final cell  = Cell.make(
+          () -> fail == null ? __.accept(memo) : __.reject(fail)
+        );
+        var work        = Work.unit();
+        var count       = 0;
+        var done        = false;
+        final trigger   = Future.trigger();
+
+        for(p in data){
+          count = count + 1;
+          work = work.par(
+            fn(p,cell).environment(
+              ok -> {
+                if(!done){
+                  memo = ok;
+                  count = count -1;
+                  if(count == 0){
+                    done = true;
+                    trigger.trigger(__.success(__.accept(memo)));
+                  }
+                }
+              },
+              no -> {
+                fail = no;
+                done = true;
+                trigger.trigger(__.success(__.reject(no)));
+              }
+            ).work()
+          );
+        }
+        return work.par(cont.receive(cont.later(trigger)));
+      }
+    ));
+  }
   static public function fromProvide<O,E>(self:Provide<Res<O,E>>):Produce<O,E>{
     return Produce.lift(Fletcher.Anon(
       (_:Noise,cont:Terminal<Res<O,E>,Noise>) -> cont.receive(self.forward(Noise))
     ));
   }
-  public inline function environment(success:O->Void,failure:Rejection<E>->Void):Fiber{
-    return Fletcher._.environment(
-      this,
-      Noise,
-      (res:Res<O,E>) -> {
-        res.fold(success,failure);
-      },
-      __.crack
-    );
+  public inline function environment(success:O->Void,failure:Refuse<E>->Void){
+    return _.environment(this,success,failure);
   }
   @:to public inline function toFletcher():Fletcher<Noise,Res<O,E>,Noise>{
     return this;
@@ -171,6 +203,16 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Res<O,E>,Noise>;
   }
 }
 class ProduceLift{
+  static public inline function environment<O,E>(self:ProduceDef<O,E>,success:O->Void,failure:Refuse<E>->Void):Fiber{
+    return Fletcher._.environment(
+      self,
+      Noise,
+      (res:Res<O,E>) -> {
+        res.fold(success,failure);
+      },
+      __.crack
+    );
+  }
   @:noUsing static private function lift<O,E>(self:ProduceDef<O,E>):Produce<O,E> return Produce.lift(self);
   
   static public function map<I,O,Z,E>(self:ProduceDef<O,E>,fn:O->Z):Produce<Z,E>{
@@ -180,7 +222,7 @@ class ProduceLift{
       )
     ));
   }
-  static public function errata<O,E,EE>(self:ProduceDef<O,E>,fn:Rejection<E>->Rejection<EE>):Produce<O,EE>{
+  static public function errata<O,E,EE>(self:ProduceDef<O,E>,fn:Refuse<E>->Refuse<EE>):Produce<O,EE>{
     return lift(self.then(
       Fletcher.fromFun1R(
         (oc:Res<O,E>) -> oc.errata(fn)
@@ -315,7 +357,7 @@ class ProduceLift{
       (Fletcher._.future(self,Noise)).map(
         (outcome:Outcome<Res<O,E>,Defect<Noise>>) -> (outcome.fold(
           (x:Res<O,E>)      -> x,
-          (e:Defect<Noise>) -> __.reject(e.elide().toError().except())
+          (e:Defect<Noise>) -> __.reject(e.elide().toRefuse())
         ))
       )
     );

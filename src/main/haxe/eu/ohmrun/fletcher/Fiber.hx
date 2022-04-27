@@ -8,14 +8,17 @@ typedef FiberDef = Fletcher<Noise,Noise,Noise>;
   static public inline function lift(self:Fletcher<Noise,Noise,Noise>):Fiber{
     return self;
   }
-  public inline function cycle():Cycle{
+  public inline function work():Work{
     return this.defer(
       Noise,
       Terminal.unit()
-    ).toCycle();
+    );
+  }
+  public inline function cycle():Cycle{
+    return work().toCycle();
   }
   public inline function submit():Void{
-    cycle().submit();
+    return cycle().submit();
   }
   public inline function crunch():Void{
     cycle().crunch();

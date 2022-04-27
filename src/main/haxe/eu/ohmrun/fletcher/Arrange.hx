@@ -156,7 +156,7 @@ class ArrangeLift{
       )
     );
   }
-  static public function errata<I,S,O,E,EE>(self:Arrange<I,S,O,E>,fn:Rejection<E>->Rejection<EE>):Arrange<I,S,O,EE>{
+  static public function errata<I,S,O,E,EE>(self:Arrange<I,S,O,E>,fn:Refuse<E>->Refuse<EE>):Arrange<I,S,O,EE>{
     return Arrange.lift(
       Fletcher.Anon(
         (res:Res<Couple<I,S>,EE>,cont:Terminal<Res<O,EE>,Noise>) -> res.fold(

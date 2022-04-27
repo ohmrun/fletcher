@@ -3,6 +3,7 @@ package eu.ohmrun;
 using tink.CoreApi;
 
 using stx.Pico;
+using stx.Fail;
 using stx.Nano;
 using stx.Fn;
 using stx.Fp;

@@ -139,7 +139,7 @@ class ReframeLift{
       )
     );
   }
-  static public inline function environment<I,O,E>(self:Reframe<I,O,E>,i:I,success:Couple<O,I>->Void,failure:Rejection<E>->Void):Fiber{
+  static public inline function environment<I,O,E>(self:Reframe<I,O,E>,i:I,success:Couple<O,I>->Void,failure:Refuse<E>->Void):Fiber{
     return Modulate._.environment(
       self,
       i,

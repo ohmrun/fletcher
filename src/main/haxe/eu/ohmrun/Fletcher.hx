@@ -173,7 +173,7 @@ class FletcherLift{
       },
       (no) -> {
         __.log().debug('fudged:fail');
-        val = __.reject(Rejection.fromDefect(no));
+        val = __.reject(no.toRefuse());
       }
     ).crunch();
     __.assert().exists(val);
@@ -251,7 +251,7 @@ class FletcherLift{
           return cont.receive(
             self.forward(i).fold_mapp(
               (ok:R)          -> __.success(__.accept(ok)),
-              (no:Defect<E>)  -> __.success(__.reject(no.toError()))
+              (no:Defect<E>)  -> __.success(__.reject(no.toRefuse()))
             )
           );
         }

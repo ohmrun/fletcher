@@ -128,7 +128,7 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Res<O,E>,Noise>;
         )
     ));  
   }
-  public inline function environment(i:I,success:O->Void,failure:Rejection<E>->Void):Fiber{
+  public inline function environment(i:I,success:O->Void,failure:Refuse<E>->Void):Fiber{
     return Modulate._.environment(toModulate(),i,success,failure);
   }
   public function mapi<Ii>(that:Ii->I):Attempt<Ii,O,E>{
@@ -169,7 +169,7 @@ class AttemptLift{
   static public function convert<I,O,Oi,E>(self:AttemptDef<I,O,E>,next:Convert<O,Oi>):Attempt<I,Oi,E>{
     return then(self,next.toModulate());
   }
-  static public function errata<I,O,E,EE>(self:AttemptDef<I,O,E>,fn:Rejection<E>->Rejection<EE>):Attempt<I,O,EE>{
+  static public function errata<I,O,E,EE>(self:AttemptDef<I,O,E>,fn:Refuse<E>->Refuse<EE>):Attempt<I,O,EE>{
     return lift(Fletcher._.map(self,(oc) -> oc.errata(fn)));
   }
   static public function errate<I,O,E,EE>(self:AttemptDef<I,O,E>,fn:E->EE):Attempt<I,O,EE>{
