@@ -68,4 +68,35 @@ class ScenarioLift{
       )
     );
   }
+  static public function initiate<P,R,E>(self:ScenarioDef<P,Noise,Noise,E>,that:Attempt<P,R,E>):Scenario<P,Noise,R,E>{
+    return lift(Fletcher.Then(
+      self,
+      Fletcher.Anon(
+        (r:Equity<P,Noise,E>,cont:Terminal<Equity<P,R,E>,Noise>) -> cont.receive(
+          that.toFletcher().map(
+            (res:Res<R,E>) -> res.fold(
+              ok -> r.rebase(Val(ok)),
+              no -> r.rebase(End(no))
+            ) 
+          ).forward(r.asset)
+        )
+      )
+    ));
+  }
+  static public function errate<P,Ri,Rii,E,EE>(self:ScenarioDef<P,Ri,Rii,E>,fn:E->EE):Scenario<P,Ri,Rii,EE>{
+    return lift(
+      Fletcher.Anon(
+        (equity:Equity<P,Ri,EE>,cont:Terminal<Equity<P,Rii,EE>,Noise>) -> {
+          return cont.receive(
+            equity.has_value().if_else(
+              () -> self.forward(equity.defuse()).map(
+                x -> x.errate(fn).refuse(equity.error)//TODO order?
+              ),
+              () -> cont.value(equity.clear())
+            )
+          );
+        }
+      )     
+    );
+  }
 }
