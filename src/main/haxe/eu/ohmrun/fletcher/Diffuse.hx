@@ -48,4 +48,30 @@ abstract Diffuse<I,O,E>(DiffuseDef<I,O,E>) from DiffuseDef<I,O,E> to DiffuseDef<
 }
 class DiffuseLift{
   static private inline function lift<I,O,E>(self:DiffuseDef<I,O,E>):Diffuse<I,O,E> return Diffuse.lift(self);
+  static public function attempt<P,Oi,Oii,E>(self:DiffuseDef<P,Oi,E>,that:Attempt<Oi,Oii,E>):Diffuse<P,Oii,E>{
+    return lift(self.then(
+      Fletcher.Anon(
+        (chk:Chunk<Oi,E>,cont:Terminal<Chunk<Oii,E>,Noise>) -> cont.receive(
+          chk.fold(
+            ok -> that.toFletcher().map(Res._.toChunk).forward(ok),
+            no -> cont.value(End(no)),
+            () -> cont.value(Tap)
+          )
+        )
+      )
+    ));
+  }
+  static public function adjust<P,Oi,Oii,E>(self:DiffuseDef<P,Oi,E>,that:Oi->Res<Oii,E>):Diffuse<P,Oii,E>{
+    return lift(self.then(
+      Fletcher.Anon(
+        (chk:Chunk<Oi,E>,cont:Terminal<Chunk<Oii,E>,Noise>) -> cont.receive(
+          chk.fold(
+            ok -> cont.value(that(ok).toChunk()),
+            no -> cont.value(End(no)),
+            () -> cont.value(Tap)
+          )
+        )
+      )
+    ));
+  }
 }

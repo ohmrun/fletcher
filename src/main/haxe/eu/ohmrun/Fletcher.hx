@@ -341,10 +341,10 @@ typedef ReceiverSinkApi<R,E>    = eu.ohmrun.fletcher.ReceiverSink.ReceiverSinkAp
 typedef RegulateDef<R,E>        = eu.ohmrun.fletcher.Regulate.RegulateDef<R,E>;
 typedef Regulate<R,E>           = eu.ohmrun.fletcher.Regulate<R,E>;
 
-typedef SequentDef<P,R,E>       = eu.ohmrun.fletcher.Sequent.SequentDef<P,R,E>;
-typedef Sequent<P,R,E>          = eu.ohmrun.fletcher.Sequent<P,R,E>;
-typedef SequentArgSum<P,R,E>    = eu.ohmrun.fletcher.Sequent.SequentArgSum<P,R,E>;
-typedef SequentArg<P,R,E>       = eu.ohmrun.fletcher.Sequent.SequentArg<P,R,E>;
+typedef ScenarioDef<P,Ri,Rii,E>      = eu.ohmrun.fletcher.Scenario.ScenarioDef<P,Ri,Rii,E>;
+typedef Scenario<P,Ri,Rii,E>         = eu.ohmrun.fletcher.Scenario<P,Ri,Rii,E>;
+typedef ScenarioArgSum<P,Ri,Rii,E>   = eu.ohmrun.fletcher.Scenario.ScenarioArgSum<P,Ri,Rii,E>;
+typedef ScenarioArg<P,Ri,Rii,E>      = eu.ohmrun.fletcher.Scenario.ScenarioArg<P,Ri,Rii,E>;
 
 class FletcherWildcards{
   // static public function arw<P,R,E>(wildcard:Wildcard,fn:F<P,R>):Fletcher<P,R,E>{
@@ -366,7 +366,7 @@ class FletcherWildcards{
   static public inline function command<P,E>(wildcard:Wildcard,self:CommandArg<P,E>):Command<P,E>{
     return Command.bump(self);
   }
-  static public inline function sequent<P,R,E>(wildcard:Wildcard,self:SequentArg<P,R,E>):Sequent<P,R,E>{
-    return Sequent.bump(self);
-  }
+  // static public inline function sequent<P,R,E>(wildcard:Wildcard,self:SequentArg<P,R,E>):Sequent<P,R,E>{
+  //   return Sequent.bump(self);
+  // }
 }
