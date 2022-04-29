@@ -52,7 +52,7 @@ class ScenarioLift{
   }
   //discharge
   static public function venture<P,Ri,Rii,Riii,E>(self:ScenarioDef<P,Ri,Rii,E>,that:Venture<Rii,Riii,E>){
-    return Fletcher.Then(
+    return lift(Fletcher.Then(
       self,
       Fletcher.Anon(
         function(r:Equity<P,Rii,E>,cont:Terminal<Equity<P,Riii,E>,Noise>){
@@ -66,7 +66,7 @@ class ScenarioLift{
           );
         }
       )
-    );
+    ));
   }
   static public function initiate<P,R,E>(self:ScenarioDef<P,Noise,Noise,E>,that:Attempt<P,R,E>):Scenario<P,Noise,R,E>{
     return lift(Fletcher.Then(
@@ -98,5 +98,12 @@ class ScenarioLift{
         }
       )     
     );
+  }
+  static public function provide<P,Ri,Rii,E>(self:Scenario<P,Ri,Rii,E>,p:Equity<P,Ri,E>):Provide<Equity<P,Rii,E>>{
+    return Provide.lift(Fletcher.Anon(
+      (_:Noise,cont:Terminal<Equity<P,Rii,E>,Noise>) -> cont.receive(
+        self.forward(p)
+      )
+    ));
   }
 }
