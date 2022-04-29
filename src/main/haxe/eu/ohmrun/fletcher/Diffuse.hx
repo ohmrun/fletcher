@@ -7,7 +7,13 @@ abstract Diffuse<I,O,E>(DiffuseDef<I,O,E>) from DiffuseDef<I,O,E> to DiffuseDef<
   static public var _(default,never) = DiffuseLift;
   public inline function new(self) this = self;
   static public inline function lift<I,O,E>(self:DiffuseDef<I,O,E>):Diffuse<I,O,E> return new Diffuse(self);
-
+  static public inline function unit<P,E>():Diffuse<P,P,E>{
+    return lift(
+      Fletcher.Sync(
+        (chk:Chunk<P,E>) -> chk
+      )
+    );
+  }
   
   @:from static public function fromFunIOptionR<I,O,E>(fn:I->Option<O>):Diffuse<I,O,E>{
     return lift(

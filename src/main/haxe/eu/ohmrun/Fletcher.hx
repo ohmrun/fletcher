@@ -346,6 +346,10 @@ typedef Scenario<P,Ri,Rii,E>         = eu.ohmrun.fletcher.Scenario<P,Ri,Rii,E>;
 typedef ScenarioArgSum<P,Ri,Rii,E>   = eu.ohmrun.fletcher.Scenario.ScenarioArgSum<P,Ri,Rii,E>;
 typedef ScenarioArg<P,Ri,Rii,E>      = eu.ohmrun.fletcher.Scenario.ScenarioArg<P,Ri,Rii,E>;
 
+typedef VentureDef<P,R,E>        = eu.ohmrun.fletcher.Venture.VentureDef<P,R,E>;
+typedef Venture<P,R,E>           = eu.ohmrun.fletcher.Venture<P,R,E>;
+
+
 class FletcherWildcards{
   // static public function arw<P,R,E>(wildcard:Wildcard,fn:F<P,R>):Fletcher<P,R,E>{
   //   return Fletcher.Sync(fn.toUnary().prj());
