@@ -355,7 +355,7 @@ class FletcherWildcards{
   //   return Fletcher.Sync(fn.toUnary().prj());
   // }
   static public inline function attempt<P,R,E>(wildcard:Wildcard,self:AttemptArg<P,R,E>,?pos:Pos):Attempt<P,R,E>{
-    __.log().debug(_ -> _.pure(pos));
+    //__.log().debug(_ -> _.pure(pos));
     return Attempt.bump(self);
   }
   static public inline function produce<R,E>(wildcard:Wildcard,self:ProduceArg<R,E>):Produce<R,E>{

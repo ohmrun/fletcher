@@ -72,14 +72,16 @@ class ScenarioLift{
     return lift(Fletcher.Then(
       self,
       Fletcher.Anon(
-        (r:Equity<P,Noise,E>,cont:Terminal<Equity<P,R,E>,Noise>) -> cont.receive(
-          that.toFletcher().map(
-            (res:Res<R,E>) -> res.fold(
-              ok -> r.rebase(Val(ok)),
-              no -> r.rebase(End(no))
-            ) 
-          ).forward(r.asset)
-        )
+        (r:Equity<P,Noise,E>,cont:Terminal<Equity<P,R,E>,Noise>) -> {
+          return cont.receive(
+              that.toFletcher().map(
+                (res:Res<R,E>) -> res.fold(
+                  ok -> r.rebase(Val(ok)),
+                  no -> r.rebase(End(no))
+                ) 
+              ).forward(r.asset)
+            );
+        }
       )
     ));
   }
@@ -87,12 +89,15 @@ class ScenarioLift{
     return lift(
       Fletcher.Anon(
         (equity:Equity<P,Ri,EE>,cont:Terminal<Equity<P,Rii,EE>,Noise>) -> {
+          __.log().debug('$equity');
+          final error = __.option(equity.error).defv(Refuse.unit());
+          
           return cont.receive(
-            equity.has_value().if_else(
-              () -> self.forward(equity.defuse()).map(
-                x -> x.errate(fn).refuse(equity.error)//TODO order?
-              ),
-              () -> cont.value(equity.clear())
+            equity.has_error().if_else(
+              () -> cont.value(equity.clear()),
+              () -> self.forward(equity.defuse()).map( //Can't call with EE errors without profunctor
+                equity -> equity.errata(x -> error.concat(x.errate(fn)))
+              )
             )
           );
         }
