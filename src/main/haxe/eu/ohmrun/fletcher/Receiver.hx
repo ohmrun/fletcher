@@ -161,6 +161,7 @@ class ReceiverLift{
         return work_left.par(work_right).seq(
           Future.irreversible(
             (cb:Work->Void) -> {
+              //trace('par');
               var ipt        = lhs.zip(rhs);
               var res        = f.apply(ipt);
               cb(res);
