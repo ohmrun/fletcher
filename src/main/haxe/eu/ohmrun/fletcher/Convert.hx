@@ -39,7 +39,9 @@ abstract Convert<I,O>(ConvertDef<I,O>) from ConvertDef<I,O> to ConvertDef<I,O>{
   @:from static inline public function fromFun1R<I,O>(fn:I->O):Convert<I,O>{
     return lift(Fletcher.fromFun1R(fn));
   }
-  
+  @:from static inline public function fromUnary<I,O>(fn:Unary<I,O>):Convert<I,O>{
+    return lift(Fletcher.fromFun1R(fn));
+  }
   @:from static public function fromFletcher<I,O>(arw:Fletcher<I,O,Noise>){
     return lift(arw);
   }

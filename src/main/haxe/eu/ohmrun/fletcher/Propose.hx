@@ -173,7 +173,7 @@ class ProposeLift{
   static public function before<O,E>(self:ProposeDef<O,E>,fn:Void->Void):Propose<O,E>{
     return Propose.lift(
       Fletcher.Then(
-        Fletcher.Sync(__.passthrough((_) -> fn())),
+        Fletcher.Sync(((_) -> fn()).promote()),
         self
       )
     );
@@ -182,7 +182,7 @@ class ProposeLift{
     return Propose.lift(
       Fletcher.Then(
         self,
-        Fletcher.Sync(__.passthrough(fn))
+        Fletcher.Sync(fn.promote())
       )
     );
   }

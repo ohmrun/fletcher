@@ -54,7 +54,7 @@ typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
   }
 
   static public function fromFun1Void<I,E>(fn:I->Void):Command<I,E>{
-    return lift(Fletcher.Sync(__.passthrough(fn).fn().then((_)->Report.unit())));
+    return lift(Fletcher.Sync(fn.promote().then((_)->Report.unit())));
   }
   static public function fromFun1Report<I,E>(fn:I->Report<E>):Command<I,E>{
     return lift(Fletcher.fromFun1R((i) -> fn(i)));
