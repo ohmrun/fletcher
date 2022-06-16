@@ -26,6 +26,9 @@ abstract ProduceArg<O,E>(ProduceArgSum<O,E>) from ProduceArgSum<O,E> to ProduceA
   @:from static public function fromPledge<O,E>(pledge:Pledge<O,E>):ProduceArg<O,E>{
     return ProduceArgPledge(pledge);
   }
+  @:from static public function fromFuture<O,E>(self:Future<O>):ProduceArg<O,E>{
+    return ProduceArgPledge(Pledge.lift(self.map(__.accept)));
+  }
   @:from static public function fromRefuse<O,E>(Refuse:Refuse<E>):ProduceArg<O,E>{
     return ProduceArgRefuse(Refuse);
   }
@@ -216,7 +219,8 @@ class ProduceLift{
   @:noUsing static private function lift<O,E>(self:ProduceDef<O,E>):Produce<O,E> return Produce.lift(self);
   
   static public function map<I,O,Z,E>(self:ProduceDef<O,E>,fn:O->Z):Produce<Z,E>{
-    return lift(self.then(
+    return lift(then(
+      self,
       Fletcher.fromFun1R(
         (oc:Res<O,E>) -> oc.map(fn)
       )
@@ -369,4 +373,14 @@ class ProduceLift{
       )
     );
   }
+  static public function zip<Ri,Rii,E>(self:Produce<Ri,E>,that:Produce<Rii,E>):Produce<Couple<Ri,Rii>,E>{
+    return lift(
+      Fletcher._.pinch(self,that).map(
+        __.decouple(
+          (lhs:Res<Ri,E>,rhs:Res<Rii,E>) -> lhs.zip(rhs)
+        )
+      ) 
+    );
+  }
+
 }
