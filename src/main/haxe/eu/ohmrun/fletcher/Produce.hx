@@ -236,6 +236,9 @@ class ProduceLift{
   static public function errate<O,E,EE>(self:ProduceDef<O,E>,fn:E->EE):Produce<O,EE>{
     return errata(self,(er) -> er.errate(fn));
   }
+  /**
+    Use the output to create an Execute.
+  **/
   static public function point<O,E>(self:ProduceDef<O,E>,success:O->Execute<E>):Execute<E>{
     return Execute.lift(
       Fletcher.Anon(
@@ -382,5 +385,17 @@ class ProduceLift{
       ) 
     );
   }
-
+  static public function command<O,E>(self:ProduceDef<O,E>,cmd:Command<O,E>):Execute<E>{
+    return Execute.lift(
+      Fletcher.Then(
+        self,
+        Fletcher.Anon(
+          (res:Res<O,E>,cont:Terminal<Report<E>,Noise>) -> res.fold(
+            ok -> cmd.defer(ok,cont),
+            no -> cont.receive(cont.value(__.report(_ -> no)))
+          )
+        )
+      )
+    );
+  }
 }

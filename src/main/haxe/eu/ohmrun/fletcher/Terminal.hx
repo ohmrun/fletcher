@@ -85,39 +85,6 @@ class TerminalLift{
       Cont.Mod(self,g)
     );
   }
-  // static public inline function acc<P,E>(self:TerminalApi<P,E>,fn:TerminalInput<P,E>->Work):Terminal<P,E>{
-  //   return lift(Cont.AnonAnon((f:TerminalInput<P,E>->Work) -> {
-  //     __.log().debug('call a');
-  //     var a = Terminal.lift(self).apply(
-  //       Apply.Anon((res) -> {
-  //         __.log().debug(_ -> _.pure(res));
-  //         return fn(res);
-  //       })
-  //     );
-  //     __.log().debug('call b');
-  //     var b = Terminal.lift(self).apply(
-  //       Apply.Anon(res -> {
-  //         __.log().debug(_ -> _.pure(res));
-  //         return f(res);
-  //       })
-  //     );
-  //     return a.seq(b);
-  //   })); 
-  // }
-  // static public function defer<P,Pi,E,EE>(self:TerminalApi<P,E>,that:Receiver<Pi,EE>):Terminal<P,E>{
-  //   return Receiver.lift((f:TerminalInput<P,E>->Work) -> {
-  //     var lhs = that.reply();
-  //     __.log().debug("lhs called"); 
-  //     return lhs.seq(Terminal.lift(self).apply(f));
-  //   });
-  // }
-  // static public function joint<P,Pi,E,EE>(self:TerminalApi<P,E>,that:Terminal<Pi,EE>->Receiver<Pi,EE>):Terminal<Pi,EE>{
-  //   return Receiver.lift(
-  //     (fn:TerminalSink<Pi,EE>) -> {
-  //       final next = that(self);
-  //     }
-  //   );
-  // }
   static public inline function receive<P,E>(self:TerminalApi<P,E>,receiver:Receiver<P,E>):Work{
     return receiver.apply(
       Apply.Anon((oc:ReceiverInput<P,E>) -> {

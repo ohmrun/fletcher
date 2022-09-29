@@ -2,7 +2,7 @@ package eu.ohmrun.fletcher;
 
 typedef ProvideDef<O> = ConvertDef<Noise,O>;
 @:using(eu.ohmrun.fletcher.Provide.ProvideLift)
-abstract Provide<O>(ProvideDef<O>) from ProvideDef<O> to ProvideDef<O>{
+@:forward abstract Provide<O>(ProvideDef<O>) from ProvideDef<O> to ProvideDef<O>{
   static public var _(default,never) = ProvideLift;
   public inline function new(self) this = self;
   static public inline function lift<O>(self:ProvideDef<O>):Provide<O> return new Provide(self);
@@ -119,5 +119,7 @@ class ProvideLift{
   static public function adjust<O,Oi,E>(self:ProvideDef<O>,fn:O->Res<Oi,E>):Produce<Oi,E>{
     return Produce.lift(self.map(fn));
   }
+  
   //static public inline function future<O>(self:Provide<O>)  
+  
 }

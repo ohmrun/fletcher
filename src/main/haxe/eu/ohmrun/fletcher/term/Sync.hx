@@ -5,4 +5,8 @@ abstract class Sync<P,Pi,E> implements FletcherApi<P,Pi,E> {
     return cont.receive(cont.issue(apply(p)));
   }
   abstract function apply(v:P):ArwOut<Pi,E>;
+  public var stx_tag(get,null):Int;
+  public function get_stx_tag():Int{
+    return -1;
+  }
 }

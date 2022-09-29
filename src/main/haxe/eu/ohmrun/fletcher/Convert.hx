@@ -86,4 +86,14 @@ class ConvertLift{
   static public function first<I,Ii,O>(self:Convert<I,O>):Convert<Couple<I,Ii>,Couple<O,Ii>>{
     return Convert.lift(Fletcher._.first(self));
   }
+  static public function flat_map<P,Ri,Rii>(self:Convert<P,Ri>,fn:Ri->Provide<Rii>):Convert<P,Rii>{
+    return Fletcher.Then(
+      self,
+      Fletcher.Anon(
+        (rI:Ri,cont:Terminal<Rii,Noise>) -> {
+          return fn(rI).defer(rI,cont);
+        }
+      )
+    );
+  }
 }

@@ -1,5 +1,8 @@
 package eu.ohmrun.fletcher;
 
+typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
+
+
 enum CommandArgSum<I,E>{
   CommandArgFun1Void(fn:I->Void);
   CommandArgFun1Report(fn:I->Report<E>);
@@ -35,7 +38,6 @@ abstract CommandArg<I,E>(CommandArgSum<I,E>) from CommandArgSum<I,E> to CommandA
     }
   }
 }
-typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
 
 @:using(eu.ohmrun.fletcher.Command.CommandLift)
 @:forward abstract Command<I,E>(CommandDef<I,E>) from CommandDef<I,E> to CommandDef<I,E>{

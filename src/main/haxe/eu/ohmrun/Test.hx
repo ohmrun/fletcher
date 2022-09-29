@@ -5,7 +5,7 @@ import eu.ohmrun.test.*;
 
 class Test{
   static function main(){
-    __.test(
+    __.test().run(
       [new ThenTest()],
       []
     );
