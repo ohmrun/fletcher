@@ -1,4 +1,3 @@
-
 package eu.ohmrun.fletcher.core;
 
 typedef SettleCls<P>      = ContCls<P,Work>; 
