@@ -37,7 +37,7 @@ class TerminalLift{
     return issue(self,__.success(r));
   }
   static public inline function issue<R,E>(self:Terminal<R,E>,value:ArwOut<R,E>):Receiver<R,E>{
-    return Receiver.lift(Settle._.map(
+    return Receiver.lift(eu.ohmrun.fletcher.core.Settle.SettleLift.map(
       self,
       (trg:TerminalInput<R,E>) -> {
         trg.trigger(value);

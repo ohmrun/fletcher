@@ -44,7 +44,7 @@ class ScenarioLift{
       Fletcher.Anon(
         function(r:Equity<P,Rii,E>,cont:Terminal<Equity<P,Riii,E>,Noise>){
           return cont.receive(
-            Diffuse._.attempt(Diffuse.unit(),that).map(chk -> r.rebase(chk)).forward(r.toChunk())
+            Diffuse.DiffuseLift.attempt(Diffuse.unit(),that).map(chk -> r.rebase(chk)).forward(r.toChunk())
           );
         }
       ) 

@@ -13,7 +13,8 @@ abstract Perform(PerformDef) from PerformDef to PerformDef{
       Fletcher.Anon(
         (_:Res<Noise,E>,cont:Terminal<Res<Noise,E>,Noise>) -> {
           return cont.receive(
-            Fletcher._.map(this,(_:Noise) -> __.accept(_)).forward(Noise)
+            //CPP fix 08/11/22
+            Fletcher.FletcherLift.map(this,(_:Noise) -> __.accept(_)).forward(Noise)
           );
         }
       )

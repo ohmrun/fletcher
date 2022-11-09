@@ -29,9 +29,9 @@ typedef ProvideDef<O> = ConvertDef<Noise,O>;
       Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> cont.value(fn()).serve())
     );
   }
-  @:from static public inline function fromFunXFuture<O>(fn:Void->Future<O>):Provide<O>{
+  @:from static public inline function fromFunXFuture<O>(fn:Void->Future<O>,?pos:Pos):Provide<O>{
     return lift(
-      Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> cont.later(fn().map(__.success)).serve())
+      Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> cont.later(fn().map(__.success)).serve(),pos)
     );
   }
   @:noUsing static public inline function fromFunTerminalWork<O>(fn:Terminal<O,Noise>->Work):Provide<O>{
@@ -64,7 +64,7 @@ typedef ProvideDef<O> = ConvertDef<Noise,O>;
 }
 
 class ProvideLift{
-  static public inline function environment<O>(self:Provide<O>,handler:O->Void):Fiber{
+  static public inline function environment<O>(self:Provide<O>,handler:O->Void,?pos:Pos):Fiber{
     return Fletcher._.environment(
       self,
       Noise,
@@ -74,7 +74,8 @@ class ProvideLift{
       (e) -> {
         __.log().fatal(_ -> _.pure(e));
         throw(e);
-      }
+      },
+      pos
     );
   }
   static public function flat_map<O,Oi>(self:Provide<O>,fn:O->ProvideDef<Oi>):Provide<Oi>{
@@ -88,7 +89,7 @@ class ProvideLift{
   }
   static public function convert<O,Oi>(self:ProvideDef<O>,that:Convert<O,Oi>):Provide<Oi>{
     //__.log().debug(_ -> _.pure(pos));
-    return Provide.lift(Convert._.then(
+    return Provide.lift(eu.ohmrun.fletcher.Convert.ConvertLift.then(
       self,
       that
     ));

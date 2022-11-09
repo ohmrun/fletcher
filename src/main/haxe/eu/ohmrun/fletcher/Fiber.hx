@@ -17,8 +17,8 @@ typedef FiberDef = Fletcher<Noise,Noise,Noise>;
   public inline function cycle():Cycle{
     return work().toCycle();
   }
-  public inline function submit():Void{
-    return cycle().submit();
+  public inline function submit(?pos:Pos):Void{
+    return cycle().submit(pos);
   }
   public inline function crunch():Void{
     cycle().crunch();

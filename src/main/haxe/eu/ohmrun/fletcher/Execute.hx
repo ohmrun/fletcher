@@ -10,7 +10,7 @@ abstract Execute<E>(ExecuteDef<E>) from ExecuteDef<E> to ExecuteDef<E>{
   @:noUsing static public inline function unit<E>():Execute<E> return lift(Fletcher.pure(Report.unit()));
 
   @:noUsing static public function bind_fold<T,E>(fn:T->Report<E>->Execute<E>,arr:Array<T>):Execute<E>{
-    return __.tracer()(arr).lfold(
+    return (arr).lfold(
       (next:T,memo:Execute<E>) -> Execute.lift(Provide._.flat_map(
         memo,
         (report) -> lift(fn(next,report))
@@ -59,15 +59,26 @@ abstract Execute<E>(ExecuteDef<E>) from ExecuteDef<E> to ExecuteDef<E>{
   @:noUsing static public function fromRefuse<E>(err:Refuse<E>):Execute<E>{
     return fromFunXR(() -> Report.pure(err));
   }
-  public inline function environment(success:Void->Void,failure:Refuse<E>->Void){
+  public function environment(?success:Void->Void,?failure:Refuse<E>->Void,?pos:Pos){
+    __.log().trace('execute environment ${(pos:Position)}');
+    if(success == null){
+      success = () -> __.log().info('execute complete');
+    } 
+    if(failure == null){
+      failure = (e) -> e.report();
+    }
     return Fletcher._.environment(
       this,
       Noise,
-      (report) -> report.fold(
-        failure,
-        success
-      ),
-      __.crack
+      (report) -> {
+        __.log().trace(_ -> _.thunk(() -> 'report'));
+        report.fold(
+          failure,
+          success
+        );
+      },
+      __.raise,
+      pos
     );
   }
 }

@@ -10,14 +10,14 @@ enum abstract ArrowType(Int){
 
   final ArrowThen            = 6;
 
-  @:from static public fromTaskType(v:TaskType):ArrowType{
-    return switch(v){
-      case TaskUnspecified:   ArrowTaskUnspecified;
-      case TaskNoop:          ArrowTaskNoop;
-      case TaskFuture:        ArrowTaskFuture;
-      case TaskSeq:           ArrowTaskSeq;
-      case TaskAmb:           ArrowTaskAmb;
-      case TaskThroughBind:   ArrowTaskThroughBind;
-    }
-  } 
+  // @:from static public function fromTaskType(v:TaskType):ArrowType{
+  //   return switch(v){
+  //     case TaskUnspecified:   ArrowTaskUnspecified;
+  //     case TaskNoop:          ArrowTaskNoop;
+  //     case TaskFuture:        ArrowTaskFuture;
+  //     case TaskSeq:           ArrowTaskSeq;
+  //     case TaskAmb:           ArrowTaskAmb;
+  //     case TaskThroughBind:   ArrowTaskThroughBind;
+  //   }
+  // } 
 }

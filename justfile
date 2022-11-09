@@ -1,2 +1,2 @@
 unit:
-  hx build unit
+  clear && hx build unit
