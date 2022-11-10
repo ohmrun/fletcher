@@ -9,7 +9,10 @@ typedef TerminalCls<R,E>    = SettleCls<TerminalInput<R,E>>;
   @:noUsing static public inline function unit<R,E>():Terminal<R,E>{
     return lift(
       Cont.AnonAnon((fn:TerminalInput<R,E> -> Work) -> {
-        return fn(TerminalInput.unit());
+        __.log().trace('terminal BEFORE unit()');
+        final val = fn(TerminalInput.unit());
+        __.log().trace('terminal AFTER unit()');
+        return val;
       })
     );
   }
@@ -46,8 +49,10 @@ class TerminalLift{
     ).prj());
   } 
   static public inline function later<R,E>(self:Terminal<R,E>,ft:Future<Outcome<R,Defect<E>>>,?pos:Pos):Receiver<R,E>{
+    __.log().debug('later $self');
     return Receiver.lift(
       Cont.Anon((r_ipt:ReceiverSinkApi<R,E>) -> {
+        __.log().debug('later $self called');
         var next = Future.trigger();
         var fst = self.apply(
           Apply.Anon((t_ipt:TerminalInput<R,E>) -> {
@@ -69,27 +74,32 @@ class TerminalLift{
   //   return Terminal.lift(Continuation.lift(Terminal.unit().prj()).zip_with(self.prj(),(lhs,rhs) -> lhs).asFunction());
   // }
   static public function tap<P,E>(self:TerminalApi<P,E>,fn:ArwOut<P,E>->Void):Terminal<P,E>{
+    __.log().trace('tap $self');
     return lift(Cont.AnonAnon(
-      (cont:TerminalInput<P,E>->Work) -> Terminal.lift(self).apply(
+      (cont:TerminalInput<P,E>->Work) -> {
+        __.log().trace('tap $self called');
+        return Terminal.lift(self).apply(
         Apply.Anon(
           (p:TerminalInput<P,E>) -> {
             p.asFuture().handle(fn);
             return cont(p);
           }
         )
-      )
+      );
+      }
     ));
   }
   static public inline function mod<P,E>(self:TerminalApi<P,E>,g:Work->Work):Terminal<P,E>{
-    return lift(
-      Cont.Mod(self,g)
-    );
+    return lift(Cont.Mod(self,g));
   }
   static public inline function receive<P,E>(self:TerminalApi<P,E>,receiver:Receiver<P,E>):Work{
+    __.log().trace('receive $self');
     return receiver.apply(
       Apply.Anon((oc:ReceiverInput<P,E>) -> {
+        __.log().trace('receive $self called');
         return Terminal.lift(self).apply(
           Apply.Anon((ip:TerminalInput<P,E>) -> {
+            __.log().trace('receive inner called');
             oc.handle(
               (out) -> {
                 ip.trigger(out);

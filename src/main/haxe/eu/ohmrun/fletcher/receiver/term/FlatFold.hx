@@ -3,6 +3,7 @@ package eu.ohmrun.fletcher.receiver.term;
 abstract class FlatFold<P,Pi,E> extends ReceiverCls<Pi,E>{
   public final self : Receiver<P,E>;
   public function new(self){
+    super();
     this.self = self;
   }
   abstract public function ok(p:P):Receiver<Pi,E>;

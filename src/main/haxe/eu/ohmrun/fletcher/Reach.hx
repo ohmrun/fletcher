@@ -43,7 +43,7 @@ class ReachLift{
   static public function then<Pi,Ri,Rii,E>(lhs:ReachApi<Pi,Ri,E>,rhs:ReachApi<Ri,Rii,E>):ReachApi<Pi,Rii,E>{
     return new AnonReach(
       (p:Pi,term:Terminal<Rii,E>) -> {
-        $type(lhs.apply);
+        //$type(lhs.apply);
         //final a = lhs.apply(p,term);
         return null;
         // return rI.ready ? 

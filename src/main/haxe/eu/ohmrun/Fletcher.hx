@@ -68,21 +68,26 @@ typedef FletcherDef<P,Pi,E> = FletcherApi<P,Pi,E>;
     return Receiver.lift(
       Cont.Anon(
         function(k:ReceiverSinkApi<Pi,E>){
-          //__.log().trace('forward called');
+          __.log().trace('forward called');
           var ft : FutureTrigger<ArwOut<Pi,E>> = Future.trigger();
           var fst = f.defer(
             p,
             Terminal.lift(
               Cont.AnonAnon((t_sink:TerminalSink<Pi,E>) -> {
+                __.log().trace('$t_sink');
                 #if debug
-                  //__.log().trace('forwarding');
+                  __.log().trace('FORWARD forwarding');
                   __.assert().exists(t_sink);
                 #end
-                return t_sink(ft);
+                final result =  t_sink(ft);
+                __.log().trace('FORWARD after t_sink');
+                return result;
               })
             )
           );
+          __.log().trace('FORWARD before apply');
           var snd = k.apply(ft.asFuture());
+          __.log().trace('FORWARD after apply');
           return fst.seq(snd);
         }
       )
@@ -119,40 +124,10 @@ class FletcherLift{
     return Fletcher.lift(self);
   }
   static public function environment<P,Pi,E>(self:Fletcher<P,Pi,E>,p:P,success:Pi->Void,?failure:Defect<E>->Void,?pos:Pos):Fiber{
-    trace('environment: ${(pos:Position)}');
-    return Fiber.lift(
-      Fletcher.Anon((_:Noise,cont:Terminal<Noise,Noise>) -> {
-        return cont.apply(
-          Apply.Anon((trg) -> {
-            __.log().trace('fiber ${(pos:Position)}');
-            var init = false;
-            return self.defer(
-              p,
-              Terminal.lift(
-                Cont.AnonAnon((fn:TerminalSink<Pi,E>) -> {
-                  __.log().trace('fiber:lifted ${(pos:Position)}');
-                  if(init){
-                    throw "Stack";
-                  }
-                    
-                  if(!init){
-                    init = true;
-                  }
-                  var ft = Future.trigger();
-                      ft.handle(
-                        (x:ArwOut<Pi,E>) -> x.fold(
-                          success,
-                          failure
-                        )
-                      );
-                  return fn(ft); 
-                })
-              )
-            );
-          })
-        );
-      }
-    ));
+    final context     = __.ctx(p,success,failure);
+    final process     = self;
+    final completion  = new eu.ohmrun.fletcher.Completion(context,process);
+    return Fiber.lift(completion);
   }
   static public function fudge<P,R,E>(self:Fletcher<P,R,E>,p:P):R{
     var val = null;

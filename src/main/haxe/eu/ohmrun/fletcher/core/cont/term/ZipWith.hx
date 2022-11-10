@@ -5,6 +5,7 @@ abstract class ZipWith<P,Pi,Pii,R> extends ContCls<Pii,R>{
   public final rhs : Cont<Pi,R>;
 
   public function new(lhs,rhs){
+    super();
     this.lhs = lhs;
     this.rhs = rhs;
   }

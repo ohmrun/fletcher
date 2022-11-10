@@ -1,13 +1,22 @@
 package eu.ohmrun.fletcher.core;
 
 interface ContApi<P,R>{
+  public final uuid : String;
+  public function toString():String;
   public function apply(p:Apply<P,R>):R;
   public function toCont():Cont<P,R>;
 }
 abstract class ContCls<P,R> implements ContApi<P,R>{
+  public function new(){
+    this.uuid = __.uuid("xxxxx");
+  }
   abstract public function apply(p:Apply<P,R>):R;
   public inline function toCont():Cont<P,R>{
     return new Cont(this);
+  }
+  public final uuid : String;
+  public function toString():String{
+    return Type.getClassName(Type.getClass(this)) + ":" + uuid;
   }
 }
 @:using(eu.ohmrun.fletcher.core.Cont.ContLift)
@@ -29,8 +38,8 @@ abstract class ContCls<P,R> implements ContApi<P,R>{
   static public inline function Anon<P,R>(self:Apply<P,R>->R){
     return lift(new eu.ohmrun.fletcher.core.cont.term.Anon(self));
   }
-  static public inline function AnonAnon<P,R>(self:(P->R)->R){
-    return lift(new eu.ohmrun.fletcher.core.cont.term.AnonAnon(self));
+  static public inline function AnonAnon<P,R>(self:(P->R)->R,?pos:Pos){
+    return lift(new eu.ohmrun.fletcher.core.cont.term.AnonAnon(self,pos));
   }
 }
 class ContLift{

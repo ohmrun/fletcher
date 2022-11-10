@@ -6,7 +6,7 @@ abstract class Map<R,Ri,E> extends Delegate<Receiver<R,E>,Ri,E>{
   }
   abstract public function map(r:R):Ri;
 
-  public inline function apply(app:Apply<ReceiverInput<Ri,E>,Work>):Work{
+  public function apply(app:Apply<ReceiverInput<Ri,E>,Work>):Work{
     return delegate.apply(
       Apply.Anon(
         (input:ReceiverInput<R,E>) -> {
