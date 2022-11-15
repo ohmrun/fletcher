@@ -2,10 +2,10 @@
 
 Fletcher is an effect system and integrated scheduler based on how [arrowlets](https://www.cs.umd.edu/~mwh/papers/jsarrows.pdf) relate to the logical equivalency of threads and events.
 
-A `Fletcher` is a constructor for a continuation monad constrained to return work for a scheduler. (literally `Work`)
+A `Fletcher` can be described as a constructor for a continuation monad constrained to return work for a scheduler.
 
 Both the input value, the output value and the continuation monad are available to access with a comprehensive set of combinators which allow any combination of synchronous and asynchonous programs to
-be connected in ways as powerful as a monad but without the type system requirements.
+be connected in ways as powerful as a monad but [without the type system requirements](http://www.cse.chalmers.se/~rjmh/Papers/arrows.pdf).
 
 Topics regarding interleaving functions and values over data streams and between processes are taken on in [stx_coroutine](https://github.com/ohmrun/stx_coroutine) and [stx_proxy](https://github.com/ohmrun/stx_proxy) which rely on this library for their cross platform async support.
 
