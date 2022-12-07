@@ -11,6 +11,7 @@ class AnonAnon<P,R> extends ContCls<P,R>{
     this.pos    = pos;
   }
   public inline function apply(p:Apply<P,R>):R{
+    __.log().trace('$p $pos');
     res = _apply(p.apply);
     return res;
   }

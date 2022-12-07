@@ -60,29 +60,31 @@ typedef FletcherDef<P,Pi,E> = FletcherApi<P,Pi,E>;
     return Sync((_:Noise) -> self());
   }
   //?pos:haxe.PosInfos
-  static public function forward<P,Pi,E>(f:FletcherApi<P,Pi,E>,p:P):Receiver<Pi,E>{
+  static public function forward<P,Pi,E>(f:FletcherApi<P,Pi,E>,p:P,?pos:Pos):Receiver<Pi,E>{
     #if debug
       //__.log().debug(_ -> _.pure(pos));
       __.assert().exists(f);
+      //__.assert().exists(p);
     #end
     return Receiver.lift(
       Cont.Anon(
         function(k:ReceiverSinkApi<Pi,E>){
-          __.log().trace('forward called');
+          __.log().trace('forward called $p');
           var ft : FutureTrigger<ArwOut<Pi,E>> = Future.trigger();
           var fst = f.defer(
             p,
             Terminal.lift(
               Cont.AnonAnon((t_sink:TerminalSink<Pi,E>) -> {
-                __.log().trace('$t_sink');
                 #if debug
                   __.log().trace('FORWARD forwarding');
                   __.assert().exists(t_sink);
                 #end
                 final result =  t_sink(ft);
-                __.log().trace('FORWARD after t_sink');
+                #if debug
+                __.log().trace('FORWARD after t_sink: $result');
+                #end
                 return result;
-              })
+              },pos)
             )
           );
           __.log().trace('FORWARD before apply');

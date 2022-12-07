@@ -9,6 +9,7 @@ class Then<P,Ri,Rii,E> extends FletcherCls<P,Rii,E>{
     this.rhs = rhs;
   }
   public function defer(pI:P,cont:Terminal<Rii,E>):Work{
+    __.log().trace('$source $pI');
     var a = lhs.forward(pI);
     return cont.receive(a.flat_fold(
       ok -> rhs.forward(ok),

@@ -5,6 +5,7 @@ package eu.ohmrun.fletcher.core;
     return make(environment);
   }
   @:noUsing static public function make<P,R,E>(environment:P,?on_value:R->Void,?on_error:Defect<E>->Void):Context<P,R,E>{
+    //__.assert().exists(environment);
     var result = new ContextCls(environment);
     if(__.option(on_value).is_defined()){
       result.on_value = on_value;

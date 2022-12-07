@@ -5,16 +5,15 @@ abstract class Map<P,Pi,R> extends Delegate<Cont<P,R>,Pi,R>{
   abstract private function map(p:P):Pi;
 
   public function apply(fn:Apply<Pi,R>):R{
-    __.log().trace('map $this');
+    __.log().trace('map $this $fn');
     return delegate.apply(
       Apply.Anon(
         (p:P) -> {
-          __.log().trace('map $this apply');
-          __.log().trace('map $delegate apply');
-          
+          __.log().trace('map apply $delegate $fn');
+        
           final next = map(p);
           final done = fn.apply(next);
-          __.log().trace('$done');
+          
           return done;
         }
       )

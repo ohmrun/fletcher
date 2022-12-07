@@ -15,9 +15,7 @@ typedef ProvideDef<O> = ConvertDef<Noise,O>;
   //   );
   // }
   @:noUsing static public inline function pure<O>(v:O):Provide<O>{
-    return lift(
-      Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> cont.receive(cont.value(v)))
-    );
+    return lift(Fletcher.Sync((_:Noise) -> v));
   }
   @:noUsing static public inline function fromFuture<O>(future:Future<O>):Provide<O>{
     return lift(
@@ -102,9 +100,9 @@ class ProvideLift{
   }
   static public function map<O,Oi>(self:ProvideDef<O>,fn:O->Oi):Provide<Oi>{
     return Provide.lift(
-      Fletcher._.then(
+      Fletcher.Then(
         self,
-        Fletcher.Sync(fn)
+        Fletcher.Sync((x) -> { trace(x); return fn(x); })
       )
     );
   }
