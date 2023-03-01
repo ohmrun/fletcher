@@ -14,17 +14,17 @@
     "version": "0.2.0",
     "url": "https://github.com/ohmrun/fletcher",
     "dependencies": {
-        "tink_core"     : "git:https://github.com/haxetink/tink_core.git",
+        "tink_core"     : "",
 
 
-        "stx_pico"      : "git:https://github.com/ohmrun/stx_pico.git",
-        "stx_nano"      : "git:https://github.com/ohmrun/stx_nano.git",
-        "stx_fail"      : "git:https://github.com/ohmrun/stx_fail.git",        
-        "stx_fn"        : "git:https://github.com/ohmrun/stx_fn.git",
-        "stx_fp"        : "git:https://github.com/ohmrun/stx_fp.git",
-        "stx_log"       : "git:https://github.com/ohmrun/stx_log.git",
-        "stx_stream"    : "git:https://github.com/ohmrun/stx_stream.git",
-        "stx_pkg"       : "git:https://github.com/ohmrun/stx_pkg.git"
+        "stx_pico"      : "",
+        "stx_nano"      : "",
+        "stx_fail"      : "",        
+        "stx_fn"        : "",
+        "stx_fp"        : "",
+        "stx_log"       : "",
+        "stx_stream"    : "",
+        "stx_pkg"       : ""
     },
     "classPath": "src/main/haxe"
 }
