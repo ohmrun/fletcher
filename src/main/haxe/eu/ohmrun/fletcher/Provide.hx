@@ -27,7 +27,7 @@ typedef ProvideDef<O> = ConvertDef<Noise,O>;
       Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> cont.value(fn()).serve())
     );
   }
-  @:from static public inline function fromFunXFuture<O>(fn:Void->Future<O>,?pos:Pos):Provide<O>{
+  @:from static public inline function fromFunXFuture<O>(fn:Void->Future<O>):Provide<O>{
     return lift(
       Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> cont.later(fn().map(__.success)).serve(),pos)
     );
