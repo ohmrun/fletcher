@@ -1,6 +1,10 @@
 package eu.ohmrun.fletcher;
 
+using stx.Log;
+using stx.Nano;
 using stx.Test;
+using stx.Stream;
+
 import eu.ohmrun.test.*;
 
 class Test{

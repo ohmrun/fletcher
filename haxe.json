@@ -2,7 +2,7 @@
   "build" : {
     "-D"    : ["no-deprecation-warnings"],
     "-cp"   : ["src/main/haxe"],
-    "-L"    : ["tink_core","stx_pico","stx_nano","stx_fn","stx_fp","stx_log","stx_test"],
+    "-L"    : ["tink_core","stx_pico","stx_nano","stx_fn","stx_fp","stx_log"],
     "unit"  : {
       "--macro" : [
         "include('eu.ohmrun.Fletcher',true)",
@@ -19,7 +19,9 @@
       }
     },
     "test"  : {
-      "-main"     : "eu.ohmrun.Test",
+      "-cp"       : "src/test/haxe",
+      "-L"        : "stx_test",
+      "-main"     : "eu.ohmrun.fletcher.Test",
       "interp"  : {
         "--interp"  : true
       }
