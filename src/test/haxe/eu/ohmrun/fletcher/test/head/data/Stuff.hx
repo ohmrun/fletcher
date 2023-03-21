@@ -1,4 +1,4 @@
-package eu.ohmrun.test.head.data;
+package eu.ohmrun.fletcher.test.head.data;
 
 enum Stuff{
   Bo(l:Stuff,r:Stuff);

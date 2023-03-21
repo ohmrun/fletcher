@@ -1,4 +1,4 @@
-package eu.ohmrun;
+package eu.ohmrun.fletcher;
 
 using stx.Test;
 import eu.ohmrun.test.*;
