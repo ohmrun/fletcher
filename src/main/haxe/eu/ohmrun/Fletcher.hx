@@ -349,6 +349,9 @@ class FletcherWildcards{
   static public inline function command<P,E>(wildcard:Wildcard,self:CommandArg<P,E>):Command<P,E>{
     return Command.bump(self);
   }
+  static public inline function recover<P,E>(wildcard:Wildcard,self:RecoverDef<P,E>){
+    return Recover.lift(self);
+  }
   // static public inline function sequent<P,R,E>(wildcard:Wildcard,self:SequentArg<P,R,E>):Sequent<P,R,E>{
   //   return Sequent.bump(self);
   // }

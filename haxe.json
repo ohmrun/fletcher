@@ -2,7 +2,7 @@
   "build" : {
     "-D"    : ["no-deprecation-warnings"],
     "-cp"   : ["src/main/haxe"],
-    "-L"    : ["tink_core","stx_pico","stx_nano","stx_fn","stx_fp","stx_log"],
+    "-L"    : ["tink_core","stx_pico","stx_nano","stx_fn","stx_fp","stx_log","stx_stream","stx_bake"],
     "unit"  : {
       "--macro" : [
         "include('eu.ohmrun.Fletcher',true)",
