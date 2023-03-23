@@ -1,6 +1,13 @@
 package eu.ohmrun;
 
+using tink.CoreApi;
+using stx.Pico;
+using stx.Nano;
+using stx.Stream;
+using stx.Log;
+using stx.Assert;
 using eu.ohmrun.fletcher.Core;
+using eu.ohmrun.Fletcher;
 
 typedef ArwOutDef<R,E>    = Outcome<R,Defect<E>>;
 typedef ArwOut<R,E>       = ArwOutDef<R,E>; 
