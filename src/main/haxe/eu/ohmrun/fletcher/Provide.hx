@@ -102,7 +102,7 @@ class ProvideLift{
     return Provide.lift(
       Fletcher.Then(
         self,
-        Fletcher.Sync((x) -> { trace(x); return fn(x); })
+        Fletcher.Sync((x) -> { return fn(x); })
       )
     );
   }
