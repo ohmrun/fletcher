@@ -1,5 +1,6 @@
 package eu.ohmrun;
 
+using eu.ohmrun.fletcher.Logging;
 using tink.CoreApi;
 using stx.Pico;
 using stx.Nano;
