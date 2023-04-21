@@ -17,6 +17,7 @@ typedef ArwOut<R,E>       = ArwOutDef<R,E>;
 interface FletcherApi<P,Pi,E> extends StxMemberApi{
   final source : Position;
   public function defer(p:P,cont:Terminal<Pi,E>):Work;
+  public function toFletcher():Fletcher<P,Pi,E>;
 }
 abstract class FletcherCls<P,R,E> implements FletcherApi<P,R,E> extends StxMemberCls{
   public final source : Position;
@@ -29,7 +30,10 @@ abstract class FletcherCls<P,R,E> implements FletcherApi<P,R,E> extends StxMembe
   }
   abstract public function defer(p:P,cont:Terminal<R,E>):Work;
   public function toString(){
-  return Type.getClassName(Type.getClass(this)) + ":" + source;
+    return Type.getClassName(Type.getClass(this)) + ":" + source;
+  }
+  public function toFletcher():Fletcher<P,R,E>{
+    return this;
   }
 }
 typedef FletcherFun<P,Pi,E> = P -> Terminal<Pi,E> -> Work;
@@ -363,5 +367,18 @@ class FletcherWildcards{
   }
   // static public inline function sequent<P,R,E>(wildcard:Wildcard,self:SequentArg<P,R,E>):Sequent<P,R,E>{
   //   return Sequent.bump(self);
+  // }
+}
+// class LiftFletcherLoad{
+//   static public function load<P,R,E>(self:Context<P,R,E>,arrowlet:Fletcher<P,R,E>):Fiber{
+//     return Fiber.lift(new Completion(self,arrowlet));
+//   }
+// }
+class LiftProvideLoad{
+  static public function load<P,R,E>(self:Context<Noise,R,Noise>,arrowlet:Provide<R>):Fiber{
+    return Fiber.lift(new eu.ohmrun.fletcher.Completion(self,arrowlet.toFletcher()));
+  }
+  // static public function fly<R,E>(wildcard:Wildcard,arrowlet:Provide<R>,?on_value:R->Void,?on_error:Defect<Noise>->Void):Fiber{
+  //   return Fiber.lift(new eu.ohmrun.fletcher.Completion(Context.make(Noise,on_value,on_error),arrowlet));
   // }
 }

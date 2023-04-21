@@ -5,6 +5,7 @@ typedef ConvertDef<I,O> = FletcherDef<I,O,Noise>;
 /**
   An Fletcher with no fail case
 **/
+@:transitive
 @:using(eu.ohmrun.fletcher.Convert.ConvertLift)
 abstract Convert<I,O>(ConvertDef<I,O>) from ConvertDef<I,O> to ConvertDef<I,O>{
   static public var _(default,never) = ConvertLift;

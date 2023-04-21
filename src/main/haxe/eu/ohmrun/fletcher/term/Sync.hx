@@ -13,4 +13,7 @@ abstract class Sync<P,Pi,E> implements FletcherApi<P,Pi,E> {
   public function get_stx_tag():Int{
     return -1;
   }
+  public function toFletcher(){
+    return this;
+  }
 }
