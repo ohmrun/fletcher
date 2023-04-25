@@ -86,7 +86,7 @@ abstract CommandArg<I,E>(CommandArgSum<I,E>) from CommandArgSum<I,E> to CommandA
   }
   public function toModulate():Modulate<I,I,E>{
     return Modulate.lift(
-      Fletcher.Anon((p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
+      Fletcher.Anon((p:Upshot<I,E>,cont:Waypoint<I,E>) -> p.fold(
         ok -> cont.receive(
           this.forward(ok).fold_mapp(
             report -> report.fold(
@@ -128,7 +128,7 @@ abstract CommandArg<I,E>(CommandArgSum<I,E>) from CommandArgSum<I,E> to CommandA
 class CommandLift{
   static public function toModulate<I,O,E>(command:CommandDef<I,E>):Modulate<I,I,E>{
     return Modulate.lift(
-      Fletcher.Anon((p:Res<I,E>,cont:Waypoint<I,E>) -> p.fold(
+      Fletcher.Anon((p:Upshot<I,E>,cont:Waypoint<I,E>) -> p.fold(
         (okI:I) -> cont.receive(command.forward(okI).fold_mapp(
           okII -> okII.fold(
             er -> __.success(__.reject(er)),
@@ -145,7 +145,7 @@ class CommandLift{
       Fletcher.Then(
         command.toFletcher(),
         Fletcher.Anon(
-          (ipt:Report<E>,cont:Terminal<Res<O,E>,Noise>) -> {
+          (ipt:Report<E>,cont:Terminal<Upshot<O,E>,Noise>) -> {
             __.log().debug(_ -> _.pure(ipt));
             return ipt.fold(
               e   -> cont.receive(cont.value(__.reject(e))),

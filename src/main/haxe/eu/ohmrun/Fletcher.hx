@@ -162,7 +162,7 @@ class FletcherLift{
     
     return val;
   }
-  static public function force<P,R,E>(self:Fletcher<P,R,E>,p:P):Res<R,E>{
+  static public function force<P,R,E>(self:Fletcher<P,R,E>,p:P):Upshot<R,E>{
     var val = null;
     environment(
       self,
@@ -238,7 +238,7 @@ class FletcherLift{
   static public function produce<P,R,E>(self:Fletcher<P,R,E>,i:P):Produce<R,E>{
     return Produce.lift(
       Fletcher.Anon(
-        (_:Noise,cont:Terminal<Res<R,E>,Noise>) -> {
+        (_:Noise,cont:Terminal<Upshot<R,E>,Noise>) -> {
           return cont.receive(
             self.forward(i).fold_mapp(
               (ok:R)          -> __.success(__.accept(ok)),
@@ -261,7 +261,7 @@ typedef TerminalAbs<R,E>        = eu.ohmrun.fletcher.Terminal.TerminalAbs<R,E>;
 typedef TerminalCls<R,E>        = eu.ohmrun.fletcher.Terminal.TerminalCls<R,E>;
 typedef TerminalApi<R,E>        = eu.ohmrun.fletcher.Terminal.TerminalApi<R,E>;
 typedef Terminal<R,E>           = eu.ohmrun.fletcher.Terminal<R,E>;
-typedef Waypoint<R,E>           = Terminal<Res<R,E>,Noise>;
+typedef Waypoint<R,E>           = Terminal<Upshot<R,E>,Noise>;
 
 typedef Fiber                   = eu.ohmrun.fletcher.Fiber;
 typedef FiberDef                = eu.ohmrun.fletcher.Fiber.FiberDef;

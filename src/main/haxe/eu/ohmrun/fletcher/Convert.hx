@@ -58,7 +58,7 @@ abstract Convert<I,O>(ConvertDef<I,O>) from ConvertDef<I,O> to ConvertDef<I,O>{
 class ConvertLift{
   static public function toModulate<I,O,E>(self:Convert<I,O>):Modulate<I,O,E>{
     return Modulate.lift(
-      Fletcher.Anon((p:Res<I,E>,cont:Waypoint<O,E>) -> p.fold(
+      Fletcher.Anon((p:Upshot<I,E>,cont:Waypoint<O,E>) -> p.fold(
         ok -> cont.receive(self.forward(ok).map(__.accept)),
         no -> cont.receive(cont.value(__.reject(no)))
       ))

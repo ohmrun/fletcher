@@ -46,7 +46,7 @@ abstract Resolve<I,E>(ResolveDef<I,E>) from ResolveDef<I,E> to ResolveDef<I,E>{
 class ResolveLift{
   static public function toModulate<I,E>(self:Resolve<I,E>):Modulate<I,I,E>{
     return Modulate.lift(
-      Fletcher.Anon((i:Res<I,E>,cont:Terminal<Res<I,E>,Noise>) -> 
+      Fletcher.Anon((i:Upshot<I,E>,cont:Terminal<Upshot<I,E>,Noise>) -> 
           i.fold(
             (s) -> cont.value(__.accept(s)).serve(),
             (e) -> {

@@ -12,7 +12,7 @@ typedef ReframeDef<I,O,E>               = ModulateDef<I,Couple<O,I>,E>;
   @:noUsing static public inline function pure<I,O,E>(o:O):Reframe<I,O,E>{
     return lift(Fletcher._.map(
       Modulate.unit(),
-      (oc:Res<I,E>) -> (oc.map(__.couple.bind(o)):Res<Couple<O,I>,E>)
+      (oc:Upshot<I,E>) -> (oc.map(__.couple.bind(o)):Upshot<Couple<O,I>,E>)
     ));
   }
   
@@ -23,7 +23,7 @@ typedef ReframeDef<I,O,E>               = ModulateDef<I,Couple<O,I>,E>;
   @:to public function toModulate():Modulate<I,Couple<O,I>,E>{
     return Modulate.lift(this);
   }
-  @:to public inline function toFletcher():Fletcher<Res<I,E>,Res<Couple<O,I>,E>,Noise>{
+  @:to public inline function toFletcher():Fletcher<Upshot<I,E>,Upshot<Couple<O,I>,E>,Noise>{
     return Fletcher.lift(this);
   }
   @:from static public function fromModulate<I,O,E>(self:Modulate<I,Couple<O,I>,E>):Reframe<I,O,E>{
@@ -38,11 +38,11 @@ class ReframeLift{
     return Modulate.lift(Fletcher.Then(self,that));
   }
   static public function attempt<I,O,Oi,E>(self:Reframe<I,O,E>,that:Attempt<O,Oi,E>):Reframe<I,Oi,E>{
-    var fn = (chk:Res<Couple<Res<Oi,E>,I>,E>) -> (chk.flat_map(
+    var fn = (chk:Upshot<Couple<Upshot<Oi,E>,I>,E>) -> (chk.flat_map(
       (tp) -> tp.fst().map(
         (r) -> __.couple(r,tp.snd())
       )
-    ):Res<Couple<Oi,I>,E>);
+    ):Upshot<Couple<Oi,I>,E>);
     var arw =  lift(
       Fletcher._.map(self.toModulate().convert(
         Convert.lift(that.toFletcher().first())
@@ -50,11 +50,11 @@ class ReframeLift{
     );
     return arw;
   }
-  static public function rearrange<I,O,Oi,E>(self:Reframe<I,O,E>,that:Arrange<Res<O,E>,I,Oi,E>):Reframe<I,Oi,E>{
+  static public function rearrange<I,O,Oi,E>(self:Reframe<I,O,E>,that:Arrange<Upshot<O,E>,I,Oi,E>):Reframe<I,Oi,E>{
     return Reframe.lift(
       Fletcher.Anon(
-        (ipt:Res<I,E>,cont:Terminal<Res<Couple<Oi,I>,E>,Noise>) -> return cont.receive(self.forward(ipt).flat_fold(
-          (res:Res<Couple<O,I>,E>) -> that.forward(
+        (ipt:Upshot<I,E>,cont:Terminal<Upshot<Couple<Oi,I>,E>,Noise>) -> return cont.receive(self.forward(ipt).flat_fold(
+          (res:Upshot<Couple<O,I>,E>) -> that.forward(
             res.fold(
               (tp:Couple<O,I>)  -> __.accept(__.couple(__.accept(tp.fst()),tp.snd())),
               (err)             -> ipt.fold(i -> __.accept(__.couple(__.reject(err),i)),e -> __.reject(e))
@@ -69,7 +69,7 @@ class ReframeLift{
     var arw = 
       Fletcher._.map(
         modulate(self,that).broach(),
-        (res:Res<Couple<I,Oi>,E>) -> {
+        (res:Upshot<Couple<I,Oi>,E>) -> {
             return res.map(tp -> tp.swap());
           }
         );
@@ -77,8 +77,8 @@ class ReframeLift{
   }
   static public function arrangement<I,Ii,O,Oi,E>(self:Reframe<I,O,E>,that:O->Arrange<Ii,I,Oi,E>):Attempt<Couple<Ii,I>,Oi,E>{
     return Attempt.lift(Fletcher.Anon(
-      (ipt:Couple<Ii,I>,cont:Terminal<Res<Oi,E>,Noise>) -> cont.receive(self.forward(__.success(ipt.snd())).flat_fold(
-        (tp:Res<Couple<O,I>,E>) -> tp.fold(
+      (ipt:Couple<Ii,I>,cont:Terminal<Upshot<Oi,E>,Noise>) -> cont.receive(self.forward(__.success(ipt.snd())).flat_fold(
+        (tp:Upshot<Couple<O,I>,E>) -> tp.fold(
           tp  -> that(tp.fst()).forward(__.success(ipt)),
           err -> cont.value(__.reject(err))
         ),
@@ -91,7 +91,7 @@ class ReframeLift{
       Fletcher.Anon(
         (ipt:I,cont:Terminal<Report<E>,Noise>) -> cont.receive(self.commandment(fn).then(
           Fletcher.Sync(
-            (res:Res<Couple<O,I>,E>) -> res.fold(
+            (res:Upshot<Couple<O,I>,E>) -> res.fold(
               _ -> Report.unit(),
               Report.pure
             )
@@ -102,7 +102,7 @@ class ReframeLift{
   }
   static public function commandment<I,O,E>(self:Reframe<I,O,E>,fn:O->Command<I,E>):Reframe<I,O,E>{
     return lift(Fletcher.Anon(
-      (ipt:Res<I,E>,cont:Terminal<Res<Couple<O,I>,E>,Noise>) -> cont.receive(self.forward(ipt).flat_fold(
+      (ipt:Upshot<I,E>,cont:Terminal<Upshot<Couple<O,I>,E>,Noise>) -> cont.receive(self.forward(ipt).flat_fold(
         res -> res.fold(
           ok -> {
             var cmd = fn(ok.fst());//TODO HMMM
@@ -132,7 +132,7 @@ class ReframeLift{
   static public function errate<I,O,E,EE>(self:Reframe<I,O,E>,fn:E->EE):Reframe<I,O,EE>{
     return lift(
       Fletcher.Anon(
-        (i:Res<I,EE>,cont:Terminal<Res<Couple<O,I>,EE>,Noise>) -> i.fold(
+        (i:Upshot<I,EE>,cont:Terminal<Upshot<Couple<O,I>,EE>,Noise>) -> i.fold(
           (i) -> cont.receive(self.map(o -> o.errata((e) -> e.errate(fn))).forward(__.accept(i))),
           (e) -> cont.value(__.reject(e)).serve()
         )

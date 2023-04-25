@@ -59,7 +59,7 @@ class DiffuseLift{
       Fletcher.Anon(
         (chk:Chunk<Oi,E>,cont:Terminal<Chunk<Oii,E>,Noise>) -> cont.receive(
           chk.fold(
-            ok -> that.toFletcher().map(Res._.toChunk).forward(ok),
+            ok -> that.toFletcher().map(Upshot._.toChunk).forward(ok),
             no -> cont.value(End(no)),
             () -> cont.value(Tap)
           )
@@ -67,7 +67,7 @@ class DiffuseLift{
       )
     ));
   }
-  static public function adjust<P,Oi,Oii,E>(self:DiffuseDef<P,Oi,E>,that:Oi->Res<Oii,E>):Diffuse<P,Oii,E>{
+  static public function adjust<P,Oi,Oii,E>(self:DiffuseDef<P,Oi,E>,that:Oi->Upshot<Oii,E>):Diffuse<P,Oii,E>{
     return lift(self.then(
       Fletcher.Anon(
         (chk:Chunk<Oi,E>,cont:Terminal<Chunk<Oii,E>,Noise>) -> cont.receive(

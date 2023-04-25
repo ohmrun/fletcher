@@ -75,7 +75,7 @@ class ScenarioLift{
         (r:Equity<P,Noise,E>,cont:Terminal<Equity<P,R,E>,Noise>) -> {
           return cont.receive(
               that.toFletcher().map(
-                (res:Res<R,E>) -> res.fold(
+                (res:Upshot<R,E>) -> res.fold(
                   ok -> r.rebase(Val(ok)),
                   no -> r.rebase(End(no))
                 ) 

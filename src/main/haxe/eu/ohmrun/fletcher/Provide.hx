@@ -117,7 +117,7 @@ class ProvideLift{
   static public function zip<Oi,Oii>(self:ProvideDef<Oi>,that:ProvideDef<Oii>):Provide<Couple<Oi,Oii>>{
     return Provide.lift(Fletcher._.pinch(self,that));
   }
-  static public function adjust<O,Oi,E>(self:ProvideDef<O>,fn:O->Res<Oi,E>):Produce<Oi,E>{
+  static public function adjust<O,Oi,E>(self:ProvideDef<O>,fn:O->Upshot<Oi,E>):Produce<Oi,E>{
     return Produce.lift(self.map(fn));
   }
   

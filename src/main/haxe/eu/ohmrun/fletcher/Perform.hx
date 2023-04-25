@@ -11,7 +11,7 @@ abstract Perform(PerformDef) from PerformDef to PerformDef{
   public function toModulate<E>():Modulate<Noise,Noise,E>{
     return Modulate.lift(
       Fletcher.Anon(
-        (_:Res<Noise,E>,cont:Terminal<Res<Noise,E>,Noise>) -> {
+        (_:Upshot<Noise,E>,cont:Terminal<Upshot<Noise,E>,Noise>) -> {
           return cont.receive(
             //CPP fix 08/11/22
             Fletcher.FletcherLift.map(this,(_:Noise) -> __.accept(_)).forward(Noise)

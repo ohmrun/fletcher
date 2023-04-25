@@ -89,7 +89,7 @@ class ProposeLift{
       self,
       Fletcher.Anon(
         (ipt:Chunk<O,E>,cont:Terminal<Chunk<Oi,E>,Noise>) -> ipt.fold(
-          (o) -> cont.receive(next.toFletcher().map((res:Res<Oi,E>) -> res.toChunk()).forward(o)),
+          (o) -> cont.receive(next.toFletcher().map((res:Upshot<Oi,E>) -> res.toChunk()).forward(o)),
           (e) -> cont.value(End(e)).serve(),
           ()  -> cont.value(Tap).serve()
         )
