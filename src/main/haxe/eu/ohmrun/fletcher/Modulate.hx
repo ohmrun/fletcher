@@ -152,7 +152,7 @@ typedef ModulateDef<I, O, E> = FletcherDef<Upshot<I, E>, Upshot<O, E>, Noise>;
 
 	@:to public function toFletcher():Fletcher<Upshot<I, E>, Upshot<O, E>, Noise> return this;
 
-	public inline function environment(i:I, success:O->Void, failure:Refuse<E>->Void):Fiber {
+	public inline function environment(i:I, success:O->Void, ?failure:Refuse<E>->Void):Fiber {
 		return _.environment(this, i, success, failure);
 	}
 	public inline function split<Oi>(that:Modulate<I, Oi, E>):Modulate<I, Couple<O, Oi>, E> {
@@ -246,8 +246,14 @@ class ModulateLift {
 		return lift(Modulate.fromFletcher(Fletcher.fromFun1R(fn)).then(self));
 	}
 
-	@:noUsing static public inline function environment<I, O, E>(self:ModulateDef<I, O, E>, i:I, success:O->Void, failure:Refuse<E>->Void):Fiber {
-		return Fletcher._.environment(self, __.accept(i), (res) -> res.fold(success, failure), (err) -> throw err);
+	@:noUsing static public inline function environment<I, O, E>(self:ModulateDef<I, O, E>, i:I, success:O->Void, ?failure:Refuse<E>->Void):Fiber {
+		failure = failure ?? (e:Refuse<E>) ->  e.crack();
+		return Fletcher._.environment(
+			self, 
+			__.accept(i), 
+			(res) -> res.fold(success, failure), 
+			(err) -> throw err
+		);
 	}
 
 	static public function produce<I, O, E>(self:ModulateDef<I, O, E>, i:Upshot<I,E>):Produce<O, E> {

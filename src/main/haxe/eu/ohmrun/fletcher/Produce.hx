@@ -183,7 +183,7 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Upshot<O,E>,Noise>;
       (_:Noise,cont:Terminal<Upshot<O,E>,Noise>) -> cont.receive(self.forward(Noise))
     ));
   }
-  public inline function environment(success:O->Void,failure:Refuse<E>->Void){
+  public inline function environment(success:O->Void,?failure:Refuse<E>->Void){
     return _.environment(this,success,failure);
   }
   @:to public inline function toFletcher():Fletcher<Noise,Upshot<O,E>,Noise>{
@@ -206,7 +206,8 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Upshot<O,E>,Noise>;
   }
 }
 class ProduceLift{
-  static public inline function environment<O,E>(self:ProduceDef<O,E>,success:O->Void,failure:Refuse<E>->Void):Fiber{
+  static public inline function environment<O,E>(self:ProduceDef<O,E>,success:O->Void,?failure:Refuse<E>->Void):Fiber{
+    failure = failure ?? (e:Refuse<E>) ->  e.crack();
     return Fletcher._.environment(
       self,
       Noise,

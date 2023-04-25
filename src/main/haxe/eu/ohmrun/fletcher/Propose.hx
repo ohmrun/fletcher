@@ -186,7 +186,8 @@ class ProposeLift{
       )
     );
   }
-  static public inline function environment<O,E>(self:ProposeDef<O,E>,success:Option<O>->Void,failure:Refuse<E>->Void){
+  static public inline function environment<O,E>(self:ProposeDef<O,E>,success:Option<O>->Void,?failure:Refuse<E>->Void){
+    failure = failure ?? (e:Refuse<E>) ->  e.crack();
     return Fletcher._.environment(
       Fletcher.lift(self),
       Noise,

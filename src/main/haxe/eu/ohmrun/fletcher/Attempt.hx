@@ -128,7 +128,7 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Upshot<O,E>,Noise>;
         )
     ));  
   }
-  public inline function environment(i:I,success:O->Void,failure:Refuse<E>->Void):Fiber{
+  public inline function environment(i:I,success:O->Void,?failure:Refuse<E>->Void):Fiber{
     return Modulate._.environment(toModulate(),i,success,failure);
   }
   public function mapi<Ii>(that:Ii->I):Attempt<Ii,O,E>{
