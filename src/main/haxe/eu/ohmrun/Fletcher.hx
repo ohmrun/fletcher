@@ -268,6 +268,7 @@ typedef FiberDef                = eu.ohmrun.fletcher.Fiber.FiberDef;
 
 typedef Convert<I,O>            = eu.ohmrun.fletcher.Convert<I,O>;
 typedef ConvertDef<I,O>         = eu.ohmrun.fletcher.Convert.ConvertDef<I,O>;
+typedef ConvertArg<P,R>         = eu.ohmrun.fletcher.Convert.ConvertArg<P,R>;
 
 typedef Provide<O>              = eu.ohmrun.fletcher.Provide<O>;
 typedef ProvideDef<O>           = eu.ohmrun.fletcher.Provide.ProvideDef<O>;
@@ -365,7 +366,7 @@ class FletcherWildcards{
   static public inline function recover<P,E>(wildcard:Wildcard,self:RecoverDef<P,E>){
     return Recover.lift(self);
   }
-  static public inline function convert<P,R>(wildcard:Wildcard,self:ConvertDef<P,R>){
+  static public inline function convert<P,R>(wildcard:Wildcard,self:ConvertArg<P,R>){
     return Convert.lift(self);
   }
   // static public inline function sequent<P,R,E>(wildcard:Wildcard,self:SequentArg<P,R,E>):Sequent<P,R,E>{
