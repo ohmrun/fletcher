@@ -116,7 +116,7 @@ typedef ArrangeDef<I,S,O,E>             = ModulateDef<Couple<I,S>,O,E>;
         );
     }));
   }
-  @:noUsing static public function bind_fold<I,S,E,T>(fn:T->I->Modulate<S,I,E>,iterable:Iterable<T>):Option<Arrange<I,S,I,E>>{
+  @:noUsing static public function bind_fold<I,S,E,T>(fn:T->I->Modulate<S,I,E>,iterable:Iter<T>):Option<Arrange<I,S,I,E>>{
     return iterable
      .toIter()
      .map((t:T) -> (fn.bind1(t):I->Modulate<S,I,E>))
@@ -174,7 +174,17 @@ class ArrangeLift{
     return Arrange.lift(
       Fletcher.Anon(
         (res:Upshot<Couple<I,S>,EE>,cont:Terminal<Upshot<O,EE>,Noise>) -> res.fold(
-          i -> cont.receive(self.map((res:Upshot<O,E>) -> res.errata(fn)).forward(__.accept(i))),
+          i -> cont.receive(
+            (
+              self.forward(__.accept(i)).map(
+                (res:Upshot<O,E>) -> (res.errata(fn):Upshot<O,EE>)
+              )
+            )
+            // Modulate._.modulate(
+            //   self,
+            //   (res:Upshot<O,E>) -> (res.errata(fn):Upshot<O,EE>)
+            // ).forward(__.accept(i) )
+          ),
           e -> cont.value(__.reject(e)).serve()
         )
       )
@@ -225,6 +235,12 @@ class ArrangeLift{
     var d = Arrange.lift(b.split(c).map((tp:Couple<Oi,O>) -> tp.swap()));
     //$type(d);
     return d;
+  }
+  static public function map<I,S,O,Oi,E>(self:Arrange<I,S,O,E>,that:O->Oi):Arrange<I,S,Oi,E>{
+    return Arrange.lift(Fletcher._.then(
+      self,
+      Fletcher.Sync((res:Upshot<O,E>) -> (res.map)(that))
+    ));
   }
   //static public function arrange<I,S,O,Oi,E>(self:Arrange<I,S,O,E>,that:Arrange<)
 }

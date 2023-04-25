@@ -2,11 +2,12 @@ package eu.ohmrun.fletcher;
 
 
 enum ModulateArgSum<P,R,E>{
+	ModulateArgFunResRes0(fn:Upshot<P,E>->Upshot<R,E>);
 	ModulateArgFun1Produce(arw:P->Produce<R, E>);
 	ModulateArgAttempt(self:Attempt<P,R,E>);
 	ModulateArgFletcher(arw:Fletcher<P, R, E>);
 	//ModulateArgFunResUpshot(fn:Upshot<P,E>->Upshot<R,EE>);
-	ModulateArgFunResRes0(fn:Upshot<P,E>->Upshot<R,E>);
+	
 	ModulateArgFun1Upshot(fn:P -> Upshot<R, E>);
 	ModulateArgFun1R(fn:P -> R );
 	ModulateArgUpshot(ocR:Upshot<R, E>);
@@ -20,17 +21,17 @@ abstract ModulateArg<P,R,E>(ModulateArgSum<P,R,E>) from ModulateArgSum<P,R,E> to
 	private var self(get,never):ModulateArg<P,R,E>;
 	private function get_self():ModulateArg<P,R,E> return lift(this);
 
+	@:from static public function fromModulateArgFunResRes0<P,R,E>(self:Upshot<P,E>->Upshot<R,E>){
+		return lift(ModulateArgFunResRes0(self));
+	}
 	@:from static public function fromModulateArgFun1Produce<P,R,E>(self:P->Produce<R, E>){
-	return lift(ModulateArgFun1Produce(self));
+		return lift(ModulateArgFun1Produce(self));
 	}
 	@:from static public function fromModulateArgAttempt<P,R,E>(self:Attempt<P,R,E>){
 		return lift(ModulateArgAttempt(self));
 	}
 	@:from static public function fromModulateArgFletcher<P,R,E>(self:Fletcher<P, R, E>){
 		return lift(ModulateArgFletcher(self));
-	}
-	@:from static public function fromModulateArgFunResRes0<P,R,E>(self:Upshot<P,E>->Upshot<R,E>){
-		return lift(ModulateArgFunResRes0(self));
 	}
 	@:from static public function fromModulateArgFun1Upshot<P,R,E>(self:P -> Upshot<R, E>){
 		return lift(ModulateArgFun1Upshot(self));

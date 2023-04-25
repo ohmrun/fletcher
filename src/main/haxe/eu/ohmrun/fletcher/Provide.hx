@@ -39,7 +39,7 @@ typedef ProvideDef<O> = ConvertDef<Noise,O>;
       Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> fn(cont))
     );
   }
-  static public inline function bind_fold<T,O>(fn:Convert<Couple<T,O>,O>,arr:Cluster<T>,seed:O):Provide<O>{
+  static public inline function bind_fold<T,O>(fn:Convert<Couple<T,O>,O>,arr:Iter<T>,seed:O):Provide<O>{
     return arr.lfold(
       (next:T,memo:Provide<O>) -> {
         return memo.convert(
