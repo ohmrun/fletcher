@@ -2,6 +2,30 @@ package eu.ohmrun.fletcher;
 
 typedef ConvertDef<I,O> = FletcherDef<I,O,Noise>;
 
+enum ConvertArgSum<P,R>{
+  ConvertArgFun1R(fn:P->R);
+  ConvertArgLift(x:FletcherDef<P,R,Noise>);
+}
+abstract ConvertArg<P,R>(ConvertArgSum<P,R>) from ConvertArgSum<P,R> to ConvertArgSum<P,R>{
+  public function new(self) this = self;
+  @:noUsing static public function lift<P,R>(self:ConvertArgSum<P,R>):ConvertArg<P,R> return new ConvertArg(self);
+
+  @:from static public function fromArgFun1R<P,R>(self:P->R){
+    return lift(ConvertArgFun1R(self));
+  }
+  @:from static public function fromArgLift<P,R>(self:FletcherDef<P,R,Noise>):ConvertArg<P,R>{
+    return lift(ConvertArgLift(self));
+  }
+  public function prj():ConvertArgSum<P,R> return this;
+  private var self(get,never):ConvertArg<P,R>;
+  private function get_self():ConvertArg<P,R> return lift(this);
+  @:to public function bump(){
+    return switch(this){
+      case ConvertArgFun1R(fn)  : Convert.fromFun1R(fn);
+      case ConvertArgLift(x)    : Convert.lift(x);
+    }
+  }
+}
 /**
   An Fletcher with no fail case
 **/
