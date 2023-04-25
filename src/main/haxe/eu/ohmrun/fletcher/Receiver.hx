@@ -171,4 +171,14 @@ class ReceiverLift{
       }
     ));
   }
+  static public function errata<P,E,EE>(self:ReceiverApi<P,E>,fn:Defect<E>->Defect<EE>){
+    return fold_mapp(
+      self,
+      (p) -> __.success(p),
+      (e) -> __.failure(fn(e))      
+    );
+  }
+  static public function errate<P,E,EE>(self:ReceiverApi<P,E>,fn:E->EE){
+    return errata(self,x -> x.errate(fn));
+  }
 }

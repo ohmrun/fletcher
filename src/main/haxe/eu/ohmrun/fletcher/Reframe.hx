@@ -123,17 +123,21 @@ class ReframeLift{
     )));
   }
   static public function evaluation<I,O,E>(self:Reframe<I,O,E>):Modulate<I,O,E>{
-    return Modulate.lift(self.map(o -> o.map(tp -> tp.fst())));
+    return Modulate.lift(Modulate._.map(self,o -> o.fst()));
   }
 
   static public function execution<I,O,E>(self:Reframe<I,O,E>):Modulate<I,I,E>{
-    return Modulate.lift(self.map(o -> o.map(tp -> tp.snd())));
+    return Modulate.lift(Modulate._.map(self,tp -> tp.snd()));
   }
   static public function errate<I,O,E,EE>(self:Reframe<I,O,E>,fn:E->EE):Reframe<I,O,EE>{
     return lift(
       Fletcher.Anon(
         (i:Upshot<I,EE>,cont:Terminal<Upshot<Couple<O,I>,EE>,Noise>) -> i.fold(
-          (i) -> cont.receive(self.map(o -> o.errata((e) -> e.errate(fn))).forward(__.accept(i))),
+          (i) -> cont.receive(
+            self.forward(__.accept(i)).map(
+              x -> x.errate(fn)  
+            )
+          ),
           (e) -> cont.value(__.reject(e)).serve()
         )
       )
@@ -150,6 +154,11 @@ class ReframeLift{
   static public function convert<I,O,Oi,E>(self:Reframe<I,O,E>,fn:Convert<O,Oi>):Reframe<I,Oi,E>{
     return lift(self.modulate(
       fn.first().toModulate()
+    ));
+  }
+  static public function map<I,O,Oi,E>(self:Reframe<I,O,E>,fn:O->Oi):Reframe<I,Oi,E>{
+    return lift(self.modulate(
+      __.convert(fn).first().toModulate()
     ));
   }
 }
