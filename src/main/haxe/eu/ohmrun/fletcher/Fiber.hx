@@ -1,16 +1,16 @@
 package eu.ohmrun.fletcher;
 
-typedef FiberDef = Fletcher<Noise,Noise,Noise>;
+typedef FiberDef = Fletcher<Nada,Nada,Nada>;
 
 @:using(eu.ohmrun.fletcher.Fiber.FiberLift)
 @:forward abstract Fiber(FiberDef) from FiberDef{
   static public var _(default,never) = FiberLift;
-  static public inline function lift(self:Fletcher<Noise,Noise,Noise>):Fiber{
+  static public inline function lift(self:Fletcher<Nada,Nada,Nada>):Fiber{
     return self;
   }
   public inline function work():Work{
     return this.defer(
-      Noise,
+      Nada,
       Terminal.unit()
     );
   }
@@ -26,7 +26,7 @@ typedef FiberDef = Fletcher<Noise,Noise,Noise>;
   @:from static public function fromCompletion<P,R,E>(self:Completion<P,R,E>){
     return lift(Fletcher.lift(self));
   }
-  public function prj():FletcherDef<Noise,Noise,Noise>{
+  public function prj():FletcherDef<Nada,Nada,Nada>{
     return this;
   }
 }

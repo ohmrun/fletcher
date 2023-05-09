@@ -1,6 +1,6 @@
 package eu.ohmrun.fletcher;
         
-typedef RecoverDef<I,E>                 = FletcherDef<Refuse<E>,I,Noise>;
+typedef RecoverDef<I,E>                 = FletcherDef<Refuse<E>,I,Nada>;
 
 @:forward abstract Recover<I,E>(RecoverDef<I,E>) from RecoverDef<I,E> to RecoverDef<I,E>{
   public inline function new(self) this = self;
@@ -20,7 +20,7 @@ typedef RecoverDef<I,E>                 = FletcherDef<Refuse<E>,I,Noise>;
     ))
   );
   public function toReform():Reform<I,I,E> return Reform.lift(
-    Fletcher.Anon((p:Upshot<I,E>,cont:Terminal<I,Noise>) -> p.fold(
+    Fletcher.Anon((p:Upshot<I,E>,cont:Terminal<I,Nada>) -> p.fold(
       ok -> cont.receive(cont.value(ok)),
       er -> cont.receive(this.forward(er))
     ))
@@ -29,13 +29,13 @@ typedef RecoverDef<I,E>                 = FletcherDef<Refuse<E>,I,Noise>;
   public inline function prj():RecoverDef<I,E>{
     return this;
   }
-  public inline function toFletcher():Fletcher<Refuse<E>,I,Noise>{
+  public inline function toFletcher():Fletcher<Refuse<E>,I,Nada>{
     return Fletcher.lift(this);
   }
 } 
 class RecoverLift{
   static public function toReform<I,E>(self:Recover<I,E>):Reform<I,I,E>{
-    return Reform.lift(Fletcher.Anon((p:Upshot<I,E>,cont:Terminal<I,Noise>) -> {
+    return Reform.lift(Fletcher.Anon((p:Upshot<I,E>,cont:Terminal<I,Nada>) -> {
       return p.fold(
         ok -> cont.value(ok).serve(),
         no -> cont.receive(

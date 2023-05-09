@@ -1,6 +1,6 @@
 package eu.ohmrun.fletcher;
 
-typedef ProposeDef<O,E> = FletcherDef<Noise,Chunk<O,E>,Noise>;
+typedef ProposeDef<O,E> = FletcherDef<Nada,Chunk<O,E>,Nada>;
 
 @:using(eu.ohmrun.fletcher.Propose.ProposeLift)
 abstract Propose<O,E>(ProposeDef<O,E>) from ProposeDef<O,E> to ProposeDef<O,E>{
@@ -29,11 +29,11 @@ abstract Propose<O,E>(ProposeDef<O,E>) from ProposeDef<O,E> to ProposeDef<O,E>{
   @:from @:noUsing static public function fromChunkThunk<O,E>(thunk:Thunk<Chunk<O,E>>):Propose<O,E>{
     return lift(
       Fletcher.Sync(
-        (_:Noise) -> thunk()
+        (_:Nada) -> thunk()
       )
     );
   }
-  public inline function toFletcher():Fletcher<Noise,Chunk<O,E>,Noise>{
+  public inline function toFletcher():Fletcher<Nada,Chunk<O,E>,Nada>{
     return this;
   }
   public function elide():Propose<Any,E>{
@@ -46,8 +46,8 @@ abstract Propose<O,E>(ProposeDef<O,E>) from ProposeDef<O,E> to ProposeDef<O,E>{
       (next:T,memo:Propose<O,E>) -> Propose.lift(
         memo.toFletcher().then(
           Fletcher.Anon(
-            (res:Chunk<O,E>,cont:Terminal<Chunk<O,E>,Noise>) -> res.fold(
-              (o) -> cont.receive(fn(next,o).forward(Noise)),
+            (res:Chunk<O,E>,cont:Terminal<Chunk<O,E>,Nada>) -> res.fold(
+              (o) -> cont.receive(fn(next,o).forward(Nada)),
               (e) -> cont.value(End(e)).serve(),
               ()  -> cont.value(Tap).serve()
             )
@@ -76,7 +76,7 @@ class ProposeLift{
     return Propose.lift(Fletcher.Then(
       self,
       Fletcher.Anon(
-        (ipt:Chunk<O,E>,cont:Terminal<Chunk<Oi,E>,Noise>) -> ipt.fold(
+        (ipt:Chunk<O,E>,cont:Terminal<Chunk<Oi,E>,Nada>) -> ipt.fold(
           (o) -> cont.receive(next.map(Val).forward(o)),
           (e) -> cont.value(End(e)).serve(),
           ()  -> cont.value(Tap).serve()
@@ -88,7 +88,7 @@ class ProposeLift{
     return Propose.lift(Fletcher.Then(
       self,
       Fletcher.Anon(
-        (ipt:Chunk<O,E>,cont:Terminal<Chunk<Oi,E>,Noise>) -> ipt.fold(
+        (ipt:Chunk<O,E>,cont:Terminal<Chunk<Oi,E>,Nada>) -> ipt.fold(
           (o) -> cont.receive(next.toFletcher().map((res:Upshot<Oi,E>) -> res.toChunk()).forward(o)),
           (e) -> cont.value(End(e)).serve(),
           ()  -> cont.value(Tap).serve()
@@ -110,10 +110,10 @@ class ProposeLift{
       Fletcher.Then(
         self,
         Fletcher.Anon(
-          (ipt:Chunk<O,E>,cont:Terminal<Chunk<O,E>,Noise>) -> ipt.fold(
+          (ipt:Chunk<O,E>,cont:Terminal<Chunk<O,E>,Nada>) -> ipt.fold(
             (o) -> cont.value(Val(o)).serve(),
             (e) -> cont.value(End(e)).serve(),
-            ()  -> cont.receive(or().forward(Noise))
+            ()  -> cont.receive(or().forward(Nada))
           )
         )
       )
@@ -147,8 +147,8 @@ class ProposeLift{
       Fletcher.Then(
         Fletcher.lift(self),
         Fletcher.Anon(
-          (ipt:Chunk<O,E>,cont:Terminal<Chunk<Couple<O,Oi>,E>,Noise>) -> ipt.fold(
-            (o) -> cont.receive(that.map(__.couple.bind(o)).forward(Noise)),
+          (ipt:Chunk<O,E>,cont:Terminal<Chunk<Couple<O,Oi>,E>,Nada>) -> ipt.fold(
+            (o) -> cont.receive(that.map(__.couple.bind(o)).forward(Nada)),
             (e) -> cont.value(End(e)).serve(),
             ()  -> cont.value(Tap).serve()
           )
@@ -161,7 +161,7 @@ class ProposeLift{
       Fletcher.Then(
         self,
         Fletcher.Anon(
-          (ipt:Chunk<O,E>,cont:Terminal<Report<E>,Noise>) -> ipt.fold(
+          (ipt:Chunk<O,E>,cont:Terminal<Report<E>,Nada>) -> ipt.fold(
             o     -> cont.receive(that.forward(o)),
             e     -> cont.value(Report.pure(e)).serve(),
             ()    -> cont.value(Report.unit()).serve()
@@ -190,7 +190,7 @@ class ProposeLift{
     failure = failure ?? (e:Refuse<E>) ->  e.crack();
     return Fletcher._.environment(
       Fletcher.lift(self),
-      Noise,
+      Nada,
       (chunk) -> chunk.fold(
         (o) -> success(Some(o)),
         (e) -> failure(e),

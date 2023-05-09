@@ -1,6 +1,6 @@
 package eu.ohmrun.fletcher;
 
-typedef ProvideDef<O> = ConvertDef<Noise,O>;
+typedef ProvideDef<O> = ConvertDef<Nada,O>;
 @:transitive
 @:using(eu.ohmrun.fletcher.Provide.ProvideLift)
 @:forward abstract Provide<O>(ProvideDef<O>) from ProvideDef<O> to ProvideDef<O> 
@@ -9,34 +9,34 @@ typedef ProvideDef<O> = ConvertDef<Noise,O>;
   public inline function new(self) this = self;
   static public inline function lift<O>(self:ProvideDef<O>):Provide<O> return new Provide(self);
 
-  // @:from static public inline function fromFunTerminalWork<O>(fn:Terminal<O,Noise>->Work):Provide<O>{
+  // @:from static public inline function fromFunTerminalWork<O>(fn:Terminal<O,Nada>->Work):Provide<O>{
   //   return lift(
   //     Fletcher.Anon(
-  //       (i:Noise,cont:Terminal<O,Noise>) -> fn(cont)
+  //       (i:Nada,cont:Terminal<O,Nada>) -> fn(cont)
   //     )
   //   );
   // }
   @:noUsing static public inline function pure<O>(v:O):Provide<O>{
-    return lift(Fletcher.Sync((_:Noise) -> v));
+    return lift(Fletcher.Sync((_:Nada) -> v));
   }
   @:noUsing static public inline function fromFuture<O>(future:Future<O>):Provide<O>{
     return lift(
-      Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> cont.receive(cont.later(future.map(__.success))))
+      Fletcher.Anon((_:Nada,cont:Terminal<O,Nada>) -> cont.receive(cont.later(future.map(__.success))))
     );
   }
   @:from static public inline function fromFunXR<O>(fn:Void->O):Provide<O>{
     return lift(
-      Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> cont.value(fn()).serve())
+      Fletcher.Anon((_:Nada,cont:Terminal<O,Nada>) -> cont.value(fn()).serve())
     );
   }
   @:from static public inline function fromFunXFuture<O>(fn:Void->Future<O>):Provide<O>{
     return lift(
-      Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> cont.later(fn().map(__.success)).serve())
+      Fletcher.Anon((_:Nada,cont:Terminal<O,Nada>) -> cont.later(fn().map(__.success)).serve())
     );
   }
-  @:noUsing static public inline function fromFunTerminalWork<O>(fn:Terminal<O,Noise>->Work):Provide<O>{
+  @:noUsing static public inline function fromFunTerminalWork<O>(fn:Terminal<O,Nada>->Work):Provide<O>{
     return lift(
-      Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> fn(cont))
+      Fletcher.Anon((_:Nada,cont:Terminal<O,Nada>) -> fn(cont))
     );
   }
   static public inline function bind_fold<T,O>(fn:Convert<Couple<T,O>,O>,arr:Iter<T>,seed:O):Provide<O>{
@@ -51,7 +51,7 @@ typedef ProvideDef<O> = ConvertDef<Noise,O>;
       Provide.pure(seed)
     );
   }
-  @:to public inline function toFletcher():Fletcher<Noise,O,Noise>{
+  @:to public inline function toFletcher():Fletcher<Nada,O,Nada>{
     return this;
   }
   public function prj():ProvideDef<O> return this;
@@ -67,7 +67,7 @@ class ProvideLift{
   static public inline function environment<O>(self:Provide<O>,handler:O->Void,?pos:Pos):Fiber{
     return Fletcher._.environment(
       self,
-      Noise,
+      Nada,
       (o) -> {
         handler(o);
       },
@@ -109,9 +109,9 @@ class ProvideLift{
     );
   }
   static public inline function fudge<O>(self:Provide<O>):O{
-    return Fletcher._.fudge(self,Noise);
+    return Fletcher._.fudge(self,Nada);
   }
-  static public function then<O,Oi>(self:ProvideDef<O>,that:Fletcher<O,Oi,Noise>):Provide<Oi>{
+  static public function then<O,Oi>(self:ProvideDef<O>,that:Fletcher<O,Oi,Nada>):Provide<Oi>{
     return Provide.lift(Fletcher.Then(self,that));
   }
   static public function zip<Oi,Oii>(self:ProvideDef<Oi>,that:ProvideDef<Oii>):Provide<Couple<Oi,Oii>>{

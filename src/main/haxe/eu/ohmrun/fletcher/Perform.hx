@@ -1,20 +1,20 @@
 package eu.ohmrun.fletcher;
 
-typedef PerformDef = FletcherDef<Noise,Noise,Noise>;
+typedef PerformDef = FletcherDef<Nada,Nada,Nada>;
 
 abstract Perform(PerformDef) from PerformDef to PerformDef{
   public inline function new(self) this = self;
   static public inline function lift(self:PerformDef):Perform return new Perform(self);
   
   
-  public inline function toFletcher():Fletcher<Noise,Noise,Noise> return this;
-  public function toModulate<E>():Modulate<Noise,Noise,E>{
+  public inline function toFletcher():Fletcher<Nada,Nada,Nada> return this;
+  public function toModulate<E>():Modulate<Nada,Nada,E>{
     return Modulate.lift(
       Fletcher.Anon(
-        (_:Upshot<Noise,E>,cont:Terminal<Upshot<Noise,E>,Noise>) -> {
+        (_:Upshot<Nada,E>,cont:Terminal<Upshot<Nada,E>,Nada>) -> {
           return cont.receive(
             //CPP fix 08/11/22
-            Fletcher.FletcherLift.map(this,(_:Noise) -> __.accept(_)).forward(Noise)
+            Fletcher.FletcherLift.map(this,(_:Nada) -> __.accept(_)).forward(Nada)
           );
         }
       )

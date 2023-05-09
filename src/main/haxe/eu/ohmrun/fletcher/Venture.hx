@@ -1,6 +1,6 @@
 package eu.ohmrun.fletcher;
 
-typedef VentureDef<P,R,E> = FletcherApi<P,Receipt<R,E>,Noise>;
+typedef VentureDef<P,R,E> = FletcherApi<P,Receipt<R,E>,Nada>;
 
 @:using(eu.ohmrun.fletcher.Venture.VentureLift)
 abstract Venture<P,R,E>(VentureDef<P,R,E>) from VentureDef<P,R,E> to VentureDef<P,R,E>{

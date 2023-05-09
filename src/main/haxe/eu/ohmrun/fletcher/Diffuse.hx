@@ -1,6 +1,6 @@
 package eu.ohmrun.fletcher;
 
-typedef DiffuseDef<I,O,E> = FletcherDef<Chunk<I,E>,Chunk<O,E>,Noise>;
+typedef DiffuseDef<I,O,E> = FletcherDef<Chunk<I,E>,Chunk<O,E>,Nada>;
 
 @:using(eu.ohmrun.fletcher.Diffuse.DiffuseDef)
 abstract Diffuse<I,O,E>(DiffuseDef<I,O,E>) from DiffuseDef<I,O,E> to DiffuseDef<I,O,E>{
@@ -18,7 +18,7 @@ abstract Diffuse<I,O,E>(DiffuseDef<I,O,E>) from DiffuseDef<I,O,E> to DiffuseDef<
   @:from static public function fromFunIOptionR<I,O,E>(fn:I->Option<O>):Diffuse<I,O,E>{
     return lift(
       Fletcher.Anon(
-        (ipt:Chunk<I,E>,cont:Terminal<Chunk<O,E>,Noise>) -> {
+        (ipt:Chunk<I,E>,cont:Terminal<Chunk<O,E>,Nada>) -> {
           return ipt.fold(
             (o) -> cont.value(fn(o).fold(
               (o) -> Val(o),
@@ -34,7 +34,7 @@ abstract Diffuse<I,O,E>(DiffuseDef<I,O,E>) from DiffuseDef<I,O,E> to DiffuseDef<
   @:from static public function fromOptionIR<I,O,E>(fn:Option<I>->O):Diffuse<I,O,E>{
     return lift(
       Fletcher.Anon(
-        (ipt:Chunk<I,E>,cont:Terminal<Chunk<O,E>,Noise>) -> {
+        (ipt:Chunk<I,E>,cont:Terminal<Chunk<O,E>,Nada>) -> {
           return ipt.fold(
            (i)  -> cont.value(Val(fn(Some(i)))).serve(),
            (e)  -> cont.value(End(e)).serve(),
@@ -48,7 +48,7 @@ abstract Diffuse<I,O,E>(DiffuseDef<I,O,E>) from DiffuseDef<I,O,E> to DiffuseDef<
   private var self(get,never):Diffuse<I,O,E>;
   private function get_self():Diffuse<I,O,E> return lift(this);
 
-  public inline function toFletcher():Fletcher<Chunk<I,E>,Chunk<O,E>,Noise>{
+  public inline function toFletcher():Fletcher<Chunk<I,E>,Chunk<O,E>,Nada>{
     return Fletcher.lift(this);
   }
 }
@@ -57,7 +57,7 @@ class DiffuseLift{
   static public function attempt<P,Oi,Oii,E>(self:DiffuseDef<P,Oi,E>,that:Attempt<Oi,Oii,E>):Diffuse<P,Oii,E>{
     return lift(self.then(
       Fletcher.Anon(
-        (chk:Chunk<Oi,E>,cont:Terminal<Chunk<Oii,E>,Noise>) -> cont.receive(
+        (chk:Chunk<Oi,E>,cont:Terminal<Chunk<Oii,E>,Nada>) -> cont.receive(
           chk.fold(
             ok -> that.toFletcher().map(Upshot._.toChunk).forward(ok),
             no -> cont.value(End(no)),
@@ -70,7 +70,7 @@ class DiffuseLift{
   static public function adjust<P,Oi,Oii,E>(self:DiffuseDef<P,Oi,E>,that:Oi->Upshot<Oii,E>):Diffuse<P,Oii,E>{
     return lift(self.then(
       Fletcher.Anon(
-        (chk:Chunk<Oi,E>,cont:Terminal<Chunk<Oii,E>,Noise>) -> cont.receive(
+        (chk:Chunk<Oi,E>,cont:Terminal<Chunk<Oii,E>,Nada>) -> cont.receive(
           chk.fold(
             ok -> cont.value(that(ok).toChunk()),
             no -> cont.value(End(no)),

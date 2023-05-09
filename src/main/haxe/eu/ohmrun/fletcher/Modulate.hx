@@ -58,10 +58,10 @@ abstract ModulateArg<P,R,E>(ModulateArgSum<P,R,E>) from ModulateArgSum<P,R,E> to
 		}
 	}
 }
-interface ModulateApi<I, O, E> extends FletcherApi<Upshot<I, E>, Upshot<O, E>, Noise>{
+interface ModulateApi<I, O, E> extends FletcherApi<Upshot<I, E>, Upshot<O, E>, Nada>{
 	
 }
-typedef ModulateDef<I, O, E> = FletcherDef<Upshot<I, E>, Upshot<O, E>, Noise>;
+typedef ModulateDef<I, O, E> = FletcherDef<Upshot<I, E>, Upshot<O, E>, Nada>;
 
 //@:using(eu.ohmrun.Fletcher.Lift)
 @:using(eu.ohmrun.fletcher.Modulate.ModulateLift)
@@ -74,7 +74,7 @@ typedef ModulateDef<I, O, E> = FletcherDef<Upshot<I, E>, Upshot<O, E>, Noise>;
 	@:from static public function fromApi<P,Pi,E>(self:ModulateApi<P,Pi,E>){
     return lift(self); 
   }
-	@:noUsing static public inline function lift<I, O, E>(self:FletcherDef<Upshot<I, E>, Upshot<O, E>, Noise>):Modulate<I, O, E> {
+	@:noUsing static public inline function lift<I, O, E>(self:FletcherDef<Upshot<I, E>, Upshot<O, E>, Nada>):Modulate<I, O, E> {
 		return new Modulate(self);
 	}
 	@:noUsing static public inline function bump<I, O, E>(self:ModulateArg<I,O,E>):Modulate<I, O, E> {
@@ -143,14 +143,14 @@ typedef ModulateDef<I, O, E> = FletcherDef<Upshot<I, E>, Upshot<O, E>, Noise>;
 			Fletcher.Anon(
 				(i:Upshot<I, E>, cont:Waypoint<O,E>) -> 
 					i.fold(
-						(i) -> cont.receive(arw(i).forward(Noise)), 
+						(i) -> cont.receive(arw(i).forward(Nada)), 
 						e -> cont.receive(cont.value(__.reject(e)))
 					)
 			)
 		);
 	}
 
-	@:to public function toFletcher():Fletcher<Upshot<I, E>, Upshot<O, E>, Noise> return this;
+	@:to public function toFletcher():Fletcher<Upshot<I, E>, Upshot<O, E>, Nada> return this;
 
 	public inline function environment(i:I, success:O->Void, ?failure:Refuse<E>->Void):Fiber {
 		return _.environment(this, i, success, failure);
@@ -170,20 +170,20 @@ typedef ModulateDef<I, O, E> = FletcherDef<Upshot<I, E>, Upshot<O, E>, Noise>;
 	public inline function flat_map<Oi>(fn:O->Modulate<I,Oi,E>):Modulate<I,Oi,E>{
 		return _.flat_map(this,fn);
 	}
-	public inline function prj():FletcherDef<Upshot<I,E>,Upshot<O,E>,Noise>{
+	public inline function prj():FletcherDef<Upshot<I,E>,Upshot<O,E>,Nada>{
 		return this;
 	}
 }
 
 class ModulateLift {
-	static private function lift<I, O, E>(self:FletcherDef<Upshot<I, E>, Upshot<O, E>, Noise>):Modulate<I, O, E> {
+	static private function lift<I, O, E>(self:FletcherDef<Upshot<I, E>, Upshot<O, E>, Nada>):Modulate<I, O, E> {
 		return new Modulate(self);
 	}
 
 	static public function or<Ii, Iii, O, E>(self:ModulateDef<Ii, O, E>, that:Modulate<Iii, O, E>):Modulate<Either<Ii, Iii>, O, E> {
 		return lift(
 			Fletcher.Anon(
-				(ipt:Upshot<Either<Ii, Iii>, E>, cont:Terminal<Upshot<O, E>, Noise>) -> 
+				(ipt:Upshot<Either<Ii, Iii>, E>, cont:Terminal<Upshot<O, E>, Nada>) -> 
 					ipt.fold(
 						ok -> cont.receive(ok.fold(
 							lhs -> self.forward(__.accept(lhs)),
@@ -257,7 +257,7 @@ class ModulateLift {
 	}
 
 	static public function produce<I, O, E>(self:ModulateDef<I, O, E>, i:Upshot<I,E>):Produce<O, E> {
-		return Produce.lift(Fletcher.Anon((_:Noise, cont) -> cont.receive(self.forward(i))));
+		return Produce.lift(Fletcher.Anon((_:Nada, cont) -> cont.receive(self.forward(i))));
 	}
 
 	static public function reclaim<I, O, Oi, E>(self:ModulateDef<I, O, E>, that:Convert<O, Produce<Oi, E>>):Modulate<I, Oi, E> {
@@ -265,7 +265,7 @@ class ModulateLift {
 			that.toModulate()).attempt(
 				Attempt.lift(
 				Fletcher.Anon(
-						(prd:Produce<Oi, E>, cont:Waypoint<Oi,E>) -> cont.receive(prd.forward(Noise))
+						(prd:Produce<Oi, E>, cont:Waypoint<Oi,E>) -> cont.receive(prd.forward(Nada))
 					)
 				)		
 			)
@@ -273,7 +273,7 @@ class ModulateLift {
 	}
 
 	static public function arrange<I, O, Oi, E>(self:ModulateDef<I, O, E>, then:Arrange<O, I, Oi, E>):Modulate<I, Oi, E> {
-		return lift(Fletcher.Anon((i:Upshot<I, E>, cont:Terminal<Upshot<Oi, E>, Noise>) -> cont.receive(self.forward(i).flat_fold(
+		return lift(Fletcher.Anon((i:Upshot<I, E>, cont:Terminal<Upshot<Oi, E>, Nada>) -> cont.receive(self.forward(i).flat_fold(
 				res -> then.forward(res.zip(i)),
 				e 	-> cont.error(e)
 			))
@@ -309,7 +309,7 @@ class ModulateLift {
       Fletcher.Then(
         self,
         Fletcher.Anon(
-          (ipt:Upshot<O,E>,cont:Terminal<Upshot<O,E>,Noise>) -> ipt.fold(
+          (ipt:Upshot<O,E>,cont:Terminal<Upshot<O,E>,Nada>) -> ipt.fold(
             o -> cont.receive(that.produce(Produce.pure(o)).forward(o)),
             e -> cont.receive(cont.value(__.reject(e)))
           )

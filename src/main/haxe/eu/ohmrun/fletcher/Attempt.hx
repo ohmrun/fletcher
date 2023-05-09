@@ -35,7 +35,7 @@ abstract AttemptArg<I,O,E>(AttemptArgSum<I,O,E>) from AttemptArgSum<I,O,E> to At
     return AttemptArgPure(r);
   }
 }
-typedef AttemptDef<I,O,E>               = FletcherDef<I,Upshot<O,E>,Noise>;
+typedef AttemptDef<I,O,E>               = FletcherDef<I,Upshot<O,E>,Nada>;
 
 @:using(eu.ohmrun.fletcher.Attempt.AttemptLift)
 @:forward abstract Attempt<I,O,E>(AttemptDef<I,O,E>) from AttemptDef<I,O,E> to AttemptDef<I,O,E>{
@@ -61,7 +61,7 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Upshot<O,E>,Noise>;
 
   static public function unit<I,E>():Attempt<I,I,E>{
     return lift(
-      Fletcher.Anon((i:I,cont:Terminal<Upshot<I,E>,Noise>) -> {
+      Fletcher.Anon((i:I,cont:Terminal<Upshot<I,E>,Nada>) -> {
         return cont.receive(cont.value(__.accept(i)));
       })
     );
@@ -86,7 +86,7 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Upshot<O,E>,Noise>;
   @:from static public function fromFun1Produce<Pi,O,E>(fn:Pi->Produce<O,E>):Attempt<Pi,O,E>{
     return lift(
       Fletcher.Anon((pI:Pi,cont:Waypoint<O,E>) -> {
-        return cont.receive(fn(pI).forward(Noise));
+        return cont.receive(fn(pI).forward(Nada));
       })
     );
   }
@@ -105,7 +105,7 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Upshot<O,E>,Noise>;
           return cont.receive(
             Produce.lift(
               rest.convert(Fletcher.Sync(__.accept))
-            ).forward(Noise)
+            ).forward(Nada)
           );
         }
       )
@@ -116,7 +116,7 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Upshot<O,E>,Noise>;
       Fletcher.Anon((i,cont) -> cont.receive(cont.value(__.accept(fn(i)))))
     );
   }
-  @:to public inline function toFletcher():Fletcher<I,Upshot<O,E>,Noise>{
+  @:to public inline function toFletcher():Fletcher<I,Upshot<O,E>,Nada>{
     return this;
   }
   public function toModulate():Modulate<I,O,E>{
@@ -144,7 +144,7 @@ class AttemptLift{
   static public function then<I,O,Oi,E>(self:AttemptDef<I,O,E>,that:Modulate<O,Oi,E>):Attempt<I,Oi,E>{
     return lift(Fletcher.Then(self,that));
   }
-  static public function rectify<I,O,Oi,E>(self:AttemptDef<I,O,E>,next:Reform<O,Oi,E>):Fletcher<I,Oi,Noise>{
+  static public function rectify<I,O,Oi,E>(self:AttemptDef<I,O,E>,next:Reform<O,Oi,E>):Fletcher<I,Oi,Nada>{
     return Fletcher.lift(Fletcher.Then(lift(self).toFletcher(),next.toFletcher()));
   }
   static public function resolve<I,O,E>(self:AttemptDef<I,O,E>,next:Resolve<O,E>):Attempt<I,O,E>{
@@ -157,8 +157,8 @@ class AttemptLift{
         next.toModulate()
       ).attempt(
         lift(Fletcher.Anon(
-          (prd:Produce<Oi,E>,cont:Terminal<Upshot<Oi,E>,Noise>) ->
-            cont.receive(prd.forward(Noise))
+          (prd:Produce<Oi,E>,cont:Terminal<Upshot<Oi,E>,Nada>) ->
+            cont.receive(prd.forward(Nada))
         ))
       )
     );
@@ -184,7 +184,7 @@ class AttemptLift{
   static public function broach<I,O,E>(self:AttemptDef<I,O,E>):Attempt<I,Couple<I,O>,E>{
     return Attempt.lift(
       Fletcher.Anon(
-        (ipt:I,cont:Terminal<Upshot<Couple<I,O>,E>,Noise>) -> {
+        (ipt:I,cont:Terminal<Upshot<Couple<I,O>,E>,Nada>) -> {
           return cont.receive(
             lift(self).map(
               (o:O) -> __.couple(ipt,o)
@@ -197,7 +197,7 @@ class AttemptLift{
   static public function provide<I,O,E>(self:AttemptDef<I,O,E>,i:I):Produce<O,E>{
     return Produce.lift(
       Fletcher.Anon(
-        (_:Noise,cont) -> cont.receive(self.forward(i))
+        (_:Nada,cont) -> cont.receive(self.forward(i))
       )
    );
   }  
@@ -224,7 +224,7 @@ class AttemptLift{
         self,
         Fletcher.Anon(
           (ipt:Upshot<O,E>,cont:Waypoint<O,E>) -> ipt.fold(
-            o -> cont.receive(that.produce(Produce.pure(o)).forward(Noise)),
+            o -> cont.receive(that.produce(Produce.pure(o)).forward(Nada)),
             e -> cont.receive(cont.value(__.reject(e)))
           )
         )
@@ -257,7 +257,7 @@ class AttemptLift{
   }
   static public function flat_map<I,O,Oi,E>(self:AttemptDef<I,O,E>,fn:O->Attempt<I,Oi,E>):Attempt<I,Oi,E>{
     return Attempt.lift(Fletcher.Anon(
-      (ipt:I,cont:Terminal<Upshot<Oi,E>,Noise>) -> cont.receive(
+      (ipt:I,cont:Terminal<Upshot<Oi,E>,Nada>) -> cont.receive(
         self.forward(ipt).flat_map(
           res -> res.fold(
             ok -> fn(ok).forward(ipt),
@@ -268,7 +268,7 @@ class AttemptLift{
     ));
   }
   static public function produce<P, R, E>(self:AttemptDef<P, R, E>, i:P):Produce<R, E> {
-		return Produce.lift(Fletcher.Anon((_:Noise, cont) -> cont.receive(self.forward(i))));
+		return Produce.lift(Fletcher.Anon((_:Nada, cont) -> cont.receive(self.forward(i))));
 	}
   static public function adjust<P,R,Ri,E>(self:AttemptDef<P,R,E>,fn:R->Upshot<Ri,E>):Attempt<P,Ri,E>{
     return lift(Fletcher._.then(

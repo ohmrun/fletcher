@@ -7,7 +7,7 @@ enum ProduceArgSum<O,E>{
   ProduceArgRefuse(Refuse:Refuse<E>);
   ProduceArgPledge(pledge:Pledge<O,E>);
   ProduceArgFunXProduce(fn:Void->Produce<O,E>);
-  ProduceArgFletcher(fletcher:Fletcher<Noise,O,E>);
+  ProduceArgFletcher(fletcher:Fletcher<Nada,O,E>);
 }
 abstract ProduceArg<O,E>(ProduceArgSum<O,E>) from ProduceArgSum<O,E> to ProduceArgSum<O,E>{
   public function new(self) this = self;
@@ -20,7 +20,7 @@ abstract ProduceArg<O,E>(ProduceArgSum<O,E>) from ProduceArgSum<O,E> to ProduceA
   @:from static public function fromFunXProduce<O,E>(fn:Void->Produce<O,E>):ProduceArg<O,E>{
     return ProduceArgFunXProduce(fn);
   }
-  @:from static public function fromFletcher<O,E>(fletcher:Fletcher<Noise,O,E>):ProduceArg<O,E>{
+  @:from static public function fromFletcher<O,E>(fletcher:Fletcher<Nada,O,E>):ProduceArg<O,E>{
     return ProduceArgFletcher(fletcher);
   }
   @:from static public function fromPledge<O,E>(pledge:Pledge<O,E>):ProduceArg<O,E>{
@@ -42,7 +42,7 @@ abstract ProduceArg<O,E>(ProduceArgSum<O,E>) from ProduceArgSum<O,E> to ProduceA
     return ProduceArgPure(o);
   }
 }
-typedef ProduceDef<O,E> = FletcherDef<Noise,Upshot<O,E>,Noise>;
+typedef ProduceDef<O,E> = FletcherDef<Nada,Upshot<O,E>,Nada>;
 
 @:using(eu.ohmrun.fletcher.Produce.ProduceLift)
 @:forward(then) abstract Produce<O,E>(ProduceDef<O,E>) from ProduceDef<O,E> to ProduceDef<O,E>{
@@ -65,17 +65,17 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Upshot<O,E>,Noise>;
   }
   @:noUsing static public function Sync<O,E>(result:Upshot<O,E>):Produce<O,E>{
     return Produce.lift(
-      Fletcher.Anon((_:Noise,cont) -> cont.receive(cont.value(result)))
+      Fletcher.Anon((_:Nada,cont) -> cont.receive(cont.value(result)))
     );
   }
   @:noUsing static public function Thunk<O,E>(result:Thunk<Upshot<O,E>>):Produce<O,E>{
     return Produce.lift(
-      Fletcher.Anon((_:Noise,cont) -> cont.receive(cont.value(result())))
+      Fletcher.Anon((_:Nada,cont) -> cont.receive(cont.value(result())))
     );
   }
   @:from @:noUsing static public function fromFunXProduce<O,E>(self:Void->Produce<O,E>):Produce<O,E>{
     return lift(Fletcher.Anon(
-      (_:Noise,cont:Terminal<Upshot<O,E>,Noise>) -> cont.receive(self().forward(Noise))
+      (_:Nada,cont:Terminal<Upshot<O,E>,Nada>) -> cont.receive(self().forward(Nada))
     ));
   }
   @:noUsing static public function fromRefuse<O,E>(e:Refuse<E>):Produce<O,E>{
@@ -100,7 +100,7 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Upshot<O,E>,Noise>;
   @:from @:noUsing static public function fromPledge<O,E>(pl:Pledge<O,E>):Produce<O,E>{
     return lift(
       Fletcher.Anon(      
-        (_:Noise,cont:Terminal<Upshot<O,E>,Noise>) -> {
+        (_:Nada,cont:Terminal<Upshot<O,E>,Nada>) -> {
           return cont.receive(cont.later(
             pl.fold(
               (x) -> __.success(__.accept(x)),
@@ -115,14 +115,14 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Upshot<O,E>,Noise>;
   @:noUsing static public function fromFunXR<O,E>(fn:Void->O):Produce<O,E>{
     return lift(
       Fletcher.fromFun1R(
-        (_:Noise) -> __.accept(fn())
+        (_:Nada) -> __.accept(fn())
       )
     ); 
   }
-  @:noUsing static public function fromFletcher<O,E>(arw:Fletcher<Noise,O,E>):Produce<O,E>{
+  @:noUsing static public function fromFletcher<O,E>(arw:Fletcher<Nada,O,E>):Produce<O,E>{
     return lift(
-      Fletcher.Anon((_:Noise,cont:Waypoint<O,E>) -> cont.receive(
-          arw.forward(Noise).fold_mapp(
+      Fletcher.Anon((_:Nada,cont:Waypoint<O,E>) -> cont.receive(
+          arw.forward(Nada).fold_mapp(
             (ok:O)          -> __.success(__.accept(ok)),
             (no:Defect<E>)  -> __.success(__.reject(no.toRefuse()))
           )
@@ -141,7 +141,7 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Upshot<O,E>,Noise>;
   }
   static public function parallel<P,O,R,E>(data:Iter<P>,fn:P->Cell<Upshot<R,E>>->Produce<R,E>,r:R):Produce<R,E>{
     return lift(Fletcher.Anon(
-      (_:Noise,cont:Waypoint<R,E>) -> {
+      (_:Nada,cont:Waypoint<R,E>) -> {
         var memo                          = r;
         var fail    : Null<Refuse<E>>  = null;
         final cell  = Cell.make(
@@ -180,13 +180,13 @@ typedef ProduceDef<O,E> = FletcherDef<Noise,Upshot<O,E>,Noise>;
   }
   static public function fromProvide<O,E>(self:Provide<Upshot<O,E>>):Produce<O,E>{
     return Produce.lift(Fletcher.Anon(
-      (_:Noise,cont:Terminal<Upshot<O,E>,Noise>) -> cont.receive(self.forward(Noise))
+      (_:Nada,cont:Terminal<Upshot<O,E>,Nada>) -> cont.receive(self.forward(Nada))
     ));
   }
   public inline function environment(success:O->Void,?failure:Refuse<E>->Void){
     return _.environment(this,success,failure);
   }
-  @:to public inline function toFletcher():Fletcher<Noise,Upshot<O,E>,Noise>{
+  @:to public inline function toFletcher():Fletcher<Nada,Upshot<O,E>,Nada>{
     return this;
   }
   @:to public function toPropose():Propose<O,E>{
@@ -210,7 +210,7 @@ class ProduceLift{
     failure = failure ?? (e:Refuse<E>) ->  e.crack();
     return Fletcher._.environment(
       self,
-      Noise,
+      Nada,
       (res:Upshot<O,E>) -> {
         res.fold(success,failure);
       },
@@ -243,10 +243,10 @@ class ProduceLift{
   static public function point<O,E>(self:ProduceDef<O,E>,success:O->Execute<E>):Execute<E>{
     return Execute.lift(
       Fletcher.Anon(
-        (_:Noise,cont:Terminal<Report<E>,Noise>) -> cont.receive(
-          self.forward(Noise).flat_fold(
+        (_:Nada,cont:Terminal<Report<E>,Nada>) -> cont.receive(
+          self.forward(Nada).flat_fold(
             res -> res.fold(
-              ok -> success(ok).forward(Noise),
+              ok -> success(ok).forward(Nada),
               er -> cont.value(Report.pure(er))
             ),
             err -> cont.error(err)
@@ -293,13 +293,13 @@ class ProduceLift{
         next.toModulate().toFletcher()
       )).attempt(
         Attempt.lift(Fletcher.Anon(
-          (prd:Produce<Oi,E>,cont:Terminal<Upshot<Oi,E>,Noise>) -> cont.receive(prd.forward(Noise))
+          (prd:Produce<Oi,E>,cont:Terminal<Upshot<Oi,E>,Nada>) -> cont.receive(prd.forward(Nada))
         ))
       );
   }
   static public function arrange<S,O,Oi,E>(self:ProduceDef<O,E>,next:Arrange<O,S,Oi,E>):Attempt<S,Oi,E>{
     return Attempt.lift(Fletcher.Anon(
-      (i:S,cont:Terminal<Upshot<Oi,E>,Noise>) -> cont.receive(self.forward(Noise).flat_fold(
+      (i:S,cont:Terminal<Upshot<Oi,E>,Nada>) -> cont.receive(self.forward(Nada).flat_fold(
         res -> next.forward(res.map(__.couple.bind(_,i))),
         err -> cont.error(err)
       ))
@@ -308,8 +308,8 @@ class ProduceLift{
   static public function rearrange<S,O,Oi,E>(self:ProduceDef<O,E>,next:Arrange<Upshot<O,E>,S,Oi,E>):Attempt<S,Oi,E>{
     return Attempt.lift(
       Fletcher.Anon(
-        (i:S,cont:Terminal<Upshot<Oi,E>,Noise>) -> 
-          cont.receive(self.forward(Noise).flat_fold(
+        (i:S,cont:Terminal<Upshot<Oi,E>,Nada>) -> 
+          cont.receive(self.forward(Nada).flat_fold(
             res -> next.forward(__.accept(__.couple(res,i))),
             no  -> cont.error(no)
           ))
@@ -320,10 +320,10 @@ class ProduceLift{
     return lift(self.then(that));
   }
   static public inline function fudge<O,E>(self:ProduceDef<O,E>):O{
-    return Fletcher._.fudge(self,Noise).fudge();
+    return Fletcher._.fudge(self,Nada).fudge();
   }
   static public inline function force<O,E>(self:ProduceDef<O,E>):Upshot<O,E>{
-    return Fletcher._.force(self,Noise).fudge();
+    return Fletcher._.force(self,Nada).fudge();
   }
   static public function flat_map<O,Oi,E>(self:ProduceDef<O,E>,that:O->Produce<Oi,E>):Produce<Oi,E>{
     return lift(
@@ -344,7 +344,7 @@ class ProduceLift{
       )
     );
   }
-  static public function then<O,Oi,E>(self:ProduceDef<O,E>,that:Fletcher<Upshot<O,E>,Oi,Noise>):Provide<Oi>{
+  static public function then<O,Oi,E>(self:ProduceDef<O,E>,that:Fletcher<Upshot<O,E>,Oi,Nada>):Provide<Oi>{
     return Provide.lift(Fletcher.Then(self,that));
   }
   static public function split<O,Oi,E>(self:ProduceDef<O,E>,that:Produce<Oi,E>):Produce<Couple<O,Oi>,E>{
@@ -362,10 +362,10 @@ class ProduceLift{
   }
   static public function pledge<O,E>(self:ProduceDef<O,E>):Pledge<O,E>{
     return Pledge.lift(
-      (Fletcher._.future(self,Noise)).map(
-        (outcome:Outcome<Upshot<O,E>,Defect<Noise>>) -> (outcome.fold(
+      (Fletcher._.future(self,Nada)).map(
+        (outcome:Outcome<Upshot<O,E>,Defect<Nada>>) -> (outcome.fold(
           (x:Upshot<O,E>)      -> x,
-          (e:Defect<Noise>) -> __.reject(e.elide().toRefuse())
+          (e:Defect<Nada>) -> __.reject(e.elide().toRefuse())
         ))
       )
     );
@@ -373,7 +373,7 @@ class ProduceLift{
   static public function toModulate<P,R,E>(self:ProduceDef<R,E>):Modulate<P,R,E>{
     return Modulate.lift(
       Fletcher.Anon(
-        (p:Upshot<P,E>,cont:Waypoint<R,E>) -> cont.receive(self.forward(Noise))
+        (p:Upshot<P,E>,cont:Waypoint<R,E>) -> cont.receive(self.forward(Nada))
       )
     );
   }
@@ -391,7 +391,7 @@ class ProduceLift{
       Fletcher.Then(
         self,
         Fletcher.Anon(
-          (res:Upshot<O,E>,cont:Terminal<Report<E>,Noise>) -> res.fold(
+          (res:Upshot<O,E>,cont:Terminal<Report<E>,Nada>) -> res.fold(
             ok -> cmd.defer(ok,cont),
             no -> cont.receive(cont.value(__.report(_ -> no)))
           )

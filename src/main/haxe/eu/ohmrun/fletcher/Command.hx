@@ -1,6 +1,6 @@
 package eu.ohmrun.fletcher;
 
-typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Noise>;
+typedef CommandDef<I,E>                 = FletcherDef<I,Report<E>,Nada>;
 
 
 enum CommandArgSum<I,E>{
@@ -64,9 +64,9 @@ abstract CommandArg<I,E>(CommandArgSum<I,E>) from CommandArgSum<I,E> to CommandA
   static public function fromFun1OptionRefuse<I,E>(fn:I->Option<Refuse<E>>):Command<I,E>{
     return lift(Fletcher.fromFun1R((i) -> Report.fromOption(fn(i))));
   } 
-  static public function fromFletcher<I,E>(self:Fletcher<I,Noise,E>):Command<I,E>{
+  static public function fromFletcher<I,E>(self:Fletcher<I,Nada,E>):Command<I,E>{
     return lift(
-      Fletcher.Anon((p:I,cont:Terminal<Report<E>,Noise>) -> cont.receive(
+      Fletcher.Anon((p:I,cont:Terminal<Report<E>,Nada>) -> cont.receive(
         self.forward(p).fold_mapp(
           _ -> __.success(__.report()),
           e -> __.success(e.toRefuse().report())
@@ -77,9 +77,9 @@ abstract CommandArg<I,E>(CommandArgSum<I,E>) from CommandArgSum<I,E> to CommandA
   static public function fromFun1Execute<I,E>(fn:I->Execute<E>):Command<I,E>{
     return lift(
       Fletcher.Anon(
-        (i:I,cont:Terminal<Report<E>,Noise>) -> {
+        (i:I,cont:Terminal<Report<E>,Nada>) -> {
           __.log().debug(_ -> _.pure(i));
-          return cont.receive(fn(i).forward(Noise));
+          return cont.receive(fn(i).forward(Nada));
         }
       )
     );
@@ -103,7 +103,7 @@ abstract CommandArg<I,E>(CommandArgSum<I,E>) from CommandArgSum<I,E> to CommandA
   public function prj():CommandDef<I,E>{
     return this;
   }
-  public inline function toFletcher():Fletcher<I,Report<E>,Noise>{
+  public inline function toFletcher():Fletcher<I,Report<E>,Nada>{
     return this;
   }
   public function and(that:Command<I,E>):Command<I,E>{
@@ -118,7 +118,7 @@ abstract CommandArg<I,E>(CommandArgSum<I,E>) from CommandArgSum<I,E> to CommandA
   }
   public function provide(i:I):Execute<E>{
     return Execute.lift(
-      Fletcher.Anon((_:Noise,cont:Terminal<Report<E>,Noise>) -> cont.receive(this.forward(i)))
+      Fletcher.Anon((_:Nada,cont:Terminal<Report<E>,Nada>) -> cont.receive(this.forward(i)))
     );
   }
   private var self(get,never):Command<I,E>;
@@ -145,11 +145,11 @@ class CommandLift{
       Fletcher.Then(
         command.toFletcher(),
         Fletcher.Anon(
-          (ipt:Report<E>,cont:Terminal<Upshot<O,E>,Noise>) -> {
+          (ipt:Report<E>,cont:Terminal<Upshot<O,E>,Nada>) -> {
             __.log().debug(_ -> _.pure(ipt));
             return ipt.fold(
               e   -> cont.receive(cont.value(__.reject(e))),
-              ()  -> cont.receive(prod.forward(Noise))
+              ()  -> cont.receive(prod.forward(Nada))
             );
           }
         )

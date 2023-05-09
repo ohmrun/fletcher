@@ -51,7 +51,7 @@ typedef ArrangeDef<I,S,O,E>             = ModulateDef<Couple<I,S>,O,E>;
   }
   @:noUsing static public function pure<I,S,O,E>(o:O):Arrange<I,S,O,E>{
     return lift(Fletcher.Anon(
-      (i:Upshot<Couple<I,S>,E>,cont:Terminal<Upshot<O,E>,Noise>) -> 
+      (i:Upshot<Couple<I,S>,E>,cont:Terminal<Upshot<O,E>,Nada>) -> 
         cont.receive(
           i.fold(
             i -> cont.value(__.accept(o)),
@@ -62,7 +62,7 @@ typedef ArrangeDef<I,S,O,E>             = ModulateDef<Couple<I,S>,O,E>;
   }
   @:noUsing static public function fromUpshot<I,S,O,E>(res:Upshot<O,E>):Arrange<I,S,O,E>{
     return lift(Fletcher.Anon(
-      (i:Upshot<Couple<I,S>,E>,cont:Terminal<Upshot<O,E>,Noise>) -> 
+      (i:Upshot<Couple<I,S>,E>,cont:Terminal<Upshot<O,E>,Nada>) -> 
         cont.receive(
           i.fold(
             i -> cont.value(res),
@@ -73,7 +73,7 @@ typedef ArrangeDef<I,S,O,E>             = ModulateDef<Couple<I,S>,O,E>;
   }
   @:from static public function fromFun1Attempt<I,S,O,E>(f:I->Attempt<S,O,E>):Arrange<I,S,O,E>{
     return lift(Fletcher.Anon(
-      (i:Upshot<Couple<I,S>,E>,cont:Terminal<Upshot<O,E>,Noise>) -> 
+      (i:Upshot<Couple<I,S>,E>,cont:Terminal<Upshot<O,E>,Nada>) -> 
         i.fold(
           i -> cont.receive(f(i.fst()).forward(i.snd())),
           e -> cont.value(__.reject(e)).serve()
@@ -82,7 +82,7 @@ typedef ArrangeDef<I,S,O,E>             = ModulateDef<Couple<I,S>,O,E>;
   }
   @:from static public function fromFunResAttempt<I,S,O,E>(f:Upshot<I,E>->Attempt<S,O,E>):Arrange<Upshot<I,E>,S,O,E>{
     return lift(Fletcher.Anon(
-      (i:Upshot<Couple<Upshot<I,E>,S>,E>,cont:Terminal<Upshot<O,E>,Noise>) -> 
+      (i:Upshot<Couple<Upshot<I,E>,S>,E>,cont:Terminal<Upshot<O,E>,Nada>) -> 
         i.fold(
           i -> cont.receive(f(i.fst()).forward(i.snd())),
           e -> cont.value(__.reject(e)).serve()
@@ -91,7 +91,7 @@ typedef ArrangeDef<I,S,O,E>             = ModulateDef<Couple<I,S>,O,E>;
   }
   @:from static public function fromFun1Modulate<I,S,O,E>(f:I->Modulate<S,O,E>):Arrange<I,S,O,E>{
     return lift(Fletcher.Anon(
-      (i:Upshot<Couple<I,S>,E>,cont:Terminal<Upshot<O,E>,Noise>) -> 
+      (i:Upshot<Couple<I,S>,E>,cont:Terminal<Upshot<O,E>,Nada>) -> 
         i.fold(
           i -> cont.receive(f(i.fst()).forward(__.accept(i.snd()))),
           e -> cont.value(__.reject(e)).serve()
@@ -100,7 +100,7 @@ typedef ArrangeDef<I,S,O,E>             = ModulateDef<Couple<I,S>,O,E>;
   }
   @:from static public function fromFunResModulate<I,S,O,E>(f:Upshot<I,E>->Modulate<S,O,E>):Arrange<Upshot<I,E>,S,O,E>{
     return lift(Fletcher.Anon(
-      (i:Upshot<Couple<Upshot<I,E>,S>,E>,cont:Terminal<Upshot<O,E>,Noise>) -> 
+      (i:Upshot<Couple<Upshot<I,E>,S>,E>,cont:Terminal<Upshot<O,E>,Nada>) -> 
         i.fold(
           (i) -> cont.receive(f(i.fst()).forward(__.accept(i.snd()))),
           (e) -> cont.value(__.reject(e)).serve()
@@ -109,7 +109,7 @@ typedef ArrangeDef<I,S,O,E>             = ModulateDef<Couple<I,S>,O,E>;
   }
   @:from static public function fromArrangeArgFun1Convert<I,S,O,E>(f:I->Convert<S,O>):Arrange<I,S,O,E>{
     return lift(Fletcher.Anon(
-      (i:Upshot<Couple<I,S>,E>,cont:Terminal<Upshot<O,E>,Noise>) -> {
+      (i:Upshot<Couple<I,S>,E>,cont:Terminal<Upshot<O,E>,Nada>) -> {
         return i.fold(
           i -> cont.receive(f(i.fst()).map(__.accept).forward((i.snd()))),
           e -> cont.value(__.reject(e)).serve()
@@ -133,7 +133,7 @@ typedef ArrangeDef<I,S,O,E>             = ModulateDef<Couple<I,S>,O,E>;
    @:noUsing static public function modifier<I,S,O,E>(fn:I->S->O):Arrange<I,S,O,E>{
      return lift(
        Fletcher.Anon(
-         (res:Upshot<Couple<I,S>,E>,cont:Terminal<Upshot<O,E>,Noise>) -> 
+         (res:Upshot<Couple<I,S>,E>,cont:Terminal<Upshot<O,E>,Nada>) -> 
             res.fold( 
               __.decouple((i:I,s:S) -> cont.value(__.accept(fn(i,s))).serve()),
               (e) -> cont.value(__.reject(e)).serve()
@@ -144,7 +144,7 @@ typedef ArrangeDef<I,S,O,E>             = ModulateDef<Couple<I,S>,O,E>;
    public function split<Oi>(that:Arrange<I,S,Oi,E>):Arrange<I,S,Couple<O,Oi>,E>{
     return _.split(this,that);
    }
-   @:to public inline function toFletcher():Fletcher<Upshot<Couple<I,S>,E>,Upshot<O,E>,Noise>{
+   @:to public inline function toFletcher():Fletcher<Upshot<Couple<I,S>,E>,Upshot<O,E>,Nada>{
      return this;
    }
    @:to public function toModulate():Modulate<Couple<I,S>,O,E>{
@@ -173,7 +173,7 @@ class ArrangeLift{
   static public function errata<I,S,O,E,EE>(self:Arrange<I,S,O,E>,fn:Refuse<E>->Refuse<EE>):Arrange<I,S,O,EE>{
     return Arrange.lift(
       Fletcher.Anon(
-        (res:Upshot<Couple<I,S>,EE>,cont:Terminal<Upshot<O,EE>,Noise>) -> res.fold(
+        (res:Upshot<Couple<I,S>,EE>,cont:Terminal<Upshot<O,EE>,Nada>) -> res.fold(
           i -> cont.receive(
             (
               self.forward(__.accept(i)).map(
@@ -201,7 +201,7 @@ class ArrangeLift{
   static public function cover<I,S,O,E>(self:Arrange<I,S,O,E>,i:I):Modulate<S,O,E>{
     return Modulate.lift(
       Fletcher.Anon(
-        (res:Upshot<S,E>,cont:Terminal<Upshot<O,E>,Noise>) ->  
+        (res:Upshot<S,E>,cont:Terminal<Upshot<O,E>,Nada>) ->  
           cont.receive(
             self.forward(res.map(__.couple.bind(i)))
          )

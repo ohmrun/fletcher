@@ -1,6 +1,6 @@
 package eu.ohmrun.fletcher;
 
-typedef ExecuteDef<E>                   = FletcherDef<Noise,Report<E>,Noise>;
+typedef ExecuteDef<E>                   = FletcherDef<Nada,Report<E>,Nada>;
 
 @:using(eu.ohmrun.fletcher.Execute.ExecuteLift)
 abstract Execute<E>(ExecuteDef<E>) from ExecuteDef<E> to ExecuteDef<E>{
@@ -34,7 +34,7 @@ abstract Execute<E>(ExecuteDef<E>) from ExecuteDef<E> to ExecuteDef<E>{
   @:to public function toProvide():Provide<Report<E>>{
     return this;
   }
-  @:to public inline function toFletcher():Fletcher<Noise,Report<E>,Noise>{
+  @:to public inline function toFletcher():Fletcher<Nada,Report<E>,Nada>{
     return this;
   }
   @:from static public function fromFunXR<E>(fn:Void->Report<E>):Execute<E>{
@@ -69,7 +69,7 @@ abstract Execute<E>(ExecuteDef<E>) from ExecuteDef<E> to ExecuteDef<E>{
     }
     return Fletcher._.environment(
       this,
-      Noise,
+      Nada,
       (report) -> {
         __.log().trace(_ -> _.thunk(() -> 'report'));
         report.fold(
@@ -102,7 +102,7 @@ class ExecuteLift{
       Fletcher.Sync(
         (report) -> {
           fn(report);
-          return Noise;
+          return Nada;
         }
       )
     );
@@ -115,7 +115,7 @@ class ExecuteLift{
       )
     );
   }
-  static public function then<E,O>(self:ExecuteDef<E>,that:Fletcher<Report<E>,O,Noise>):Provide<O>{
+  static public function then<E,O>(self:ExecuteDef<E>,that:Fletcher<Report<E>,O,Nada>):Provide<O>{
     return Provide.lift(Fletcher.Then(
       self,
       that
@@ -125,9 +125,9 @@ class ExecuteLift{
     return Execute.lift(Fletcher.Then(
       self,
       Fletcher.Anon(
-        (ipt:Report<E>,cont:Terminal<Report<E>,Noise>) -> ipt.fold(
+        (ipt:Report<E>,cont:Terminal<Report<E>,Nada>) -> ipt.fold(
           (e) -> cont.receive(cont.value(Report.pure(e))),
-          ()  -> cont.receive(next.forward(Noise))
+          ()  -> cont.receive(next.forward(Nada))
         )
       )
     ));
@@ -139,7 +139,7 @@ class ExecuteLift{
         Fletcher.Anon(
           (ipt:Report<E>,cont:Waypoint<O,E>) -> ipt.fold(
             (e) -> cont.receive(cont.value(__.reject(e))),
-            ()  -> cont.receive(next.forward(Noise))
+            ()  -> cont.receive(next.forward(Nada))
           )
         )
       )
@@ -150,9 +150,9 @@ class ExecuteLift{
       Fletcher.Then(
         self,
         Fletcher.Anon(
-          (ipt:Report<E>,cont:Terminal<Chunk<O,E>,Noise>) -> ipt.fold(
+          (ipt:Report<E>,cont:Terminal<Chunk<O,E>,Nada>) -> ipt.fold(
             (e) -> cont.receive(cont.value(End(e))),
-            ()  -> cont.receive(next.forward(Noise))
+            ()  -> cont.receive(next.forward(Nada))
           )
         )
       )

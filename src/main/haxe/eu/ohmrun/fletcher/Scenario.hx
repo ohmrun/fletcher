@@ -18,7 +18,7 @@ abstract ScenarioArg<P,Ri,Rii,E>(ScenarioArgSum<P,Ri,Rii,E>) from ScenarioArgSum
   //   }
   // }
 }
-typedef ScenarioDef<P,Ri,Rii,E> = FletcherApi<Equity<P,Ri,E>,Equity<P,Rii,E>,Noise>;
+typedef ScenarioDef<P,Ri,Rii,E> = FletcherApi<Equity<P,Ri,E>,Equity<P,Rii,E>,Nada>;
 
 @:using(eu.ohmrun.fletcher.Scenario.ScenarioLift)
 abstract Scenario<P,Ri,Rii,E>(ScenarioDef<P,Ri,Rii,E>) from ScenarioDef<P,Ri,Rii,E> to ScenarioDef<P,Ri,Rii,E>{
@@ -33,7 +33,7 @@ abstract Scenario<P,Ri,Rii,E>(ScenarioDef<P,Ri,Rii,E>) from ScenarioDef<P,Ri,Rii
   private var self(get,never):Scenario<P,Ri,Rii,E>;
   private function get_self():Scenario<P,Ri,Rii,E> return lift(this);
 
-  @:to public function toFletcher():Fletcher<Equity<P,Ri,E>,Equity<P,Rii,E>,Noise>{
+  @:to public function toFletcher():Fletcher<Equity<P,Ri,E>,Equity<P,Rii,E>,Nada>{
     return Fletcher.lift(this);
   }
 }
@@ -42,7 +42,7 @@ class ScenarioLift{
   static public function attempt<P,Ri,Rii,Riii,E>(self:ScenarioDef<P,Ri,Rii,E>,that:Attempt<Rii,Riii,E>):Scenario<P,Ri,Riii,E>{
     return lift(Fletcher.Then(self,
       Fletcher.Anon(
-        function(r:Equity<P,Rii,E>,cont:Terminal<Equity<P,Riii,E>,Noise>){
+        function(r:Equity<P,Rii,E>,cont:Terminal<Equity<P,Riii,E>,Nada>){
           return cont.receive(
             Diffuse.DiffuseLift.attempt(Diffuse.unit(),that).map(chk -> r.rebase(chk)).forward(r.toChunk())
           );
@@ -55,7 +55,7 @@ class ScenarioLift{
     return lift(Fletcher.Then(
       self,
       Fletcher.Anon(
-        function(r:Equity<P,Rii,E>,cont:Terminal<Equity<P,Riii,E>,Noise>){
+        function(r:Equity<P,Rii,E>,cont:Terminal<Equity<P,Riii,E>,Nada>){
           return cont.receive(
             r.has_value().if_else(
               () -> that.map(
@@ -68,11 +68,11 @@ class ScenarioLift{
       )
     ));
   }
-  static public function initiate<P,R,E>(self:ScenarioDef<P,Noise,Noise,E>,that:Attempt<P,R,E>):Scenario<P,Noise,R,E>{
+  static public function initiate<P,R,E>(self:ScenarioDef<P,Nada,Nada,E>,that:Attempt<P,R,E>):Scenario<P,Nada,R,E>{
     return lift(Fletcher.Then(
       self,
       Fletcher.Anon(
-        (r:Equity<P,Noise,E>,cont:Terminal<Equity<P,R,E>,Noise>) -> {
+        (r:Equity<P,Nada,E>,cont:Terminal<Equity<P,R,E>,Nada>) -> {
           return cont.receive(
               that.toFletcher().map(
                 (res:Upshot<R,E>) -> res.fold(
@@ -88,7 +88,7 @@ class ScenarioLift{
   static public function errate<P,Ri,Rii,E,EE>(self:ScenarioDef<P,Ri,Rii,E>,fn:E->EE):Scenario<P,Ri,Rii,EE>{
     return lift(
       Fletcher.Anon(
-        (equity:Equity<P,Ri,EE>,cont:Terminal<Equity<P,Rii,EE>,Noise>) -> {
+        (equity:Equity<P,Ri,EE>,cont:Terminal<Equity<P,Rii,EE>,Nada>) -> {
           __.log().debug('$equity');
           final error = __.option(equity.error).defv(Refuse.unit());
           
@@ -106,7 +106,7 @@ class ScenarioLift{
   }
   static public function provide<P,Ri,Rii,E>(self:Scenario<P,Ri,Rii,E>,p:Equity<P,Ri,E>):Provide<Equity<P,Rii,E>>{
     return Provide.lift(Fletcher.Anon(
-      (_:Noise,cont:Terminal<Equity<P,Rii,E>,Noise>) -> cont.receive(
+      (_:Nada,cont:Terminal<Equity<P,Rii,E>,Nada>) -> cont.receive(
         self.forward(p)
       )
     ));

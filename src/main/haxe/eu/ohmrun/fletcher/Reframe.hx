@@ -23,7 +23,7 @@ typedef ReframeDef<I,O,E>               = ModulateDef<I,Couple<O,I>,E>;
   @:to public function toModulate():Modulate<I,Couple<O,I>,E>{
     return Modulate.lift(this);
   }
-  @:to public inline function toFletcher():Fletcher<Upshot<I,E>,Upshot<Couple<O,I>,E>,Noise>{
+  @:to public inline function toFletcher():Fletcher<Upshot<I,E>,Upshot<Couple<O,I>,E>,Nada>{
     return Fletcher.lift(this);
   }
   @:from static public function fromModulate<I,O,E>(self:Modulate<I,Couple<O,I>,E>):Reframe<I,O,E>{
@@ -53,7 +53,7 @@ class ReframeLift{
   static public function rearrange<I,O,Oi,E>(self:Reframe<I,O,E>,that:Arrange<Upshot<O,E>,I,Oi,E>):Reframe<I,Oi,E>{
     return Reframe.lift(
       Fletcher.Anon(
-        (ipt:Upshot<I,E>,cont:Terminal<Upshot<Couple<Oi,I>,E>,Noise>) -> return cont.receive(self.forward(ipt).flat_fold(
+        (ipt:Upshot<I,E>,cont:Terminal<Upshot<Couple<Oi,I>,E>,Nada>) -> return cont.receive(self.forward(ipt).flat_fold(
           (res:Upshot<Couple<O,I>,E>) -> that.forward(
             res.fold(
               (tp:Couple<O,I>)  -> __.accept(__.couple(__.accept(tp.fst()),tp.snd())),
@@ -77,7 +77,7 @@ class ReframeLift{
   }
   static public function arrangement<I,Ii,O,Oi,E>(self:Reframe<I,O,E>,that:O->Arrange<Ii,I,Oi,E>):Attempt<Couple<Ii,I>,Oi,E>{
     return Attempt.lift(Fletcher.Anon(
-      (ipt:Couple<Ii,I>,cont:Terminal<Upshot<Oi,E>,Noise>) -> cont.receive(self.forward(__.success(ipt.snd())).flat_fold(
+      (ipt:Couple<Ii,I>,cont:Terminal<Upshot<Oi,E>,Nada>) -> cont.receive(self.forward(__.success(ipt.snd())).flat_fold(
         (tp:Upshot<Couple<O,I>,E>) -> tp.fold(
           tp  -> that(tp.fst()).forward(__.success(ipt)),
           err -> cont.value(__.reject(err))
@@ -89,7 +89,7 @@ class ReframeLift{
   static public function commandeer<I,O,E>(self:Reframe<I,O,E>,fn:O->Command<I,E>):Command<I,E>{
     return Command.lift(
       Fletcher.Anon(
-        (ipt:I,cont:Terminal<Report<E>,Noise>) -> cont.receive(self.commandment(fn).then(
+        (ipt:I,cont:Terminal<Report<E>,Nada>) -> cont.receive(self.commandment(fn).then(
           Fletcher.Sync(
             (res:Upshot<Couple<O,I>,E>) -> res.fold(
               _ -> Report.unit(),
@@ -102,7 +102,7 @@ class ReframeLift{
   }
   static public function commandment<I,O,E>(self:Reframe<I,O,E>,fn:O->Command<I,E>):Reframe<I,O,E>{
     return lift(Fletcher.Anon(
-      (ipt:Upshot<I,E>,cont:Terminal<Upshot<Couple<O,I>,E>,Noise>) -> cont.receive(self.forward(ipt).flat_fold(
+      (ipt:Upshot<I,E>,cont:Terminal<Upshot<Couple<O,I>,E>,Nada>) -> cont.receive(self.forward(ipt).flat_fold(
         res -> res.fold(
           ok -> {
             var cmd = fn(ok.fst());//TODO HMMM
@@ -132,7 +132,7 @@ class ReframeLift{
   static public function errate<I,O,E,EE>(self:Reframe<I,O,E>,fn:E->EE):Reframe<I,O,EE>{
     return lift(
       Fletcher.Anon(
-        (i:Upshot<I,EE>,cont:Terminal<Upshot<Couple<O,I>,EE>,Noise>) -> i.fold(
+        (i:Upshot<I,EE>,cont:Terminal<Upshot<Couple<O,I>,EE>,Nada>) -> i.fold(
           (i) -> cont.receive(
             self.forward(__.accept(i)).map(
               x -> x.errate(fn)  

@@ -15,7 +15,7 @@ class Progress<R,E>{
   public final product    : Null<R>;
   public final failure    : Null<Defect<E>>;
 
-  // public function process(v:Progess<R,E>):Progress<Noise,Noise>{
+  // public function process(v:Progess<R,E>):Progress<Nada,Nada>{
 
   // }
   // @:noUsing static public function issue<R,E>(outcome:Outcome<R,Defect<E>>,?pos:Pos):Progress<R,E>{

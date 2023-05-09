@@ -69,8 +69,8 @@ typedef FletcherDef<P,Pi,E> = FletcherApi<P,Pi,E>;
   static public inline function fromFun1R<P,R,E>(self:P->R):Fletcher<P,R,E>{
     return Sync(self);
   }
-  static public inline function fromFunXR<R,E>(self:Void->R):Fletcher<Noise,R,E>{
-    return Sync((_:Noise) -> self());
+  static public inline function fromFunXR<R,E>(self:Void->R):Fletcher<Nada,R,E>{
+    return Sync((_:Nada) -> self());
   }
   //?pos:haxe.PosInfos
   static public function forward<P,Pi,E>(f:FletcherApi<P,Pi,E>,p:P,?pos:Pos):Receiver<Pi,E>{
@@ -238,7 +238,7 @@ class FletcherLift{
   static public function produce<P,R,E>(self:Fletcher<P,R,E>,i:P):Produce<R,E>{
     return Produce.lift(
       Fletcher.Anon(
-        (_:Noise,cont:Terminal<Upshot<R,E>,Noise>) -> {
+        (_:Nada,cont:Terminal<Upshot<R,E>,Nada>) -> {
           return cont.receive(
             self.forward(i).fold_mapp(
               (ok:R)          -> __.success(__.accept(ok)),
@@ -261,7 +261,7 @@ typedef TerminalAbs<R,E>        = eu.ohmrun.fletcher.Terminal.TerminalAbs<R,E>;
 typedef TerminalCls<R,E>        = eu.ohmrun.fletcher.Terminal.TerminalCls<R,E>;
 typedef TerminalApi<R,E>        = eu.ohmrun.fletcher.Terminal.TerminalApi<R,E>;
 typedef Terminal<R,E>           = eu.ohmrun.fletcher.Terminal<R,E>;
-typedef Waypoint<R,E>           = Terminal<Upshot<R,E>,Noise>;
+typedef Waypoint<R,E>           = Terminal<Upshot<R,E>,Nada>;
 
 typedef Fiber                   = eu.ohmrun.fletcher.Fiber;
 typedef FiberDef                = eu.ohmrun.fletcher.Fiber.FiberDef;
@@ -379,10 +379,10 @@ class FletcherWildcards{
 //   }
 // }
 class LiftProvideLoad{
-  static public function load<P,R,E>(self:Context<Noise,R,Noise>,arrowlet:Provide<R>):Fiber{
+  static public function load<P,R,E>(self:Context<Nada,R,Nada>,arrowlet:Provide<R>):Fiber{
     return Fiber.lift(new eu.ohmrun.fletcher.Completion(self,arrowlet.toFletcher()));
   }
-  // static public function fly<R,E>(wildcard:Wildcard,arrowlet:Provide<R>,?on_value:R->Void,?on_error:Defect<Noise>->Void):Fiber{
-  //   return Fiber.lift(new eu.ohmrun.fletcher.Completion(Context.make(Noise,on_value,on_error),arrowlet));
+  // static public function fly<R,E>(wildcard:Wildcard,arrowlet:Provide<R>,?on_value:R->Void,?on_error:Defect<Nada>->Void):Fiber{
+  //   return Fiber.lift(new eu.ohmrun.fletcher.Completion(Context.make(Nada,on_value,on_error),arrowlet));
   // }
 }

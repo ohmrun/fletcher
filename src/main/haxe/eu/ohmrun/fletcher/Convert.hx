@@ -1,10 +1,10 @@
 package eu.ohmrun.fletcher;
 
-typedef ConvertDef<I,O> = FletcherDef<I,O,Noise>;
+typedef ConvertDef<I,O> = FletcherDef<I,O,Nada>;
 
 enum ConvertArgSum<P,R>{
   ConvertArgFun1R(fn:P->R);
-  ConvertArgLift(x:FletcherDef<P,R,Noise>);
+  ConvertArgLift(x:FletcherDef<P,R,Nada>);
 }
 abstract ConvertArg<P,R>(ConvertArgSum<P,R>) from ConvertArgSum<P,R> to ConvertArgSum<P,R>{
   public function new(self) this = self;
@@ -13,7 +13,7 @@ abstract ConvertArg<P,R>(ConvertArgSum<P,R>) from ConvertArgSum<P,R> to ConvertA
   @:from static public function fromArgFun1R<P,R>(self:P->R){
     return lift(ConvertArgFun1R(self));
   }
-  @:from static public function fromArgLift<P,R>(self:FletcherDef<P,R,Noise>):ConvertArg<P,R>{
+  @:from static public function fromArgLift<P,R>(self:FletcherDef<P,R,Nada>):ConvertArg<P,R>{
     return lift(ConvertArgLift(self));
   }
   public function prj():ConvertArgSum<P,R> return this;
@@ -39,20 +39,20 @@ abstract Convert<I,O>(ConvertDef<I,O>) from ConvertDef<I,O> to ConvertDef<I,O>{
 
   @:noUsing static public function fromFun1Provide<I,O>(self:I->Provide<O>):Convert<I,O>{
     return lift(
-      Fletcher.Anon((i:I,cont:Terminal<O,Noise>) -> cont.receive(self(i).forward(Noise)))
+      Fletcher.Anon((i:I,cont:Terminal<O,Nada>) -> cont.receive(self(i).forward(Nada)))
     );
   }
   @:noUsing static public function fromConvertProvide<P,R>(self:Convert<P,Provide<R>>):Convert<P,R>{
     return lift(
       Fletcher.Anon(
         (p:P,cont) -> cont.receive(self.forward(p).flat_fold(
-          (ok:Provide<R>)   -> ok.forward(Noise),
+          (ok:Provide<R>)   -> ok.forward(Nada),
           (er)              -> Receiver.error(er)
       )))
     );
   }
   
-  @:to public inline function toFletcher():Fletcher<I,O,Noise>{
+  @:to public inline function toFletcher():Fletcher<I,O,Nada>{
     return this;
   }
   private var self(get,never):Convert<I,O>;
@@ -67,7 +67,7 @@ abstract Convert<I,O>(ConvertDef<I,O>) from ConvertDef<I,O> to ConvertDef<I,O>{
   @:from static inline public function fromUnary<I,O>(fn:Unary<I,O>):Convert<I,O>{
     return lift(Fletcher.fromFun1R(fn));
   }
-  @:from static public function fromFletcher<I,O>(arw:Fletcher<I,O,Noise>){
+  @:from static public function fromFletcher<I,O>(arw:Fletcher<I,O,Nada>){
     return lift(arw);
   }
   public inline function environment(i:I,success:O->Void):Fiber{
@@ -97,7 +97,7 @@ class ConvertLift{
   }
   static public function provide<I,O,Oi>(self:ConvertDef<I,O>,i:I):Provide<O>{
     return Provide.lift(
-      Fletcher.Anon((_:Noise,cont:Terminal<O,Noise>) -> self.defer(i,cont))
+      Fletcher.Anon((_:Nada,cont:Terminal<O,Nada>) -> self.defer(i,cont))
     );
   }
   static public function convert<I,O,Oi>(self:ConvertDef<I,O>,that:ConvertDef<O,Oi>):Convert<I,Oi>{
@@ -115,7 +115,7 @@ class ConvertLift{
     return Fletcher.Then(
       self,
       Fletcher.Anon(
-        (rI:Ri,cont:Terminal<Rii,Noise>) -> {
+        (rI:Ri,cont:Terminal<Rii,Nada>) -> {
           return fn(rI).defer(rI,cont);
         }
       )
