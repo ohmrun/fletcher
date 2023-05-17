@@ -76,8 +76,8 @@ typedef FletcherDef<P,Pi,E> = FletcherApi<P,Pi,E>;
   static public function forward<P,Pi,E>(f:FletcherApi<P,Pi,E>,p:P,?pos:Pos):Receiver<Pi,E>{
     #if debug
       //__.log().debug(_ -> _.pure(pos));
-      __.assert().exists(f);
-      //__.assert().exists(p);
+      __.assert().that().exists(f);
+      //__.assert().that().exists(p);
     #end
     return Receiver.lift(
       Cont.Anon(
@@ -90,7 +90,7 @@ typedef FletcherDef<P,Pi,E> = FletcherApi<P,Pi,E>;
               Cont.AnonAnon((t_sink:TerminalSink<Pi,E>) -> {
                 #if debug
                   __.log().trace('FORWARD forwarding');
-                  __.assert().exists(t_sink);
+                  __.assert().that().exists(t_sink);
                 #end
                 final result =  t_sink(ft);
                 #if debug
@@ -158,7 +158,7 @@ class FletcherLift{
         __.crack(no);
       }
     ).crunch();
-    __.assert().exists(val);
+    __.assert().that().exists(val);
     
     return val;
   }
@@ -176,7 +176,7 @@ class FletcherLift{
         val = __.reject(no.toRefuse());
       }
     ).crunch();
-    __.assert().exists(val);
+    __.assert().that().exists(val);
     
     return val;
   }

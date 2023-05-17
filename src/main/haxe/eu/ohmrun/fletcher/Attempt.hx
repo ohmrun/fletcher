@@ -45,7 +45,7 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Upshot<O,E>,Nada>;
   
   static public inline function bump<I,O,E>(self:AttemptArg<I,O,E>) {
     #if debug
-      __.assert().exists(self); 
+      __.assert().that().exists(self); 
     #end
     //__.log().debug(_ -> _.pure(pos));
     return switch(self){
@@ -100,7 +100,7 @@ typedef AttemptDef<I,O,E>               = FletcherDef<I,Upshot<O,E>,Nada>;
         (pI:Pi,cont:Waypoint<O,E>) -> {
           final rest = fn(pI);
           #if debug
-            __.assert().exists(rest);
+            __.assert().that().exists(rest);
           #end 
           return cont.receive(
             Produce.lift(
