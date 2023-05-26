@@ -55,21 +55,21 @@ typedef FletcherDef<P,Pi,E> = FletcherApi<P,Pi,E>;
   @:from static public function fromApi<P,Pi,E>(self:FletcherApi<P,Pi,E>){
     return lift(self); 
   }
-  static public function unit<P,E>():Fletcher<P,P,E>{
+  @:noUsing static public function unit<P,E>():Fletcher<P,P,E>{
     return Sync(x -> x);
   }
-  static public function constant<P,R,E>(self:ArwOut<R,E>):Fletcher<P,R,E>{
+  @:noUsing static public function constant<P,R,E>(self:ArwOut<R,E>):Fletcher<P,R,E>{
     return Fletcher.Anon(
       (_:P,cont:Terminal<R,E>) -> cont.receive(cont.issue(self))
     );
   }
-  static public function pure<P,R,E>(self:R):Fletcher<P,R,E>{
+  @:noUsing static public function pure<P,R,E>(self:R):Fletcher<P,R,E>{
     return constant(__.success(self));
   }
-  static public inline function fromFun1R<P,R,E>(self:P->R):Fletcher<P,R,E>{
+  @:noUsing static public inline function fromFun1R<P,R,E>(self:P->R):Fletcher<P,R,E>{
     return Sync(self);
   }
-  static public inline function fromFunXR<R,E>(self:Void->R):Fletcher<Nada,R,E>{
+  @:noUsing static public inline function fromFunXR<R,E>(self:Void->R):Fletcher<Nada,R,E>{
     return Sync((_:Nada) -> self());
   }
   //?pos:haxe.PosInfos

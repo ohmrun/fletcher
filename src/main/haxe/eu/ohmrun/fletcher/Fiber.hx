@@ -26,6 +26,13 @@ typedef FiberDef = Fletcher<Nada,Nada,Nada>;
   @:from static public function fromCompletion<P,R,E>(self:Completion<P,R,E>){
     return lift(Fletcher.lift(self));
   }
+  @:from static public function fromFuture(self:Future<Nada>){
+    return lift(
+      Fletcher.Anon((_:Nada,cont:Terminal<Nada,Nada>) -> {
+        return cont.receive(cont.later(self.map(Success)));
+      })
+    );
+  }
   public function prj():FletcherDef<Nada,Nada,Nada>{
     return this;
   }
@@ -36,5 +43,10 @@ class FiberLift{
       self.prj(),
       that
     ));
+  }
+  static public function seq(self:Fiber,that:Fiber):Fiber{
+    return Fiber.lift(
+      Fletcher.Then(self.toFletcher(),that.toFletcher())
+    );
   }
 }
