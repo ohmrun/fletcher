@@ -1,6 +1,6 @@
 # Fletcher
 
-Fletcher is an effect system and integrated scheduler based on how [arrowlets](https://www.cs.umd.edu/~mwh/papers/jsarrows.pdf) relate to the logical equivalency of threads and events.
+Fletcher is an asycnhronous effect system and integrated scheduler based on how [arrowlets](https://www.cs.umd.edu/~mwh/papers/jsarrows.pdf) relate to the logical equivalency of threads and events.
 
 A `Fletcher` can be described as a constructor for a continuation monad with the return `R` of `(A->R) -> R` constrained to return work for a scheduler. `P -> (R -> Work) -> Work`
 
@@ -25,3 +25,15 @@ Topics regarding interleaving functions and values over data streams and between
     }
   }
 ```
+
+## Struture
+
+There's two APIs, the internal and external. The external is for general use and consists of constructors and combinators, and the internal is for writing your own combinators.
+
+## External Api
+
+### Construtors
+
+  
+
+## Internal Api

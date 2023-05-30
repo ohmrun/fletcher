@@ -250,19 +250,6 @@ class FletcherLift{
    );
   } 	
 }
-
-typedef TerminalSinkDef<R,E>    = eu.ohmrun.fletcher.TerminalSink.TerminalSinkDef<R,E>;
-typedef TerminalSink<R,E>       = eu.ohmrun.fletcher.TerminalSink<R,E>;
-//typedef ReceiverApi<R,E>        = eu.ohmrun.fletcher.Receiver.ReceiverApi<R,E>;
-typedef ReceiverCls<R,E>        = eu.ohmrun.fletcher.Receiver.ReceiverCls<R,E>;
-typedef ReceiverDef<R,E>        = eu.ohmrun.fletcher.Receiver.ReceiverDef<R,E>;
-typedef Receiver<R,E>           = eu.ohmrun.fletcher.Receiver<R,E>;
-typedef TerminalAbs<R,E>        = eu.ohmrun.fletcher.Terminal.TerminalAbs<R,E>;
-typedef TerminalCls<R,E>        = eu.ohmrun.fletcher.Terminal.TerminalCls<R,E>;
-typedef TerminalApi<R,E>        = eu.ohmrun.fletcher.Terminal.TerminalApi<R,E>;
-typedef Terminal<R,E>           = eu.ohmrun.fletcher.Terminal<R,E>;
-typedef Waypoint<R,E>           = Terminal<Upshot<R,E>,Nada>;
-
 typedef Fiber                   = eu.ohmrun.fletcher.Fiber;
 typedef FiberDef                = eu.ohmrun.fletcher.Fiber.FiberDef;
 
@@ -322,13 +309,6 @@ typedef Reform<P,R,E>           = eu.ohmrun.fletcher.Reform<P,R,E>;
 
 typedef ResolveDef<I,E>         = eu.ohmrun.fletcher.Resolve.ResolveDef<I,E>;
 typedef Resolve<I,E>            = eu.ohmrun.fletcher.Resolve<I,E>;
-
-typedef TerminalInputDef<R,E>   = eu.ohmrun.fletcher.TerminalInput.TerminalInputDef<R,E>;
-typedef TerminalInput<R,E>      = eu.ohmrun.fletcher.TerminalInput<R,E>;
-
-typedef ReceiverSink<R,E>       = eu.ohmrun.fletcher.ReceiverSink<R,E>;
-typedef ReceiverSinkCls<R,E>    = eu.ohmrun.fletcher.ReceiverSink.ReceiverSinkCls<R,E>;
-typedef ReceiverSinkApi<R,E>    = eu.ohmrun.fletcher.ReceiverSink.ReceiverSinkApi<R,E>;
 
 typedef RegulateDef<R,E>        = eu.ohmrun.fletcher.Regulate.RegulateDef<R,E>;
 typedef Regulate<R,E>           = eu.ohmrun.fletcher.Regulate<R,E>;

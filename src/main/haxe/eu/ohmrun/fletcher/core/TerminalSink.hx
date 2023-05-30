@@ -1,4 +1,4 @@
-package eu.ohmrun.fletcher;
+package eu.ohmrun.fletcher.core;
 
 typedef TerminalSinkDef<R,E>    = TerminalInput<R,E>     -> Work;
 

@@ -1,8 +1,11 @@
-package eu.ohmrun.fletcher;
+package eu.ohmrun.fletcher.core;
 
 typedef ReceiverInputDef<R,E> = Future<ArwOut<R,E>>;
 
-@:using(eu.ohmrun.fletcher.ReceiverInput.ReceiverInputLift)
+/**
+ * Represents an input for the `ReceiverSink` continuation.
+ */
+@:using(eu.ohmrun.fletcher.core.ReceiverInput.ReceiverInputLift)
 @:forward abstract ReceiverInput<R,E>(ReceiverInputDef<R,E>) from ReceiverInputDef<R,E> to ReceiverInputDef<R,E>{
   static public var _(default,never) = ReceiverInputLift;
   public function new(self) this = self;

@@ -1,4 +1,4 @@
-package eu.ohmrun.fletcher;
+package eu.ohmrun.fletcher.core;
 
 typedef TerminalInputDef<R,E> = FutureTrigger<ArwOut<R,E>>;
 

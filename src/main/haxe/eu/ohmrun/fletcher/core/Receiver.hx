@@ -1,11 +1,14 @@
-package eu.ohmrun.fletcher;
+package eu.ohmrun.fletcher.core;
 
 typedef ReceiverCls<R,E> = ContCls<ReceiverInput<R,E>,Work>;
 typedef ReceiverApi<R,E> = ContApi<ReceiverInput<R,E>,Work>;
 typedef ReceiverDef<R,E> = Cont<ReceiverInput<R,E>,Work>;
 
+/**
+ * Represents an acceptable output from a `Fletcher`
+ */
 //@:using(stx.fp.Continuation.ContinuationLift)
-@:using(eu.ohmrun.fletcher.Receiver.ReceiverLift)
+@:using(eu.ohmrun.fletcher.core.Receiver.ReceiverLift)
 @:forward(apply) abstract Receiver<R,E>(ReceiverApi<R,E>) to ReceiverApi<R,E>{
   static public var _(default,never) = ReceiverLift;
   public function reply():Work{

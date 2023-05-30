@@ -1,4 +1,4 @@
-package eu.ohmrun.fletcher;
+package eu.ohmrun.fletcher.core;
 
 typedef ReceiverSinkApi<R,E> = ApplyApi<ReceiverInput<R,E>,Work>;
 typedef ReceiverSinkCls<R,E> = ApplyCls<ReceiverInput<R,E>,Work>;

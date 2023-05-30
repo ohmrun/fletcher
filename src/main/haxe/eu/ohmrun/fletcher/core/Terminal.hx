@@ -1,10 +1,10 @@
-package eu.ohmrun.fletcher;
+package eu.ohmrun.fletcher.core;
 
 typedef TerminalAbs<R,E>    = Settle<TerminalInput<R,E>>;
 typedef TerminalApi<R,E>    = SettleApi<TerminalInput<R,E>>;
 typedef TerminalCls<R,E>    = SettleCls<TerminalInput<R,E>>;
 
-@:using(eu.ohmrun.fletcher.Terminal.TerminalLift)
+@:using(eu.ohmrun.fletcher.core.Terminal.TerminalLift)
 @:forward abstract Terminal<R,E>(TerminalApi<R,E>) from TerminalApi<R,E> to TerminalApi<R,E>{
   @:noUsing static public inline function unit<R,E>():Terminal<R,E>{
     return lift(
