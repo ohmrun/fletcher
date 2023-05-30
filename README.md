@@ -32,8 +32,67 @@ There's two APIs, the internal and external. The external is for general use and
 
 ## External Api
 
-### Construtors
+### Basics
 
+A function takes an input and transforms it to an output.
+
+```mermaid
+  %%{init: {"flowchart": {"htmlLabels": false}} }%%
+  flowchart LR
+      lhs["`value : P`"]
+      fun["`function: F‹P,R›`"]
+      rhs["`return : R`"]
+      lhs --> fun --> rhs
+```
   
+```mermaid
+  %%{init: {"flowchart": {"htmlLabels": false}} }%%
+  flowchart LR
+      lhs["`P`"]
+      fun["`P -› R`"]
+      rhs["`R`"]
+      lhs --> fun --> rhs
+```
 
+An arrowlet consumes a callback to handle the output at a later date
+
+```mermaid
+  %%{init: {"flowchart": {"htmlLabels": false}} }%%
+  flowchart LR
+      lhs["`P`"]
+      fun["`P -> (R->Void) -› Void`"]
+      rhs["`Void`"]
+      lhs --> fun --> rhs
+
+```
+
+In either case, you can take the output of one and input it into another
+
+### Then
+```mermaid
+  %%{init: {"flowchart": {"htmlLabels": false}} }%%
+  flowchart LR
+    PI["P"]
+    RI["R"]
+    PII["R"]
+    RII["RI"]
+    PIII["P"]
+    RIII["RI"]
+
+    subgraph F
+    direction LR
+    PI-->RI
+    end
+  
+    subgraph G
+    direction LR
+    PII-->RII
+    end
+
+    subgraph =
+    direction LR
+    PIII-->RIII
+    end
+    F --> G --> =
+```
 ## Internal Api

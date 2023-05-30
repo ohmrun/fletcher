@@ -82,7 +82,9 @@ typedef FletcherDef<P,Pi,E> = FletcherApi<P,Pi,E>;
     return Receiver.lift(
       Cont.Anon(
         function(k:ReceiverSinkApi<Pi,E>){
+          #if debug
           __.log().trace('forward called $p');
+          #end
           var ft : FutureTrigger<ArwOut<Pi,E>> = Future.trigger();
           var fst = f.defer(
             p,
