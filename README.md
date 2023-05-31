@@ -68,9 +68,9 @@ An arrowlet consumes a callback to handle the output at a later date
 
 In either case, you can take the output of one and input it into another
 
-### Then
+### [`eu.ohmrun.fletcher.term.Then`](./src/main/haxe/eu/ohmrun/fletcher/term/Then.hx)
 ```mermaid
-  %%{init: {"flowchart": {"htmlLabels": false}} }%%
+  %%{init: { "theme": "dark","flowchart": {"htmlLabels": false}} }%%
   flowchart LR
     PI["P"]
     RI["R"]
@@ -95,4 +95,39 @@ In either case, you can take the output of one and input it into another
     end
     F --> G --> =
 ```
+
+### [`eu.ohmrun.fletcher.Modulate`](./src/main/haxe/eu/ohmrun/fletcher/Modulate.hx)
+
+Modulate introduces `Upshot` as a return type, giving more functionality for error handling and is the basis of most of 
+the combinators.
+
+```mermaid
+  %%{init: { "theme": "dark","flowchart": {"htmlLabels": false}} }%%
+  flowchart LR
+    PI["P"]
+    EI["E"]
+    EII["E"]
+
+    PII["(P,E)"]
+    RII["(R,E)"]
+
+
+    subgraph =
+    direction LR
+    direction LR
+    PI-->R
+    EI-->R
+    PI-->EII
+    EI-->EII
+    end
+
+    subgraph Modulate
+    direction LR
+    PII --> RII
+    end
+
+    Modulate --> =
+```
+
+
 ## Internal Api

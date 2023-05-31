@@ -1,5 +1,8 @@
 package eu.ohmrun.fletcher.term;
 
+/**
+ * Left-to-right combinator
+ */
 class Then<P,Ri,Rii,E> extends FletcherCls<P,Rii,E>{
   public final lhs : Fletcher<P,Ri,E>;
   public final rhs : Fletcher<Ri,Rii,E>;
