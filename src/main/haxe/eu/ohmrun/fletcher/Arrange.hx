@@ -242,5 +242,6 @@ class ArrangeLift{
       Fletcher.Sync((res:Upshot<O,E>) -> (res.map)(that))
     ));
   }
+  
   //static public function arrange<I,S,O,Oi,E>(self:Arrange<I,S,O,E>,that:Arrange<)
 }
