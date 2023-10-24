@@ -265,6 +265,20 @@ class ProduceLift{
       )
     );
   }
+  static public function propose<O,Oi,E>(self:ProduceDef<O,E>,fn:Upshot<O,E>->Propose<Oi,E>):Propose<Oi,E>{
+    return Propose.lift(
+      Fletcher.Then(
+        self,
+        Fletcher.Anon(
+          (p:Upshot<O,E>,cont:Terminal<Chunk<Oi,E>,Nada>) -> {
+            final res = fn(p);
+            __.log().trace('$res');
+            return cont.receive(res.forward(Nada));
+          }
+        )
+      )
+    );
+  }
   static public function convert<O,Oi,E>(self:ProduceDef<O,E>,then:Convert<O,Oi>):Produce<Oi,E>{
     return lift(Fletcher.Then(self,(Convert._.toModulate(then).toFletcher())));
   }
@@ -364,8 +378,8 @@ class ProduceLift{
     return Pledge.lift(
       (Fletcher._.future(self,Nada)).map(
         (outcome:Outcome<Upshot<O,E>,Defect<Nada>>) -> (outcome.fold(
-          (x:Upshot<O,E>)      -> x,
-          (e:Defect<Nada>) -> __.reject(e.elide().toRefuse())
+          (x:Upshot<O,E>)       -> x,
+          (e:Defect<Nada>)      -> __.reject(e.elide().toRefuse())
         ))
       )
     );
@@ -386,17 +400,29 @@ class ProduceLift{
       ) 
     );
   }
-  static public function command<O,E>(self:ProduceDef<O,E>,cmd:Command<O,E>):Execute<E>{
-    return Execute.lift(
+  static public function command<O,E>(self:ProduceDef<O,E>,that:Command<O,E>):Produce<O,E>{
+    return Produce.lift(
       Fletcher.Then(
         self,
         Fletcher.Anon(
-          (res:Upshot<O,E>,cont:Terminal<Report<E>,Nada>) -> res.fold(
-            ok -> cmd.defer(ok,cont),
-            no -> cont.receive(cont.value(__.report(_ -> no)))
+          (res:Upshot<O,E>,cont:Terminal<Upshot<O,E>,Nada>) -> res.fold(
+            ok -> cont.receive(that.produce(Produce.pure(ok)).forward(ok)),
+            no -> cont.receive(cont.value(__.reject(_ -> no)))
           )
         )
       )
     );
   }
+  // static public function pledge<O,E>(self:ProduceDef<O,E>):Pledge<O,E>{
+  //   final trigger = Future.trigger();
+  //   return Pledge.lift(self.deliver(
+  //     (v) -> {
+  //       trigger.trigger(__.accept(v));
+  //     }
+  //   ).deliver(
+  //     e -> trigger.trigger(__.reject(f -> e))
+  //   ).reply().flatMap(
+  //     (_) -> trigger.asFuture()
+  //   ));
+  // }
 }

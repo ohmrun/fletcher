@@ -41,19 +41,22 @@ abstract Propose<O,E>(ProposeDef<O,E>) from ProposeDef<O,E> to ProposeDef<O,E>{
   }
   private var self(get,never):Propose<O,E>;
   private function get_self():Propose<O,E> return lift(this);
-  @:noUsing static public function bind_fold<T,O,E>(fn:T->O->Propose<O,E>,iterable:Iterable<T>,seed:O):Option<Propose<O,E>>{
+  @:noUsing static public function bind_fold<T,O,E>(fn:T->O->Propose<O,E>,iterable:Iterable<T>,seed:O):Propose<O,E>{
     return iterable.toIter().lfold(
-      (next:T,memo:Propose<O,E>) -> Propose.lift(
-        memo.toFletcher().then(
-          Fletcher.Anon(
-            (res:Chunk<O,E>,cont:Terminal<Chunk<O,E>,Nada>) -> res.fold(
-              (o) -> cont.receive(fn(next,o).forward(Nada)),
-              (e) -> cont.value(End(e)).serve(),
-              ()  -> cont.value(Tap).serve()
+      (next:T,memo:Propose<O,E>) -> {
+        __.log().trace('$memo');
+        return Propose.lift(
+          memo.toFletcher().then(
+            Fletcher.Anon(
+              (res:Chunk<O,E>,cont:Terminal<Chunk<O,E>,Nada>) -> (res).fold(
+                (o) -> cont.receive(fn(next,o).forward(Nada)),
+                (e) -> cont.value(End(e)).serve(),
+                ()  -> cont.value(Tap).serve()
+              )
             )
           )
-        )
-      ),
+        );
+      },
       Propose.pure(seed)
     );
   }
@@ -138,6 +141,18 @@ class ProposeLift{
           (o) -> Val(__.option(o)),
           (e) -> End(e),
           ()  -> Val(None)
+        )
+      )
+    );
+  }
+  static public function produce<O,E>(self:ProposeDef<O,E>):Produce<Option<O>,E>{
+    return Produce.lift(
+      Fletcher._.map(
+        Fletcher.lift(self),
+        (ipt:Chunk<O,E>) -> (ipt).fold(
+          (o) -> __.accept(__.option(o)),
+          (e) -> __.reject(e),
+          ()  -> __.accept(None)
         )
       )
     );

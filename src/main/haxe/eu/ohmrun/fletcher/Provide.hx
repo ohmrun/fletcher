@@ -120,7 +120,4 @@ class ProvideLift{
   static public function adjust<O,Oi,E>(self:ProvideDef<O>,fn:O->Upshot<Oi,E>):Produce<Oi,E>{
     return Produce.lift(self.map(fn));
   }
-  
-  //static public inline function future<O>(self:Provide<O>)  
-  
 }

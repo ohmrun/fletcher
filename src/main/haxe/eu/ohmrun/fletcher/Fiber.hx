@@ -33,6 +33,18 @@ typedef FiberDef = Fletcher<Nada,Nada,Nada>;
       })
     );
   }
+  @:to public function reply():Future<Nada>{
+    final trigger = Future.trigger();
+    final next    = 
+      FiberLift.seq(this,lift(
+        Fletcher.Anon((_:Nada,cont:Terminal<Nada,Nada>) -> {
+          trigger.trigger(Nada);
+          return cont.receive(cont.value(Nada));
+        })
+      ));
+    next.submit();
+    return trigger.asFuture();
+  }
   public function prj():FletcherDef<Nada,Nada,Nada>{
     return this;
   }
